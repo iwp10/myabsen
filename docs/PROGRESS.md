@@ -10,28 +10,28 @@ Cara pakai:
 
 | Fase | Isi | Penanggung jawab | Branch | Status |
 |---|---|---|---|---|
-| 0 | Perencanaan | | | belum |
-| 1 | Database (migration, model, seeder) | | | belum |
+| 0 | Perencanaan | Agent | main | selesai |
+| 1 | Database (migration, model, seeder) | Agent | main | selesai |
 | 2 | Auth dan role | | | belum |
-| 3 | Master data admin | | | belum |
+| 3 | Master data admin | | | ditunda |
 | 4 | Absensi guru | | | belum |
 | 5 | Tampilan siswa | | | belum |
-| 6 | Rekap dan ekspor | | | belum |
-| 7 | Hardening | | | belum |
-| 8 | Siap produksi dan deploy | | | belum |
+| 6 | Rekap dan ekspor | | | ditunda |
+| 7 | Hardening | | | ditunda |
+| 8 | Siap produksi dan deploy | | | ditunda |
 
 ## Checklist per fase
 
 ### Fase 0: Perencanaan
-- [ ] Agent membaca AGENTS.md dan docs/PRD.md
-- [ ] Rencana implementasi disetujui tim
+- [x] Agent membaca AGENTS.md dan docs/PRD.md
+- [x] Rencana implementasi disetujui tim
 
 ### Fase 1: Database
-- [ ] Migration semua tabel sesuai PRD (termasuk soft delete dan index)
-- [ ] Model dan relasi
-- [ ] Enum `StatusKehadiran`
-- [ ] Factory dan seeder demo
-- [ ] `php artisan migrate:fresh --seed` berjalan tanpa error
+- [x] Migration semua tabel sesuai PRD (termasuk soft delete dan index)
+- [x] Model dan relasi
+- [x] Enum `StatusKehadiran`
+- [x] Factory dan seeder demo
+- [x] `php artisan migrate:fresh --seed` berjalan tanpa error
 
 ### Fase 2: Auth dan role
 - [ ] Breeze (Blade) terpasang, registrasi publik dihapus
@@ -82,3 +82,4 @@ Cara pakai:
 
 ## Catatan dan hambatan
 Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
+2026-09-21 | 3,6,7,8 | Fase 3, 6, 7, 8 ditunda untuk fokus MVP/BETA (Fase 1, 2, 4, 5). Master data digenerate via Seeder.
