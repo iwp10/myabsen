@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Enums\StatusKehadiran;
+use Database\Factories\DetailAbsensiFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Enums\StatusKehadiran;
 
 class DetailAbsensi extends Model
 {
-    /** @use HasFactory<\Database\Factories\DetailAbsensiFactory> */
+    /** @use HasFactory<DetailAbsensiFactory> */
     use HasFactory;
 
     protected $table = 'detail_absensi';
@@ -32,4 +33,3 @@ class DetailAbsensi extends Model
         return $this->belongsTo(Siswa::class);
     }
 }
-

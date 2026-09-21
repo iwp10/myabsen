@@ -15,6 +15,11 @@
                     <x-nav-link :href="route(Auth::user()->role . '.dashboard')" :active="request()->routeIs(Auth::user()->role . '.dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    @if(Auth::user()->role === 'guru')
+                    <x-nav-link :href="route('guru.riwayat')" :active="request()->routeIs('guru.riwayat')">
+                        {{ __('Riwayat') }}
+                    </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -70,6 +75,11 @@
             <x-responsive-nav-link :href="route(Auth::user()->role . '.dashboard')" :active="request()->routeIs(Auth::user()->role . '.dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @if(Auth::user()->role === 'guru')
+            <x-responsive-nav-link :href="route('guru.riwayat')" :active="request()->routeIs('guru.riwayat')">
+                {{ __('Riwayat') }}
+            </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->

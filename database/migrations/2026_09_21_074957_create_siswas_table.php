@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('nis')->unique();
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->index('kelas_id');
         });
     }

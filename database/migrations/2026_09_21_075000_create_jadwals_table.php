@@ -21,7 +21,7 @@ return new class extends Migration
             $table->time('jam_selesai');
             $table->string('tahun_ajaran');
             $table->timestamps();
-            
+
             $table->index(['guru_id', 'hari']);
             $table->index(['kelas_id', 'hari']);
         });

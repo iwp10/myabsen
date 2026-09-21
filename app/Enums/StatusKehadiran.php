@@ -11,7 +11,7 @@ enum StatusKehadiran: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::HADIR => 'Hadir',
             self::IZIN => 'Izin',
             self::SAKIT => 'Sakit',
@@ -19,4 +19,3 @@ enum StatusKehadiran: string
         };
     }
 }
-

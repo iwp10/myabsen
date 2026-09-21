@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('status', ['hadir', 'izin', 'sakit', 'alpa']);
             $table->string('keterangan')->nullable();
             $table->timestamps();
-            
+
             $table->unique(['sesi_absensi_id', 'siswa_id']);
             $table->index('siswa_id');
         });

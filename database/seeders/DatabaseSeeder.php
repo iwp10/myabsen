@@ -2,19 +2,19 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use App\Models\User;
+use App\Enums\StatusKehadiran;
+use App\Models\DetailAbsensi;
+use App\Models\Guru;
+use App\Models\Jadwal;
 use App\Models\Jurusan;
 use App\Models\Kelas;
-use App\Models\Guru;
-use App\Models\Siswa;
 use App\Models\Mapel;
-use App\Models\Jadwal;
 use App\Models\SesiAbsensi;
-use App\Models\DetailAbsensi;
-use App\Enums\StatusKehadiran;
+use App\Models\Siswa;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -52,18 +52,18 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $guru = Guru::create(['user_id' => $userGuru->id, 'nip' => '198001012000011001']);
-        
+
         $siswa = Siswa::create(['user_id' => $userSiswa->id, 'kelas_id' => $kelas->id, 'nis' => '1001']);
-        
+
         // Buat beberapa siswa tambahan untuk demo
         for ($i = 2; $i <= 5; $i++) {
             $u = User::create([
-                'name' => 'Siswa ' . $i,
-                'username' => 'siswa' . $i,
+                'name' => 'Siswa '.$i,
+                'username' => 'siswa'.$i,
                 'password' => Hash::make('password'),
                 'role' => 'siswa',
             ]);
-            Siswa::create(['user_id' => $u->id, 'kelas_id' => $kelas->id, 'nis' => '100' . $i]);
+            Siswa::create(['user_id' => $u->id, 'kelas_id' => $kelas->id, 'nis' => '100'.$i]);
         }
 
         $mapel = Mapel::create(['nama' => 'Pemrograman Dasar', 'kode' => 'PD']);
@@ -89,14 +89,14 @@ class DatabaseSeeder extends Seeder
 
         for ($i = 1; $i <= 5; $i++) { // 5 hari ke belakang
             $tanggal = Carbon::now()->subDays($i);
-            
+
             // Skip jika hari minggu
             if ($tanggal->isSunday()) {
                 continue;
             }
 
             $hariIndo = [
-                1 => 'senin', 2 => 'selasa', 3 => 'rabu', 4 => 'kamis', 5 => 'jumat', 6 => 'sabtu', 0 => 'minggu'
+                1 => 'senin', 2 => 'selasa', 3 => 'rabu', 4 => 'kamis', 5 => 'jumat', 6 => 'sabtu', 0 => 'minggu',
             ];
             $hariIni = $hariIndo[$tanggal->dayOfWeek];
 
