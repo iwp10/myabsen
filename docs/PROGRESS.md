@@ -12,7 +12,7 @@ Cara pakai:
 |---|---|---|---|---|
 | 0 | Perencanaan | Agent | main | selesai |
 | 1 | Database (migration, model, seeder) | Agent | main | selesai |
-| 2 | Auth dan role | | | belum |
+| 2 | Auth dan role | Agent | fitur/fase-2-auth-role | selesai |
 | 3 | Master data admin | | | ditunda |
 | 4 | Absensi guru | | | belum |
 | 5 | Tampilan siswa | | | belum |
@@ -34,11 +34,11 @@ Cara pakai:
 - [x] `php artisan migrate:fresh --seed` berjalan tanpa error
 
 ### Fase 2: Auth dan role
-- [ ] Breeze (Blade) terpasang, registrasi publik dihapus
-- [ ] Login memakai username (bukan email)
-- [ ] Middleware `role` dan redirect per role
-- [ ] Layout dasar responsif dengan navbar per role
-- [ ] Test akses per role
+- [x] Breeze (Blade) terpasang, registrasi publik dihapus
+- [x] Login memakai username (bukan email)
+- [x] Middleware `role` dan redirect per role
+- [x] Layout dasar responsif dengan navbar per role
+- [x] Test akses per role
 
 ### Fase 3: Master data admin
 - [ ] CRUD jurusan, kelas, mapel
