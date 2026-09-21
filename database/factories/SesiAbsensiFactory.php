@@ -18,7 +18,9 @@ class SesiAbsensiFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'jadwal_id' => \App\Models\Jadwal::factory(),
+            'tanggal' => $this->faker->date(),
+            'diabsen_oleh' => \App\Models\User::factory(),
         ];
     }
 }

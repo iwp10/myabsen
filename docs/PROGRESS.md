@@ -15,7 +15,7 @@ Cara pakai:
 | 2 | Auth dan role | Agent | fitur/fase-2-auth-role | selesai |
 | 3 | Master data admin | | | ditunda |
 | 4 | Absensi guru | Agent | fitur/fase-4-absensi-guru | selesai |
-| 5 | Tampilan siswa | | | belum |
+| 5 | Tampilan siswa | Agent | fitur/fase-5-tampilan-siswa | selesai |
 | 6 | Rekap dan ekspor | | | ditunda |
 | 7 | Hardening | | | ditunda |
 | 8 | Siap produksi dan deploy | | | ditunda |
@@ -56,10 +56,10 @@ Cara pakai:
 - [x] Test untuk AB-01 sampai AB-04
 
 ### Fase 5: Tampilan siswa
-- [ ] Status hari ini per mapel (termasuk Belum diabsen)
-- [ ] Riwayat dengan filter
-- [ ] Persentase kehadiran (AB-07)
-- [ ] Test akses data milik sendiri (AB-08)
+- [x] Status hari ini per mapel (termasuk Belum diabsen)
+- [x] Riwayat dengan filter
+- [x] Persentase kehadiran (AB-07)
+- [x] Test akses data milik sendiri (AB-08)
 
 ### Fase 6: Rekap dan ekspor
 - [ ] Rekap per kelas, mapel, periode (agregasi SQL)

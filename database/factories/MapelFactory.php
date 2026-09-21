@@ -18,7 +18,8 @@ class MapelFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'nama' => $this->faker->words(2, true),
+            'kode' => strtoupper($this->faker->lexify('???')),
         ];
     }
 }

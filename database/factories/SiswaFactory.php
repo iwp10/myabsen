@@ -18,7 +18,9 @@ class SiswaFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'user_id' => \App\Models\User::factory(),
+            'kelas_id' => \App\Models\Kelas::factory(),
+            'nis' => $this->faker->unique()->numerify('#####'),
         ];
     }
 }

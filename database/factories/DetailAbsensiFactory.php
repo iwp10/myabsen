@@ -18,7 +18,9 @@ class DetailAbsensiFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'sesi_absensi_id' => \App\Models\SesiAbsensi::factory(),
+            'siswa_id' => \App\Models\Siswa::factory(),
+            'status' => \App\Enums\StatusKehadiran::HADIR,
         ];
     }
 }
