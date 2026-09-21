@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\SiswaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Siswa extends Model
 {
-    /** @use HasFactory<\Database\Factories\SiswaFactory> */
+    /** @use HasFactory<SiswaFactory> */
     use HasFactory, SoftDeletes;
 
     protected $table = 'siswa';
@@ -25,4 +26,3 @@ class Siswa extends Model
         return $this->belongsTo(Kelas::class);
     }
 }
-

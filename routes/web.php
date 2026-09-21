@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Guru\AbsensiController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -9,7 +10,7 @@ Route::get('/', function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    
+
     // Admin Routes
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', function () {
@@ -19,9 +20,14 @@ Route::middleware('auth')->group(function () {
 
     // Guru Routes
     Route::middleware('role:guru')->prefix('guru')->name('guru.')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('dashboard', ['role' => 'Guru']);
-        })->name('dashboard');
+        Route::get('/dashboard', [AbsensiController::class, 'dashboard'])->name('dashboard');
+        Route::get('/riwayat', [AbsensiController::class, 'riwayat'])->name('riwayat');
+    });
+
+    // Guru & Admin Routes
+    Route::middleware('role:guru,admin')->prefix('guru')->name('guru.')->group(function () {
+        Route::get('/absensi/{jadwal}', [AbsensiController::class, 'show'])->name('absensi.show');
+        Route::post('/absensi/{jadwal}', [AbsensiController::class, 'store'])->name('absensi.store');
     });
 
     // Siswa Routes

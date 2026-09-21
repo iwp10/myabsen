@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\KelasFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Kelas extends Model
 {
-    /** @use HasFactory<\Database\Factories\KelasFactory> */
+    /** @use HasFactory<KelasFactory> */
     use HasFactory, SoftDeletes;
 
     protected $table = 'kelas';
@@ -30,4 +31,3 @@ class Kelas extends Model
         return $this->hasMany(Jadwal::class);
     }
 }
-

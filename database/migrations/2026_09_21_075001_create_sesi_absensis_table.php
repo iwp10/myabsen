@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('diubah_oleh')->nullable()->constrained('users')->cascadeOnDelete();
             $table->text('catatan')->nullable();
             $table->timestamps();
-            
+
             $table->unique(['jadwal_id', 'tanggal']);
             $table->index('tanggal');
         });

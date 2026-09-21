@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use Database\Factories\JurusanFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Jurusan extends Model
 {
-    /** @use HasFactory<\Database\Factories\JurusanFactory> */
+    /** @use HasFactory<JurusanFactory> */
     use HasFactory;
 
     protected $table = 'jurusan';
@@ -19,4 +20,3 @@ class Jurusan extends Model
         return $this->hasMany(Kelas::class);
     }
 }
-

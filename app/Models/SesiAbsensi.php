@@ -2,21 +2,18 @@
 
 namespace App\Models;
 
+use Database\Factories\SesiAbsensiFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SesiAbsensi extends Model
 {
-    /** @use HasFactory<\Database\Factories\SesiAbsensiFactory> */
+    /** @use HasFactory<SesiAbsensiFactory> */
     use HasFactory;
 
     protected $table = 'sesi_absensi';
 
     protected $fillable = ['jadwal_id', 'tanggal', 'diabsen_oleh', 'diubah_oleh', 'catatan'];
-
-    protected $casts = [
-        'tanggal' => 'date',
-    ];
 
     public function jadwal()
     {
@@ -38,4 +35,3 @@ class SesiAbsensi extends Model
         return $this->belongsTo(User::class, 'diubah_oleh');
     }
 }
-

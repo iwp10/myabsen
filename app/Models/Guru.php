@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\GuruFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Guru extends Model
 {
-    /** @use HasFactory<\Database\Factories\GuruFactory> */
+    /** @use HasFactory<GuruFactory> */
     use HasFactory, SoftDeletes;
 
     protected $table = 'guru';
@@ -25,4 +26,3 @@ class Guru extends Model
         return $this->hasMany(Jadwal::class);
     }
 }
-

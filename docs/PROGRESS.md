@@ -14,7 +14,7 @@ Cara pakai:
 | 1 | Database (migration, model, seeder) | Agent | main | selesai |
 | 2 | Auth dan role | Agent | fitur/fase-2-auth-role | selesai |
 | 3 | Master data admin | | | ditunda |
-| 4 | Absensi guru | | | belum |
+| 4 | Absensi guru | Agent | fitur/fase-4-absensi-guru | selesai |
 | 5 | Tampilan siswa | | | belum |
 | 6 | Rekap dan ekspor | | | ditunda |
 | 7 | Hardening | | | ditunda |
@@ -48,12 +48,12 @@ Cara pakai:
 - [ ] Pagination dan pencarian
 
 ### Fase 4: Absensi guru
-- [ ] Dashboard jadwal hari ini
-- [ ] Halaman absensi dengan default Hadir
-- [ ] Simpan dalam satu transaksi (AB-04)
-- [ ] Sesi unik dan edit di hari yang sama (AB-01, AB-03)
-- [ ] Koreksi oleh admin, pencatatan `diabsen_oleh` dan `diubah_oleh` (AB-09)
-- [ ] Test untuk AB-01 sampai AB-04
+- [x] Dashboard jadwal hari ini
+- [x] Halaman absensi dengan default Hadir
+- [x] Simpan dalam satu transaksi (AB-04)
+- [x] Sesi unik dan edit di hari yang sama (AB-01, AB-03)
+- [x] Koreksi oleh admin, pencatatan `diabsen_oleh` dan `diubah_oleh` (AB-09)
+- [x] Test untuk AB-01 sampai AB-04
 
 ### Fase 5: Tampilan siswa
 - [ ] Status hari ini per mapel (termasuk Belum diabsen)
