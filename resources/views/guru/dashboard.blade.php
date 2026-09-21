@@ -30,7 +30,7 @@
                                             <p class="text-gray-600 dark:text-gray-400">Kelas: {{ $jadwal->kelas->nama }}</p>
                                         </div>
                                         <div class="text-right">
-                                            <span class="text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 py-1 px-2 rounded">
+                                            <span class="whitespace-nowrap text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 py-1 px-2 rounded">
                                                 {{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }}
                                             </span>
                                         </div>
