@@ -18,7 +18,10 @@ class KelasFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'jurusan_id' => \App\Models\Jurusan::factory(),
+            'nama' => $this->faker->numerify('X RPL #'),
+            'tingkat' => 'X',
+            'tahun_ajaran' => '2026/2027',
         ];
     }
 }

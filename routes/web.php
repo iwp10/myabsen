@@ -32,9 +32,8 @@ Route::middleware('auth')->group(function () {
 
     // Siswa Routes
     Route::middleware('role:siswa')->prefix('siswa')->name('siswa.')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('dashboard', ['role' => 'Siswa']);
-        })->name('dashboard');
+        Route::get('/dashboard', [\App\Http\Controllers\Siswa\DashboardController::class, 'dashboard'])->name('dashboard');
+        Route::get('/riwayat', [\App\Http\Controllers\Siswa\DashboardController::class, 'riwayat'])->name('riwayat');
     });
 });
 

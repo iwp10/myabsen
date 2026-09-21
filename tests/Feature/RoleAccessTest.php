@@ -39,6 +39,7 @@ test('admin cannot access guru dashboard', function () {
 
 test('siswa can access siswa dashboard', function () {
     $siswa = User::factory()->create(['role' => 'siswa']);
+    \App\Models\Siswa::factory()->create(['user_id' => $siswa->id]);
 
     $response = $this->actingAs($siswa)->get(route('siswa.dashboard'));
     $response->assertStatus(200);
