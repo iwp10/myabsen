@@ -111,4 +111,26 @@ class AbsensiController extends Controller
             'riwayatSesi' => $riwayatSesi,
         ]);
     }
+    /**
+     * Mengunduh rekap absensi untuk guru.
+     */
+    public function export(Request $request)
+    {
+        $guru = \App\Models\Guru::where('user_id', $request->user()->id)->first();
+        
+        $filters = [
+            'guru_id' => $guru ? $guru->id : null,
+            'bulan' => $request->query('bulan'),
+        ];
+        
+        $filename = 'rekap_absensi_guru';
+        if (!empty($filters['bulan'])) {
+            $filename .= '_' . $filters['bulan'];
+        } else {
+            $filename .= '_' . date('Y-m');
+        }
+        $filename .= '.xlsx';
+
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\LaporanAbsensiExport($filters), $filename);
+    }
 }

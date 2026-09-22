@@ -10,6 +10,20 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold">Riwayat Sesi Absensi</h3>
+                        
+                        <form action="{{ route('guru.laporan.export') }}" method="GET" class="flex items-center space-x-2">
+                            <input type="month" name="bulan" value="{{ date('Y-m') }}" class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm text-sm" />
+                            <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Unduh Laporan Excel
+                            </button>
+                        </form>
+                    </div>
+
                     @if($riwayatSesi->isEmpty())
                         <p class="text-gray-500 dark:text-gray-400">Belum ada riwayat absensi yang tersimpan.</p>
                     @else
