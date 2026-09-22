@@ -15,6 +15,26 @@
                     <x-nav-link :href="route(Auth::user()->role . '.dashboard')" :active="request()->routeIs(Auth::user()->role . '.dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    @if(Auth::user()->role === 'admin')
+                    <x-nav-link :href="route('admin.jurusan.index')" :active="request()->routeIs('admin.jurusan.*')">
+                        {{ __('Jurusan') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('admin.kelas.index')" :active="request()->routeIs('admin.kelas.*')">
+                        {{ __('Kelas') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('admin.mapel.index')" :active="request()->routeIs('admin.mapel.*')">
+                        {{ __('Mata Pelajaran') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('admin.guru.index')" :active="request()->routeIs('admin.guru.*')">
+                        {{ __('Guru') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('admin.siswa.index')" :active="request()->routeIs('admin.siswa.*')">
+                        {{ __('Siswa') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('admin.jadwal.index')" :active="request()->routeIs('admin.jadwal.*')">
+                        {{ __('Jadwal') }}
+                    </x-nav-link>
+                    @endif
                     @if(Auth::user()->role === 'guru')
                     <x-nav-link :href="route('guru.riwayat')" :active="request()->routeIs('guru.riwayat')">
                         {{ __('Riwayat') }}
@@ -75,6 +95,26 @@
             <x-responsive-nav-link :href="route(Auth::user()->role . '.dashboard')" :active="request()->routeIs(Auth::user()->role . '.dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @if(Auth::user()->role === 'admin')
+            <x-responsive-nav-link :href="route('admin.jurusan.index')" :active="request()->routeIs('admin.jurusan.*')">
+                {{ __('Jurusan') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.kelas.index')" :active="request()->routeIs('admin.kelas.*')">
+                {{ __('Kelas') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.mapel.index')" :active="request()->routeIs('admin.mapel.*')">
+                {{ __('Mata Pelajaran') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.guru.index')" :active="request()->routeIs('admin.guru.*')">
+                {{ __('Guru') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.siswa.index')" :active="request()->routeIs('admin.siswa.*')">
+                {{ __('Siswa') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.jadwal.index')" :active="request()->routeIs('admin.jadwal.*')">
+                {{ __('Jadwal') }}
+            </x-responsive-nav-link>
+            @endif
             @if(Auth::user()->role === 'guru')
             <x-responsive-nav-link :href="route('guru.riwayat')" :active="request()->routeIs('guru.riwayat')">
                 {{ __('Riwayat') }}

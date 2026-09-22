@@ -13,7 +13,7 @@ Cara pakai:
 | 0 | Perencanaan | Agent | main | selesai |
 | 1 | Database (migration, model, seeder) | Agent | main | selesai |
 | 2 | Auth dan role | Agent | fitur/fase-2-auth-role | selesai |
-| 3 | Master data admin | | | ditunda |
+| 3 | Master data admin | Agent | fitur/fase-3-master-data | dikerjakan |
 | 4 | Absensi guru | Agent | fitur/fase-4-absensi-guru | selesai |
 | 5 | Tampilan siswa | Agent | fitur/fase-5-tampilan-siswa | selesai |
 | 6 | Rekap dan ekspor | | | ditunda |
@@ -41,10 +41,10 @@ Cara pakai:
 - [x] Test akses per role
 
 ### Fase 3: Master data admin
-- [ ] CRUD jurusan, kelas, mapel
-- [ ] CRUD guru dan siswa (akun otomatis, reset password)
-- [ ] Impor siswa dari Excel
-- [ ] CRUD jadwal dengan pencegahan bentrok (AB-06)
+- [x] CRUD jurusan, kelas, mapel
+- [x] CRUD guru dan siswa (akun otomatis, reset password)
+- [x] Impor siswa dari Excel
+- [x] CRUD jadwal dengan pencegahan bentrok (AB-06)
 - [ ] Pagination dan pencarian
 
 ### Fase 4: Absensi guru

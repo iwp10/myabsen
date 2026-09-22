@@ -16,6 +16,23 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () {
             return view('dashboard', ['role' => 'Admin']);
         })->name('dashboard');
+
+        Route::resource('jurusan', \App\Http\Controllers\Admin\JurusanController::class)->except(['show']);
+        Route::resource('kelas', \App\Http\Controllers\Admin\KelasController::class)->except(['show'])->parameters([
+            'kelas' => 'kelas' // to make parameter $kelas instead of $kela
+        ]);
+        Route::resource('mapel', \App\Http\Controllers\Admin\MapelController::class)->except(['show']);
+        
+        Route::resource('guru', \App\Http\Controllers\Admin\GuruController::class)->except(['show']);
+        Route::post('guru/{guru}/reset-password', [\App\Http\Controllers\Admin\GuruController::class, 'resetPassword'])->name('guru.reset-password');
+        
+        Route::resource('siswa', \App\Http\Controllers\Admin\SiswaController::class)->except(['show'])->parameters([
+            'siswa' => 'siswa'
+        ]);
+        Route::post('siswa/import', [\App\Http\Controllers\Admin\SiswaController::class, 'import'])->name('siswa.import');
+        Route::post('siswa/{siswa}/reset-password', [\App\Http\Controllers\Admin\SiswaController::class, 'resetPassword'])->name('siswa.reset-password');
+        
+        Route::resource('jadwal', \App\Http\Controllers\Admin\JadwalController::class)->except(['show']);
     });
 
     // Guru Routes
