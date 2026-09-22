@@ -16,6 +16,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () {
             return view('dashboard', ['role' => 'Admin']);
         })->name('dashboard');
+
+        Route::resource('jurusan', \App\Http\Controllers\Admin\JurusanController::class)->except(['show']);
+        Route::resource('kelas', \App\Http\Controllers\Admin\KelasController::class)->except(['show'])->parameters([
+            'kelas' => 'kelas' // to make parameter $kelas instead of $kela
+        ]);
+        Route::resource('mapel', \App\Http\Controllers\Admin\MapelController::class)->except(['show']);
     });
 
     // Guru Routes
