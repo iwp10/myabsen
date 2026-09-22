@@ -33,12 +33,16 @@ Route::middleware('auth')->group(function () {
         Route::post('siswa/{siswa}/reset-password', [\App\Http\Controllers\Admin\SiswaController::class, 'resetPassword'])->name('siswa.reset-password');
         
         Route::resource('jadwal', \App\Http\Controllers\Admin\JadwalController::class)->except(['show']);
+        
+        Route::get('laporan', [\App\Http\Controllers\Admin\LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('laporan/export', [\App\Http\Controllers\Admin\LaporanController::class, 'export'])->name('laporan.export');
     });
 
     // Guru Routes
     Route::middleware('role:guru')->prefix('guru')->name('guru.')->group(function () {
         Route::get('/dashboard', [AbsensiController::class, 'dashboard'])->name('dashboard');
         Route::get('/riwayat', [AbsensiController::class, 'riwayat'])->name('riwayat');
+        Route::get('/laporan/export', [AbsensiController::class, 'export'])->name('laporan.export');
     });
 
     // Guru & Admin Routes

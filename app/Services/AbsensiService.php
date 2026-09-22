@@ -132,4 +132,51 @@ class AbsensiService
 
         return $hari[$dayOfWeek] ?? null;
     }
+
+    /**
+     * Mendapatkan rekap laporan absensi berdasarkan filter.
+     */
+    public function getRekapLaporan(array $filters)
+    {
+        $query = DetailAbsensi::query()
+            ->join('sesi_absensi', 'detail_absensi.sesi_absensi_id', '=', 'sesi_absensi.id')
+            ->join('jadwal', 'sesi_absensi.jadwal_id', '=', 'jadwal.id')
+            ->join('siswa', 'detail_absensi.siswa_id', '=', 'siswa.id')
+            ->join('users', 'siswa.user_id', '=', 'users.id')
+            ->join('kelas', 'siswa.kelas_id', '=', 'kelas.id')
+            ->join('mapel', 'jadwal.mapel_id', '=', 'mapel.id');
+        
+        if (!empty($filters['kelas_id'])) {
+            $query->where('jadwal.kelas_id', $filters['kelas_id']);
+        }
+        if (!empty($filters['mapel_id'])) {
+            $query->where('jadwal.mapel_id', $filters['mapel_id']);
+        }
+        if (!empty($filters['bulan'])) {
+            // bulan is YYYY-MM
+            $query->whereRaw("DATE_FORMAT(sesi_absensi.tanggal, '%Y-%m') = ?", [$filters['bulan']]);
+        }
+        if (!empty($filters['guru_id'])) {
+            $query->where('jadwal.guru_id', $filters['guru_id']);
+        }
+
+        $query->select(
+            'siswa.id as siswa_id',
+            'siswa.nis',
+            'users.name as nama_siswa',
+            'kelas.nama as nama_kelas',
+            'mapel.nama as nama_mapel',
+            DB::raw('SUM(CASE WHEN detail_absensi.status = "hadir" THEN 1 ELSE 0 END) as hadir'),
+            DB::raw('SUM(CASE WHEN detail_absensi.status = "izin" THEN 1 ELSE 0 END) as izin'),
+            DB::raw('SUM(CASE WHEN detail_absensi.status = "sakit" THEN 1 ELSE 0 END) as sakit'),
+            DB::raw('SUM(CASE WHEN detail_absensi.status = "alpa" THEN 1 ELSE 0 END) as alpa'),
+            DB::raw('COUNT(detail_absensi.id) as total_sesi')
+        )
+        ->groupBy('siswa.id', 'siswa.nis', 'users.name', 'kelas.nama', 'mapel.nama')
+        ->orderBy('kelas.nama')
+        ->orderBy('mapel.nama')
+        ->orderBy('users.name');
+
+        return $query->get();
+    }
 }
