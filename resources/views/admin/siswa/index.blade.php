@@ -13,6 +13,12 @@
                 </div>
             @endif
 
+            @if (session('error'))
+                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <span class="block sm:inline">{!! session('error') !!}</span>
+                </div>
+            @endif
+
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="flex justify-between items-center mb-4">
@@ -26,6 +32,31 @@
                                 Tambah Siswa
                             </a>
                         </div>
+                    </div>
+                    
+                    <div class="mb-6 p-4 border rounded-md bg-gray-50 dark:bg-gray-700">
+                        <h4 class="font-bold mb-2">Impor Data Siswa</h4>
+                        <form action="{{ route('admin.siswa.import') }}" method="POST" enctype="multipart/form-data" class="flex items-end space-x-4">
+                            @csrf
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kelas</label>
+                                <select name="kelas_id" required class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm">
+                                    <option value="">Pilih Kelas</option>
+                                    @foreach($kelas as $k)
+                                        <option value="{{ $k->id }}">{{ $k->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">File Excel/CSV</label>
+                                <input type="file" name="file" accept=".xlsx,.xls,.csv" required class="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-white focus:outline-none dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400">
+                            </div>
+                            <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                Impor
+                            </button>
+                        </form>
+                        @error('file') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        @error('kelas_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="overflow-x-auto">

@@ -29,7 +29,10 @@ Route::middleware('auth')->group(function () {
         Route::resource('siswa', \App\Http\Controllers\Admin\SiswaController::class)->except(['show'])->parameters([
             'siswa' => 'siswa'
         ]);
+        Route::post('siswa/import', [\App\Http\Controllers\Admin\SiswaController::class, 'import'])->name('siswa.import');
         Route::post('siswa/{siswa}/reset-password', [\App\Http\Controllers\Admin\SiswaController::class, 'resetPassword'])->name('siswa.reset-password');
+        
+        Route::resource('jadwal', \App\Http\Controllers\Admin\JadwalController::class)->except(['show']);
     });
 
     // Guru Routes

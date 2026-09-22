@@ -135,3 +135,19 @@ test('admin soft deletes siswa if has history', function () {
     $this->assertSoftDeleted('siswa', ['id' => $siswa->id]);
     $this->assertDatabaseHas('users', ['id' => $user->id]); // user remains
 });
+
+test('admin can import siswa from excel', function () {
+    \Maatwebsite\Excel\Facades\Excel::fake();
+    
+    $file = \Illuminate\Http\UploadedFile::fake()->create('siswa.xlsx', 100);
+    
+    $response = $this->actingAs($this->admin)->post(route('admin.siswa.import'), [
+        'kelas_id' => $this->kelas->id,
+        'file' => $file,
+    ]);
+    
+    $response->assertRedirect(route('admin.siswa.index'));
+    $response->assertSessionHas('success', 'Data siswa berhasil diimpor.');
+    
+    \Maatwebsite\Excel\Facades\Excel::assertImported('siswa.xlsx');
+});

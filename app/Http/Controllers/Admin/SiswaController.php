@@ -12,6 +12,8 @@ use App\Models\DetailAbsensi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use App\Imports\SiswaImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SiswaController extends Controller
 {
@@ -27,7 +29,9 @@ class SiswaController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.siswa.index', compact('siswas'));
+        $kelas = \App\Models\Kelas::orderBy('tingkat')->orderBy('nama')->get();
+
+        return view('admin.siswa.index', compact('siswas', 'kelas'));
     }
 
     public function create()
@@ -107,5 +111,27 @@ class SiswaController extends Controller
 
         return redirect()->route('admin.siswa.index')
             ->with('success', 'Password siswa berhasil direset ke "password".');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'kelas_id' => 'required|exists:kelas,id',
+            'file' => 'required|mimes:xlsx,csv,xls',
+        ]);
+
+        try {
+            Excel::import(new SiswaImport($request->kelas_id), $request->file('file'));
+            return redirect()->route('admin.siswa.index')->with('success', 'Data siswa berhasil diimpor.');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errors = [];
+            foreach ($failures as $failure) {
+                $errors[] = 'Baris ' . $failure->row() . ': ' . implode(', ', $failure->errors());
+            }
+            return back()->with('error', 'Gagal impor:<br>' . implode('<br>', $errors));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan saat mengimpor data.');
+        }
     }
 }
