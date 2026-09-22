@@ -25,6 +25,12 @@
                     <x-nav-link :href="route('admin.mapel.index')" :active="request()->routeIs('admin.mapel.*')">
                         {{ __('Mata Pelajaran') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('admin.guru.index')" :active="request()->routeIs('admin.guru.*')">
+                        {{ __('Guru') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('admin.siswa.index')" :active="request()->routeIs('admin.siswa.*')">
+                        {{ __('Siswa') }}
+                    </x-nav-link>
                     @endif
                     @if(Auth::user()->role === 'guru')
                     <x-nav-link :href="route('guru.riwayat')" :active="request()->routeIs('guru.riwayat')">
@@ -95,6 +101,12 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('admin.mapel.index')" :active="request()->routeIs('admin.mapel.*')">
                 {{ __('Mata Pelajaran') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.guru.index')" :active="request()->routeIs('admin.guru.*')">
+                {{ __('Guru') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.siswa.index')" :active="request()->routeIs('admin.siswa.*')">
+                {{ __('Siswa') }}
             </x-responsive-nav-link>
             @endif
             @if(Auth::user()->role === 'guru')

@@ -42,7 +42,7 @@ Cara pakai:
 
 ### Fase 3: Master data admin
 - [x] CRUD jurusan, kelas, mapel
-- [ ] CRUD guru dan siswa (akun otomatis, reset password)
+- [x] CRUD guru dan siswa (akun otomatis, reset password)
 - [ ] Impor siswa dari Excel
 - [ ] CRUD jadwal dengan pencegahan bentrok (AB-06)
 - [ ] Pagination dan pencarian
