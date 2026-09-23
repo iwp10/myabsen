@@ -49,7 +49,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">File Excel/CSV</label>
-                                <input type="file" name="file" accept=".xlsx,.xls,.csv" required class="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-white focus:outline-none dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400">
+                                <input type="file" name="file" accept=".xlsx,.xls,.csv" required class="block w-full text-sm text-gray-900 dark:text-gray-300 border border-gray-300 rounded-md cursor-pointer bg-white focus:outline-none dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400">
                             </div>
                             <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                                 Impor

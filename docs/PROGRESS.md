@@ -80,6 +80,11 @@ Cara pakai:
 - [ ] `docs/DEPLOY.md`
 - [ ] Uji dengan `APP_DEBUG=false` dan `php artisan optimize`
 
+### Fase 9: Tambahan
+- [x] Otentikasi: Sistem login fleksibel menggunakan Username, NIP (Guru), atau NIS (Siswa).
+- [x] UI/UX: Penambahan toggle Mode Terang/Gelap menggunakan Alpine.js dan Tailwind, dengan Mode Terang sebagai setelan bawaan (default).
+
+
 ## Catatan dan hambatan
 Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-09-21 | 3,6,7,8 | Fase 3, 6, 7, 8 ditunda untuk fokus MVP/BETA (Fase 1, 2, 4, 5). Master data digenerate via Seeder.
