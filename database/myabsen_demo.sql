@@ -30,6 +30,9 @@ CREATE TABLE IF NOT EXISTS `cache` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping data for table myabsen.cache: ~0 rows (approximately)
+INSERT INTO `cache` (`key`, `value`, `expiration`) VALUES
+	('laravel_cache_198001012000011001|127.0.0.1', 'i:1;', 1790128649),
+	('laravel_cache_198001012000011001|127.0.0.1:timer', 'i:1790128649;', 1790128649);
 
 -- Dumping structure for table myabsen.cache_locks
 DROP TABLE IF EXISTS `cache_locks`;
@@ -122,7 +125,7 @@ CREATE TABLE IF NOT EXISTS `guru` (
   CONSTRAINT `guru_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table myabsen.guru: ~1 rows (approximately)
+-- Dumping data for table myabsen.guru: ~2 rows (approximately)
 INSERT INTO `guru` (`id`, `user_id`, `nip`, `created_at`, `updated_at`, `deleted_at`) VALUES
 	(1, 2, '198001012000011001', '2026-09-21 05:09:12', '2026-09-21 05:09:12', NULL),
 	(2, 8, '12345678910', '2026-09-22 07:43:18', '2026-09-22 07:43:18', NULL);
@@ -327,7 +330,8 @@ CREATE TABLE IF NOT EXISTS `sessions` (
 
 -- Dumping data for table myabsen.sessions: ~1 rows (approximately)
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-	('6SrmKqvXPkpIsCzo9IhHpGmviZswzF9v9nTVv45D', 2, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiaDU0a0RYQkpTZ2pIUGZhaU1jeE1KR0ZKOXp5M0ppYnhGclk2emduVyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6NTU6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMC9ndXJ1L2xhcG9yYW4vZXhwb3J0P2J1bGFuPTIwMjYtMDkiO3M6NToicm91dGUiO3M6MTk6Imd1cnUubGFwb3Jhbi5leHBvcnQiO31zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToyO30=', 1790090729);
+	('3f54YPzwS6eftpCPGEmvaRhn0OoUAZ2twW6ajrrj', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiUlZ3Z0hhN2NsNHVRMTE2WUdyd2c0bWo5V3U5QkpxTGZRcnkxaUh4UCI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6MzU6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9hZG1pbi9sYXBvcmFuIjtzOjU6InJvdXRlIjtzOjE5OiJhZG1pbi5sYXBvcmFuLmluZGV4Ijt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1790128942),
+	('sBpoJyMFe7XjfSdVAALwl3tHFeiSWWHZogZY4Q6D', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiUVV3dEZmR0tLdVdzSDNVZEZuZXlWaFA3UGlmUWpXYlE0T0dSanVMUSI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6MzI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMC9hZG1pbi9ndXJ1IjtzOjU6InJvdXRlIjtzOjE2OiJhZG1pbi5ndXJ1LmluZGV4Ijt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1790131155);
 
 -- Dumping structure for table myabsen.siswa
 DROP TABLE IF EXISTS `siswa`;

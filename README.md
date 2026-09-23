@@ -17,28 +17,29 @@ MyAbsen adalah sistem informasi absensi siswa berbasis web yang dirancang khusus
 - [Dokumentasi Proyek](#-dokumentasi-proyek)
 - [Alur Kerja Tim](#-alur-kerja-tim)
 
+
 ---
+Aplikasi ini memiliki tiga peran utama dengan batasan akses masing-masing, serta dilengkapi fitur aksesibilitas tingkat lanjut:
 
-## ✨ Fitur Utama
-
-Aplikasi ini memiliki tiga peran utama dengan batasan akses masing-masing:
+### 🌟 Fitur Unggulan (Baru)
+- **Otentikasi Fleksibel:** Pengguna dapat login menggunakan Username bawaan, ATAU menggunakan Nomor Induk (NIP untuk Guru, NIS untuk Siswa).
+- **Aksesibilitas Visual:** Dilengkapi *toggle* Light Mode dan Dark Mode untuk kenyamanan mata pengguna dari berbagai rentang usia (default: Light Mode).
 
 ### 👑 Admin
 - **Master Data:** Mengelola data jurusan, kelas, mata pelajaran, guru, dan siswa.
 - **Manajemen Jadwal:** Mengatur jadwal pelajaran dengan validasi pencegahan jadwal bentrok.
 - **Import Data:** Memasukkan data siswa secara massal melalui file Excel.
-- **Pemantauan & Koreksi:** Melihat seluruh rekap absensi sekolah dan memiliki hak untuk mengoreksi absensi jika ada kesalahan.
+- **Pemantauan & Koreksi:** Melihat seluruh rekap absensi sekolah dan hak untuk mengoreksi absensi.
 
 ### 👨‍🏫 Guru
 - **Dashboard Cerdas:** Menampilkan jadwal mengajar pada hari tersebut.
-- **Absensi Cepat:** Sistem memberikan status default **Hadir** untuk seluruh siswa di kelas. Guru hanya perlu mengubah status siswa yang *Izin*, *Sakit*, atau *Alpa*.
-- **Manajemen Sesi:** Dapat mengedit kembali sesi absensi (terbatas pada hari yang sama).
-- **Laporan:** Melihat riwayat rekap kelas yang diajar dan mengekspor data dalam format Excel & PDF.
+- **Absensi Cepat:** Sistem memberikan status default **Hadir** untuk seluruh kelas. Guru hanya mengubah status siswa yang *Izin*, *Sakit*, atau *Alpa*.
+- **Manajemen Sesi:** Dapat mengedit kembali sesi absensi pada hari yang sama.
+- **Laporan:** Mengekspor rekap kelas dalam format Excel.
 
 ### 🎓 Siswa (Read-Only)
-- **Monitoring Pribadi:** Melihat status kehadiran hari ini untuk setiap mata pelajaran.
-- **Riwayat:** Melacak riwayat kehadiran pribadi dengan filter tanggal dan mata pelajaran.
-- **Statistik:** Melihat persentase tingkat kehadiran per mata pelajaran.
+- **Monitoring Pribadi:** Melihat status kehadiran harian per mata pelajaran.
+- **Statistik & Riwayat:** Melacak persentase tingkat kehadiran dan riwayat lengkapnya.
 
 ---
 
@@ -54,6 +55,9 @@ Proyek ini dibangun menggunakan *stack* teknologi berikut (sesuai dengan aturan 
 - **Library Tambahan:** `maatwebsite/excel` (Export/Import Excel), `barryvdh/laravel-dompdf` (Export PDF)
 
 ---
+
+## 📸 Preview Tampilan Aplikasi
+**
 
 ## 🚀 Panduan Instalasi Lokal
 
@@ -118,14 +122,16 @@ Pastikan komputer Anda sudah terinstal:
 
 ## 🔑 Kredensial Demo
 
-Gunakan akun berikut untuk mencoba fitur-fitur aplikasi selama tahap pengembangan lokal. Login menggunakan **Username** (bukan email).
 
-| Role | Username | Password |
+Gunakan akun berikut untuk mencoba fitur-fitur aplikasi selama tahap pengembangan lokal. 
+
+| Role | Username / Nomor Induk | Password |
 |---|---|---|
 | Admin | `admin` | `password` |
-| Guru | `guru1` | `password` |
-| Siswa | `siswa1` | `password` |
+| Guru | `guru1` ATAU `198001012000011001` | `password` |
+| Siswa | `siswa1` ATAU `1001` | `password` |
 
+> 💡 **Info:** Anda bisa mencoba fleksibilitas login dengan memasukkan NIP atau NIS pada kolom Username saat login.
 > ⚠️ **Peringatan:** Akun ini hanya untuk *development*. Jangan gunakan kredensial ini di server produksi.
 
 ---
