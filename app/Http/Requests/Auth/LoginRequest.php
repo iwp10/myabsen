@@ -42,15 +42,35 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('username', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        $input = $this->input('username');
+        $password = $this->input('password');
+        $remember = $this->boolean('remember');
 
-            throw ValidationException::withMessages([
-                'username' => trans('auth.failed'),
-            ]);
+        // Cek username
+        if (Auth::attempt(['username' => $input, 'password' => $password], $remember)) {
+            RateLimiter::clear($this->throttleKey());
+            return;
         }
 
-        RateLimiter::clear($this->throttleKey());
+        // Cek nip dari tabel guru
+        $guru = \App\Models\Guru::where('nip', $input)->first();
+        if ($guru && Auth::attempt(['id' => $guru->user_id, 'password' => $password], $remember)) {
+            RateLimiter::clear($this->throttleKey());
+            return;
+        }
+
+        // Cek nis dari tabel siswa
+        $siswa = \App\Models\Siswa::where('nis', $input)->first();
+        if ($siswa && Auth::attempt(['id' => $siswa->user_id, 'password' => $password], $remember)) {
+            RateLimiter::clear($this->throttleKey());
+            return;
+        }
+
+        RateLimiter::hit($this->throttleKey());
+
+        throw ValidationException::withMessages([
+            'username' => trans('auth.failed'),
+        ]);
     }
 
     /**

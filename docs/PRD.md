@@ -97,3 +97,7 @@ Tidak dikerjakan sebelum MVP stabil dan diuji di sekolah:
 | 2026-09-21 | Semua siswa default Hadir, guru hanya mengubah yang berbeda |
 | 2026-09-21 | Stack: Laravel 12, Blade + Tailwind + Alpine, MySQL 8 |
 | 2026-09-21 | Login memakai username (NIS/NIP), bukan email |
+
+## 9. Update
+- Otentikasi: Sistem login fleksibel menggunakan Username, NIP (Guru), atau NIS (Siswa).
+- UI/UX: Penambahan toggle Mode Terang/Gelap menggunakan Alpine.js dan Tailwind, dengan Mode Terang sebagai setelan bawaan (default).
