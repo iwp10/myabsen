@@ -1,8 +1,7 @@
 <?php
 
-use App\Models\User;
 use App\Models\Guru;
-use App\Models\SesiAbsensi;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 beforeEach(function () {
@@ -81,4 +80,35 @@ test('admin can reset guru password', function () {
 
     $user->refresh();
     expect(Hash::check('password', $user->password))->toBeTrue();
+});
+
+test('admin can search guru by nip or user name', function () {
+    $user1 = User::factory()->create(['name' => 'Ahmad Dahlan', 'role' => 'guru', 'username' => '11111']);
+    Guru::create(['user_id' => $user1->id, 'nip' => '11111']);
+
+    $user2 = User::factory()->create(['name' => 'Siti Walidah', 'role' => 'guru', 'username' => '22222']);
+    Guru::create(['user_id' => $user2->id, 'nip' => '22222']);
+
+    $responseName = $this->actingAs($this->admin)->get(route('admin.guru.index', ['search' => 'Ahmad']));
+    $responseName->assertStatus(200);
+    $responseName->assertSee('Ahmad Dahlan');
+    $responseName->assertDontSee('Siti Walidah');
+
+    $responseNip = $this->actingAs($this->admin)->get(route('admin.guru.index', ['search' => '22222']));
+    $responseNip->assertStatus(200);
+    $responseNip->assertSee('Siti Walidah');
+    $responseNip->assertDontSee('Ahmad Dahlan');
+});
+
+test('guru index paginates 10 items per page', function () {
+    for ($i = 0; $i < 15; $i++) {
+        $user = User::factory()->create(['role' => 'guru', 'username' => 'nip'.$i]);
+        Guru::create(['user_id' => $user->id, 'nip' => 'nip'.$i]);
+    }
+
+    $response = $this->actingAs($this->admin)->get(route('admin.guru.index'));
+    $response->assertStatus(200);
+    $gurus = $response->viewData('gurus');
+    expect($gurus->count())->toBe(10);
+    expect($gurus->total())->toBe(15);
 });

@@ -6,12 +6,23 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMapelRequest;
 use App\Http\Requests\UpdateMapelRequest;
 use App\Models\Mapel;
+use Illuminate\Http\Request;
 
 class MapelController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $mapels = Mapel::orderBy('nama')->paginate(10);
+        $search = $request->search;
+        $mapels = Mapel::when($search, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('kode', 'like', "%{$search}%");
+            });
+        })
+            ->orderBy('nama')
+            ->paginate(10)
+            ->appends(['search' => $search]);
+
         return view('admin.mapel.index', compact('mapels'));
     }
 

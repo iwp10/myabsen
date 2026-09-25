@@ -1,15 +1,17 @@
 <?php
 
-use App\Models\User;
-use App\Models\Siswa;
-use App\Models\Kelas;
-use App\Models\Jurusan;
 use App\Models\DetailAbsensi;
-use App\Models\SesiAbsensi;
-use App\Models\Jadwal;
-use App\Models\Mapel;
 use App\Models\Guru;
+use App\Models\Jadwal;
+use App\Models\Jurusan;
+use App\Models\Kelas;
+use App\Models\Mapel;
+use App\Models\SesiAbsensi;
+use App\Models\Siswa;
+use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
 
 beforeEach(function () {
     $this->admin = User::factory()->create(['role' => 'admin']);
@@ -100,11 +102,11 @@ test('admin can reset siswa password', function () {
 test('admin soft deletes siswa if has history', function () {
     $user = User::factory()->create(['role' => 'siswa']);
     $siswa = Siswa::create(['user_id' => $user->id, 'nis' => '9999', 'kelas_id' => $this->kelas->id]);
-    
+
     $mapel = Mapel::create(['nama' => 'Math', 'kode' => 'MTK']);
     $guruUser = User::factory()->create(['role' => 'guru']);
     $guru = Guru::create(['user_id' => $guruUser->id, 'nip' => 'g1']);
-    
+
     $jadwal = Jadwal::create([
         'kelas_id' => $this->kelas->id,
         'mapel_id' => $mapel->id,
@@ -114,13 +116,13 @@ test('admin soft deletes siswa if has history', function () {
         'jam_selesai' => '08:30:00',
         'tahun_ajaran' => '2026/2027',
     ]);
-    
+
     $sesi = SesiAbsensi::create([
         'jadwal_id' => $jadwal->id,
         'tanggal' => now()->toDateString(),
         'diabsen_oleh' => $guruUser->id,
     ]);
-    
+
     DetailAbsensi::create([
         'sesi_absensi_id' => $sesi->id,
         'siswa_id' => $siswa->id,
@@ -137,17 +139,48 @@ test('admin soft deletes siswa if has history', function () {
 });
 
 test('admin can import siswa from excel', function () {
-    \Maatwebsite\Excel\Facades\Excel::fake();
-    
-    $file = \Illuminate\Http\UploadedFile::fake()->create('siswa.xlsx', 100);
-    
+    Excel::fake();
+
+    $file = UploadedFile::fake()->create('siswa.xlsx', 100);
+
     $response = $this->actingAs($this->admin)->post(route('admin.siswa.import'), [
         'kelas_id' => $this->kelas->id,
         'file' => $file,
     ]);
-    
+
     $response->assertRedirect(route('admin.siswa.index'));
     $response->assertSessionHas('success', 'Data siswa berhasil diimpor.');
-    
-    \Maatwebsite\Excel\Facades\Excel::assertImported('siswa.xlsx');
+
+    Excel::assertImported('siswa.xlsx');
+});
+
+test('admin can search siswa by nis or user name', function () {
+    $user1 = User::factory()->create(['name' => 'Bambang Tri', 'role' => 'siswa', 'username' => 'NIS001']);
+    Siswa::create(['user_id' => $user1->id, 'nis' => 'NIS001', 'kelas_id' => $this->kelas->id]);
+
+    $user2 = User::factory()->create(['name' => 'Dewi Lestari', 'role' => 'siswa', 'username' => 'NIS002']);
+    Siswa::create(['user_id' => $user2->id, 'nis' => 'NIS002', 'kelas_id' => $this->kelas->id]);
+
+    $responseName = $this->actingAs($this->admin)->get(route('admin.siswa.index', ['search' => 'Bambang']));
+    $responseName->assertStatus(200);
+    $responseName->assertSee('Bambang Tri');
+    $responseName->assertDontSee('Dewi Lestari');
+
+    $responseNis = $this->actingAs($this->admin)->get(route('admin.siswa.index', ['search' => 'NIS002']));
+    $responseNis->assertStatus(200);
+    $responseNis->assertSee('Dewi Lestari');
+    $responseNis->assertDontSee('Bambang Tri');
+});
+
+test('siswa index paginates 10 items per page', function () {
+    for ($i = 0; $i < 15; $i++) {
+        $user = User::factory()->create(['role' => 'siswa', 'username' => 'nis'.$i]);
+        Siswa::create(['user_id' => $user->id, 'nis' => 'nis'.$i, 'kelas_id' => $this->kelas->id]);
+    }
+
+    $response = $this->actingAs($this->admin)->get(route('admin.siswa.index'));
+    $response->assertStatus(200);
+    $siswas = $response->viewData('siswas');
+    expect($siswas->count())->toBe(10);
+    expect($siswas->total())->toBe(15);
 });

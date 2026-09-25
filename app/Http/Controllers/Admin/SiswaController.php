@@ -5,31 +5,35 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSiswaRequest;
 use App\Http\Requests\UpdateSiswaRequest;
+use App\Imports\SiswaImport;
+use App\Models\DetailAbsensi;
+use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\User;
-use App\Models\Kelas;
-use App\Models\DetailAbsensi;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Http\Request;
-use App\Imports\SiswaImport;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Validators\ValidationException;
 
 class SiswaController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->query('search');
+        $search = $request->search;
         $siswas = Siswa::with(['user', 'kelas.jurusan'])
-            ->when($search, function ($query) use ($search) {
-                $query->whereHas('user', function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%");
-                })->orWhere('nis', 'like', "%{$search}%");
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nis', 'like', "%{$search}%")
+                        ->orWhereHas('user', function ($sub) use ($search) {
+                            $sub->where('name', 'like', "%{$search}%");
+                        });
+                });
             })
             ->paginate(10)
-            ->withQueryString();
+            ->appends(['search' => $search]);
 
-        $kelas = \App\Models\Kelas::orderBy('tingkat')->orderBy('nama')->get();
+        $kelas = Kelas::orderBy('tingkat')->orderBy('nama')->get();
 
         return view('admin.siswa.index', compact('siswas', 'kelas'));
     }
@@ -37,6 +41,7 @@ class SiswaController extends Controller
     public function create()
     {
         $kelas = Kelas::with('jurusan')->orderBy('tingkat')->orderBy('nama')->get();
+
         return view('admin.siswa.create', compact('kelas'));
     }
 
@@ -65,6 +70,7 @@ class SiswaController extends Controller
     {
         $siswa->load('user');
         $kelas = Kelas::with('jurusan')->orderBy('tingkat')->orderBy('nama')->get();
+
         return view('admin.siswa.edit', compact('siswa', 'kelas'));
     }
 
@@ -92,6 +98,7 @@ class SiswaController extends Controller
 
         if ($hasHistory) {
             $siswa->delete();
+
             return redirect()->route('admin.siswa.index')
                 ->with('success', 'Siswa di-soft-delete karena memiliki riwayat absensi.');
         }
@@ -106,7 +113,7 @@ class SiswaController extends Controller
     public function resetPassword(Siswa $siswa)
     {
         $siswa->user->update([
-            'password' => Hash::make('password')
+            'password' => Hash::make('password'),
         ]);
 
         return redirect()->route('admin.siswa.index')
@@ -122,14 +129,16 @@ class SiswaController extends Controller
 
         try {
             Excel::import(new SiswaImport($request->kelas_id), $request->file('file'));
+
             return redirect()->route('admin.siswa.index')->with('success', 'Data siswa berhasil diimpor.');
-        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+        } catch (ValidationException $e) {
             $failures = $e->failures();
             $errors = [];
             foreach ($failures as $failure) {
-                $errors[] = 'Baris ' . $failure->row() . ': ' . implode(', ', $failure->errors());
+                $errors[] = 'Baris '.$failure->row().': '.implode(', ', $failure->errors());
             }
-            return back()->with('error', 'Gagal impor:<br>' . implode('<br>', $errors));
+
+            return back()->with('error', 'Gagal impor:<br>'.implode('<br>', $errors));
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan saat mengimpor data.');
         }

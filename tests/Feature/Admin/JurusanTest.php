@@ -12,13 +12,15 @@ class JurusanTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private User $guru;
+
     private User $siswa;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->admin = User::factory()->create(['role' => 'admin']);
         $this->guru = User::factory()->create(['role' => 'guru']);
         $this->siswa = User::factory()->create(['role' => 'siswa']);
@@ -81,5 +83,32 @@ class JurusanTest extends TestCase
         $this->assertDatabaseMissing('jurusan', [
             'id' => $jurusan->id,
         ]);
+    }
+
+    public function test_admin_can_search_jurusan_by_name_or_kode()
+    {
+        Jurusan::factory()->create(['nama' => 'Rekayasa Perangkat Lunak', 'kode' => 'RPL']);
+        Jurusan::factory()->create(['nama' => 'Teknik Komputer Jaringan', 'kode' => 'TKJ']);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.jurusan.index', ['search' => 'Perangkat']));
+        $response->assertStatus(200);
+        $response->assertSee('Rekayasa Perangkat Lunak');
+        $response->assertDontSee('Teknik Komputer Jaringan');
+
+        $responseKode = $this->actingAs($this->admin)->get(route('admin.jurusan.index', ['search' => 'TKJ']));
+        $responseKode->assertStatus(200);
+        $responseKode->assertSee('Teknik Komputer Jaringan');
+        $responseKode->assertDontSee('Rekayasa Perangkat Lunak');
+    }
+
+    public function test_jurusan_index_paginates_10_items_per_page()
+    {
+        Jurusan::factory()->count(15)->create();
+
+        $response = $this->actingAs($this->admin)->get(route('admin.jurusan.index'));
+        $response->assertStatus(200);
+        $jurusans = $response->viewData('jurusans');
+        $this->assertCount(10, $jurusans);
+        $this->assertEquals(15, $jurusans->total());
     }
 }

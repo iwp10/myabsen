@@ -6,12 +6,23 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreJurusanRequest;
 use App\Http\Requests\UpdateJurusanRequest;
 use App\Models\Jurusan;
+use Illuminate\Http\Request;
 
 class JurusanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $jurusans = Jurusan::orderBy('nama')->paginate(10);
+        $search = $request->search;
+        $jurusans = Jurusan::when($search, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('kode', 'like', "%{$search}%");
+            });
+        })
+            ->orderBy('nama')
+            ->paginate(10)
+            ->appends(['search' => $search]);
+
         return view('admin.jurusan.index', compact('jurusans'));
     }
 

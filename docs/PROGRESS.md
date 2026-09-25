@@ -45,7 +45,7 @@ Cara pakai:
 - [x] CRUD guru dan siswa (akun otomatis, reset password)
 - [x] Impor siswa dari Excel
 - [x] CRUD jadwal dengan pencegahan bentrok (AB-06)
-- [ ] Pagination dan pencarian
+- [x] Pagination dan pencarian
 
 ### Fase 4: Absensi guru
 - [x] Dashboard jadwal hari ini

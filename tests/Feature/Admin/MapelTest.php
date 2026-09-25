@@ -12,13 +12,15 @@ class MapelTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private User $guru;
+
     private User $siswa;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->admin = User::factory()->create(['role' => 'admin']);
         $this->guru = User::factory()->create(['role' => 'guru']);
         $this->siswa = User::factory()->create(['role' => 'siswa']);
@@ -81,5 +83,32 @@ class MapelTest extends TestCase
         $this->assertSoftDeleted('mapel', [
             'id' => $mapel->id,
         ]);
+    }
+
+    public function test_admin_can_search_mapel_by_name_or_kode()
+    {
+        Mapel::factory()->create(['nama' => 'Matematika Terapan', 'kode' => 'MTK']);
+        Mapel::factory()->create(['nama' => 'Bahasa Indonesia', 'kode' => 'BIN']);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.mapel.index', ['search' => 'Matematika']));
+        $response->assertStatus(200);
+        $response->assertSee('Matematika Terapan');
+        $response->assertDontSee('Bahasa Indonesia');
+
+        $responseKode = $this->actingAs($this->admin)->get(route('admin.mapel.index', ['search' => 'BIN']));
+        $responseKode->assertStatus(200);
+        $responseKode->assertSee('Bahasa Indonesia');
+        $responseKode->assertDontSee('Matematika Terapan');
+    }
+
+    public function test_mapel_index_paginates_10_items_per_page()
+    {
+        Mapel::factory()->count(15)->create();
+
+        $response = $this->actingAs($this->admin)->get(route('admin.mapel.index'));
+        $response->assertStatus(200);
+        $mapels = $response->viewData('mapels');
+        $this->assertCount(10, $mapels);
+        $this->assertEquals(15, $mapels->total());
     }
 }

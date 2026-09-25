@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Models\Kelas;
 use App\Models\Jurusan;
+use App\Models\Kelas;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,13 +13,15 @@ class KelasTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private User $guru;
+
     private User $siswa;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->admin = User::factory()->create(['role' => 'admin']);
         $this->guru = User::factory()->create(['role' => 'guru']);
         $this->siswa = User::factory()->create(['role' => 'siswa']);
@@ -49,7 +51,7 @@ class KelasTest extends TestCase
             'jurusan_id' => $jurusan->id,
             'nama' => '10 RPL 1',
             'tingkat' => 10,
-            'tahun_ajaran' => '2023/2024'
+            'tahun_ajaran' => '2023/2024',
         ]);
 
         $response->assertRedirect(route('admin.kelas.index'));
@@ -57,7 +59,7 @@ class KelasTest extends TestCase
             'jurusan_id' => $jurusan->id,
             'nama' => '10 RPL 1',
             'tingkat' => 10,
-            'tahun_ajaran' => '2023/2024'
+            'tahun_ajaran' => '2023/2024',
         ]);
     }
 
@@ -70,7 +72,7 @@ class KelasTest extends TestCase
             'jurusan_id' => $jurusanBaru->id,
             'nama' => 'Nama Baru',
             'tingkat' => 11,
-            'tahun_ajaran' => '2024/2025'
+            'tahun_ajaran' => '2024/2025',
         ]);
 
         $response->assertRedirect(route('admin.kelas.index'));
@@ -79,7 +81,7 @@ class KelasTest extends TestCase
             'jurusan_id' => $jurusanBaru->id,
             'nama' => 'Nama Baru',
             'tingkat' => 11,
-            'tahun_ajaran' => '2024/2025'
+            'tahun_ajaran' => '2024/2025',
         ]);
     }
 
@@ -93,5 +95,36 @@ class KelasTest extends TestCase
         $this->assertSoftDeleted('kelas', [
             'id' => $kelas->id,
         ]);
+    }
+
+    public function test_admin_can_search_kelas_by_name_tingkat_or_jurusan()
+    {
+        $jurusanRpl = Jurusan::factory()->create(['nama' => 'Rekayasa Perangkat Lunak', 'kode' => 'RPL']);
+        $jurusanTkj = Jurusan::factory()->create(['nama' => 'Teknik Komputer Jaringan', 'kode' => 'TKJ']);
+
+        Kelas::factory()->create(['jurusan_id' => $jurusanRpl->id, 'nama' => 'X RPL 1', 'tingkat' => 10]);
+        Kelas::factory()->create(['jurusan_id' => $jurusanTkj->id, 'nama' => 'XI TKJ 2', 'tingkat' => 11]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.kelas.index', ['search' => 'X RPL']));
+        $response->assertStatus(200);
+        $response->assertSee('X RPL 1');
+        $response->assertDontSee('XI TKJ 2');
+
+        $responseJurusan = $this->actingAs($this->admin)->get(route('admin.kelas.index', ['search' => 'TKJ']));
+        $responseJurusan->assertStatus(200);
+        $responseJurusan->assertSee('XI TKJ 2');
+        $responseJurusan->assertDontSee('X RPL 1');
+    }
+
+    public function test_kelas_index_paginates_10_items_per_page()
+    {
+        $jurusan = Jurusan::factory()->create();
+        Kelas::factory()->count(15)->create(['jurusan_id' => $jurusan->id]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.kelas.index'));
+        $response->assertStatus(200);
+        $kelas = $response->viewData('kelas');
+        $this->assertCount(10, $kelas);
+        $this->assertEquals(15, $kelas->total());
     }
 }

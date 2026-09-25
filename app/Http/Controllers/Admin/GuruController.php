@@ -6,25 +6,28 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreGuruRequest;
 use App\Http\Requests\UpdateGuruRequest;
 use App\Models\Guru;
-use App\Models\User;
 use App\Models\SesiAbsensi;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Http\Request;
 
 class GuruController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->query('search');
+        $search = $request->search;
         $gurus = Guru::with('user')
-            ->when($search, function ($query) use ($search) {
-                $query->whereHas('user', function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%");
-                })->orWhere('nip', 'like', "%{$search}%");
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nip', 'like', "%{$search}%")
+                        ->orWhereHas('user', function ($sub) use ($search) {
+                            $sub->where('name', 'like', "%{$search}%");
+                        });
+                });
             })
             ->paginate(10)
-            ->withQueryString();
+            ->appends(['search' => $search]);
 
         return view('admin.guru.index', compact('gurus'));
     }
@@ -57,6 +60,7 @@ class GuruController extends Controller
     public function edit(Guru $guru)
     {
         $guru->load('user');
+
         return view('admin.guru.edit', compact('guru'));
     }
 
@@ -81,13 +85,14 @@ class GuruController extends Controller
     {
         $hasHistory = SesiAbsensi::where('diabsen_oleh', $guru->user_id)
             ->orWhere('diubah_oleh', $guru->user_id)
-            ->orWhereHas('jadwal', function($q) use ($guru) {
+            ->orWhereHas('jadwal', function ($q) use ($guru) {
                 $q->where('guru_id', $guru->id);
             })
             ->exists();
 
         if ($hasHistory) {
             $guru->delete();
+
             return redirect()->route('admin.guru.index')
                 ->with('success', 'Guru di-soft-delete karena memiliki riwayat absensi.');
         }
@@ -102,7 +107,7 @@ class GuruController extends Controller
     public function resetPassword(Guru $guru)
     {
         $guru->user->update([
-            'password' => Hash::make('password')
+            'password' => Hash::make('password'),
         ]);
 
         return redirect()->route('admin.guru.index')
