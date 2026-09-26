@@ -83,7 +83,7 @@ Cara pakai:
 ### Fase 9: Tambahan
 - [x] Otentikasi: Sistem login fleksibel menggunakan Username, NIP (Guru), atau NIS (Siswa).
 - [x] UI/UX: Penambahan toggle Mode Terang/Gelap menggunakan Alpine.js dan Tailwind, dengan Mode Terang sebagai setelan bawaan (default).
-- [ ] UI/UX: Merombak halaman login dengan background kustom yang ringan.
+- [x] UI/UX: Merombak halaman login dengan background kustom yang ringan.
 
 
 ## Catatan dan hambatan
