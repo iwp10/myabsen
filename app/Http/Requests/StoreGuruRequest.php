@@ -18,7 +18,7 @@ class StoreGuruRequest extends FormRequest
             'nip' => ['required', 'string', 'max:50', 'unique:users,username'],
         ];
     }
-    
+
     public function messages(): array
     {
         return [

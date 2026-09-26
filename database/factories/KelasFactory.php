@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Jurusan;
 use App\Models\Kelas;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -18,7 +19,7 @@ class KelasFactory extends Factory
     public function definition(): array
     {
         return [
-            'jurusan_id' => \App\Models\Jurusan::factory(),
+            'jurusan_id' => Jurusan::factory(),
             'nama' => $this->faker->numerify('X RPL #'),
             'tingkat' => 'X',
             'tahun_ajaran' => '2026/2027',

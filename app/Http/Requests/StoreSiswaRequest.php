@@ -19,7 +19,7 @@ class StoreSiswaRequest extends FormRequest
             'kelas_id' => ['required', 'exists:kelas,id'],
         ];
     }
-    
+
     public function messages(): array
     {
         return [

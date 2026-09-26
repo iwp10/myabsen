@@ -145,18 +145,22 @@ class AbsensiService
             ->join('users', 'siswa.user_id', '=', 'users.id')
             ->join('kelas', 'siswa.kelas_id', '=', 'kelas.id')
             ->join('mapel', 'jadwal.mapel_id', '=', 'mapel.id');
-        
-        if (!empty($filters['kelas_id'])) {
+
+        if (! empty($filters['kelas_id'])) {
             $query->where('jadwal.kelas_id', $filters['kelas_id']);
         }
-        if (!empty($filters['mapel_id'])) {
+        if (! empty($filters['mapel_id'])) {
             $query->where('jadwal.mapel_id', $filters['mapel_id']);
         }
-        if (!empty($filters['bulan'])) {
+        if (! empty($filters['bulan'])) {
             // bulan is YYYY-MM
-            $query->whereRaw("DATE_FORMAT(sesi_absensi.tanggal, '%Y-%m') = ?", [$filters['bulan']]);
+            $parts = explode('-', $filters['bulan']);
+            if (count($parts) === 2) {
+                $query->whereYear('sesi_absensi.tanggal', $parts[0])
+                    ->whereMonth('sesi_absensi.tanggal', $parts[1]);
+            }
         }
-        if (!empty($filters['guru_id'])) {
+        if (! empty($filters['guru_id'])) {
             $query->where('jadwal.guru_id', $filters['guru_id']);
         }
 
@@ -172,10 +176,10 @@ class AbsensiService
             DB::raw('SUM(CASE WHEN detail_absensi.status = "alpa" THEN 1 ELSE 0 END) as alpa'),
             DB::raw('COUNT(detail_absensi.id) as total_sesi')
         )
-        ->groupBy('siswa.id', 'siswa.nis', 'users.name', 'kelas.nama', 'mapel.nama')
-        ->orderBy('kelas.nama')
-        ->orderBy('mapel.nama')
-        ->orderBy('users.name');
+            ->groupBy('siswa.id', 'siswa.nis', 'users.name', 'kelas.nama', 'mapel.nama')
+            ->orderBy('kelas.nama')
+            ->orderBy('mapel.nama')
+            ->orderBy('users.name');
 
         return $query->get();
     }

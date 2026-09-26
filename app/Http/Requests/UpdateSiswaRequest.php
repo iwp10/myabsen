@@ -17,9 +17,9 @@ class UpdateSiswaRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'nis' => [
-                'required', 
-                'string', 
-                'max:50', 
+                'required',
+                'string',
+                'max:50',
                 Rule::unique('users', 'username')->ignore($this->siswa->user_id),
             ],
             'kelas_id' => ['required', 'exists:kelas,id'],

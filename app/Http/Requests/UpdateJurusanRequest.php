@@ -15,7 +15,7 @@ class UpdateJurusanRequest extends FormRequest
     {
         return [
             'nama' => ['required', 'string', 'max:255'],
-            'kode' => ['required', 'string', 'max:255', 'unique:jurusan,kode,' . $this->route('jurusan')->id],
+            'kode' => ['required', 'string', 'max:255', 'unique:jurusan,kode,'.$this->route('jurusan')->id],
         ];
     }
 }

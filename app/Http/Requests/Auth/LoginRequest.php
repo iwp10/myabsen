@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\Guru;
+use App\Models\Siswa;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -49,20 +51,23 @@ class LoginRequest extends FormRequest
         // Cek username
         if (Auth::attempt(['username' => $input, 'password' => $password], $remember)) {
             RateLimiter::clear($this->throttleKey());
+
             return;
         }
 
         // Cek nip dari tabel guru
-        $guru = \App\Models\Guru::where('nip', $input)->first();
+        $guru = Guru::where('nip', $input)->first();
         if ($guru && Auth::attempt(['id' => $guru->user_id, 'password' => $password], $remember)) {
             RateLimiter::clear($this->throttleKey());
+
             return;
         }
 
         // Cek nis dari tabel siswa
-        $siswa = \App\Models\Siswa::where('nis', $input)->first();
+        $siswa = Siswa::where('nis', $input)->first();
         if ($siswa && Auth::attempt(['id' => $siswa->user_id, 'password' => $password], $remember)) {
             RateLimiter::clear($this->throttleKey());
+
             return;
         }
 

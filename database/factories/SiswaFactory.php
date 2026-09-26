@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Kelas;
 use App\Models\Siswa;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,8 +20,8 @@ class SiswaFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => \App\Models\User::factory(),
-            'kelas_id' => \App\Models\Kelas::factory(),
+            'user_id' => User::factory(),
+            'kelas_id' => Kelas::factory(),
             'nis' => $this->faker->unique()->numerify('#####'),
         ];
     }

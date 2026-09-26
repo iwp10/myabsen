@@ -15,7 +15,7 @@ class UpdateMapelRequest extends FormRequest
     {
         return [
             'nama' => ['required', 'string', 'max:255'],
-            'kode' => ['required', 'string', 'max:255', 'unique:mapel,kode,' . $this->route('mapel')->id],
+            'kode' => ['required', 'string', 'max:255', 'unique:mapel,kode,'.$this->route('mapel')->id],
         ];
     }
 }

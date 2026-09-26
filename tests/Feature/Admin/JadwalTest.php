@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Models\User;
+use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\Mapel;
-use App\Models\Guru;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -113,7 +113,7 @@ class JadwalTest extends TestCase
         $jadwal = Jadwal::factory()->create([
             'hari' => 'kamis',
             'jam_mulai' => '07:00:00',
-            'jam_selesai' => '09:00:00'
+            'jam_selesai' => '09:00:00',
         ]);
 
         $response = $this->actingAs($this->admin)->put(route('admin.jadwal.update', $jadwal), [

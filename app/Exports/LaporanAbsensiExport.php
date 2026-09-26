@@ -20,6 +20,7 @@ class LaporanAbsensiExport implements FromCollection, WithHeadings, WithMapping
     public function collection(): Collection
     {
         $absensiService = app(AbsensiService::class);
+
         return collect($absensiService->getRekapLaporan($this->filters));
     }
 

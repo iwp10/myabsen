@@ -17,9 +17,9 @@ class UpdateGuruRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'nip' => [
-                'required', 
-                'string', 
-                'max:50', 
+                'required',
+                'string',
+                'max:50',
                 Rule::unique('users', 'username')->ignore($this->guru->user_id),
             ],
         ];

@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Jadwal;
 use App\Models\SesiAbsensi;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,9 +20,9 @@ class SesiAbsensiFactory extends Factory
     public function definition(): array
     {
         return [
-            'jadwal_id' => \App\Models\Jadwal::factory(),
+            'jadwal_id' => Jadwal::factory(),
             'tanggal' => $this->faker->date(),
-            'diabsen_oleh' => \App\Models\User::factory(),
+            'diabsen_oleh' => User::factory(),
         ];
     }
 }

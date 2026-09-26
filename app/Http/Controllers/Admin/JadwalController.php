@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreJadwalRequest;
 use App\Http\Requests\UpdateJadwalRequest;
+use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\Mapel;
-use App\Models\Guru;
 use Illuminate\Http\Request;
 
 class JadwalController extends Controller
@@ -45,7 +45,7 @@ class JadwalController extends Controller
         $kelas = Kelas::orderBy('tingkat')->orderBy('nama')->get();
         $mapel = Mapel::orderBy('nama')->get();
         $guru = Guru::with('user')->get()->sortBy('user.name');
-        
+
         return view('admin.jadwal.create', compact('kelas', 'mapel', 'guru'));
     }
 
@@ -67,7 +67,7 @@ class JadwalController extends Controller
         $kelas = Kelas::orderBy('tingkat')->orderBy('nama')->get();
         $mapel = Mapel::orderBy('nama')->get();
         $guru = Guru::with('user')->get()->sortBy('user.name');
-        
+
         return view('admin.jadwal.edit', compact('jadwal', 'kelas', 'mapel', 'guru'));
     }
 

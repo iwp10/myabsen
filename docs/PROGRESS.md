@@ -16,7 +16,7 @@ Cara pakai:
 | 3 | Master data admin | Agent | fitur/fase-3-master-data | dikerjakan |
 | 4 | Absensi guru | Agent | fitur/fase-4-absensi-guru | selesai |
 | 5 | Tampilan siswa | Agent | fitur/fase-5-tampilan-siswa | selesai |
-| 6 | Rekap dan ekspor | Agent | fitur/fase-6-rekap-ekspor | dikerjakan |
+| 6 | Rekap dan ekspor | Agent | fitur/fase-6-rekap-ekspor | selesai |
 | 7 | Hardening | | | ditunda |
 | 8 | Siap produksi dan deploy | | | ditunda |
 
@@ -64,7 +64,7 @@ Cara pakai:
 ### Fase 6: Rekap dan ekspor
 - [x] Rekap per kelas, mapel, periode (agregasi SQL)
 - [x] Ekspor Excel
-- [ ] Ekspor PDF
+- [x] Ekspor PDF
 - [x] Guru hanya melihat kelas yang ia ajar
 
 ### Fase 7: Hardening
