@@ -35,32 +35,42 @@
                         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3">Nama</th>
-                                    <th scope="col" class="px-6 py-3">NIP / Username</th>
-                                    <th scope="col" class="px-6 py-3">Aksi</th>
+                                    <th scope="col" class="px-6 py-3 whitespace-nowrap">Nama</th>
+                                    <th scope="col" class="px-6 py-3 whitespace-nowrap">NIP / Username</th>
+                                    <th scope="col" class="px-6 py-3 whitespace-nowrap">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($gurus as $guru)
                                     <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                        <td class="px-6 py-4">{{ $guru->user->name }}</td>
-                                        <td class="px-6 py-4">{{ $guru->nip }}</td>
-                                        <td class="px-6 py-4 flex items-center space-x-3">
-                                            <a href="{{ route('admin.guru.edit', $guru) }}" class="text-blue-600 hover:underline">Edit</a>
+                                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">{{ $guru->user->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">{{ $guru->nip }}</td>
+                                        <td class="px-6 py-4 flex items-center space-x-3 whitespace-nowrap">
+                                            <a href="{{ route('admin.guru.edit', $guru) }}" class="text-blue-600 dark:text-blue-400 hover:underline">Edit</a>
                                             <form action="{{ route('admin.guru.destroy', $guru) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus guru ini?');" class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:underline">Hapus</button>
+                                                <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Hapus</button>
                                             </form>
                                             <form action="{{ route('admin.guru.reset-password', $guru) }}" method="POST" onsubmit="return confirm('Reset password guru ini ke \'password\'?');" class="inline">
                                                 @csrf
-                                                <button type="submit" class="text-yellow-600 hover:underline">Reset Password</button>
+                                                <button type="submit" class="text-yellow-600 dark:text-yellow-400 hover:underline">Reset Password</button>
                                             </form>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="px-6 py-4 text-center">Belum ada data guru.</td>
+                                        <td colspan="3" class="px-6 py-12 text-center">
+                                            <div class="flex flex-col items-center justify-center">
+                                                <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 mb-3">
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                                    </svg>
+                                                </div>
+                                                <p class="text-base font-medium text-gray-900 dark:text-gray-100">Belum ada data guru</p>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Data guru yang ditambahkan akan tampil di sini.</p>
+                                            </div>
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>

@@ -73,8 +73,10 @@ class LoginRequest extends FormRequest
 
         RateLimiter::hit($this->throttleKey());
 
+        $retriesLeft = RateLimiter::retriesLeft($this->throttleKey(), 5);
+
         throw ValidationException::withMessages([
-            'username' => trans('auth.failed'),
+            'username' => "Kredensial tidak valid. Sisa percobaan Anda: {$retriesLeft} kali lagi sebelum dikunci.",
         ]);
     }
 
@@ -98,6 +100,7 @@ class LoginRequest extends FormRequest
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
+            'seconds_left' => $seconds,
         ]);
     }
 

@@ -67,8 +67,18 @@
                                placeholder="Masukkan Username, NIP, atau NIS"
                                class="w-full px-3.5 py-2.5 bg-white border @error('username') border-red-500 @else border-gray-300 @enderror rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 text-sm shadow-sm">
                         @error('username')
-                            <p class="mt-1.5 text-xs text-red-600 font-medium">{{ $message }}</p>
+                            @if (!$errors->has('seconds_left'))
+                                <p class="mt-1.5 text-xs text-red-600 font-medium">{{ $message }}</p>
+                            @endif
                         @enderror
+
+                        <div x-data="{ seconds: {{ (int) ($errors->first('seconds_left') ?? 0) }} }"
+                             x-init="if(seconds > 0) setInterval(() => seconds--, 1000)"
+                             x-show="seconds > 0"
+                             style="{{ $errors->has('seconds_left') ? '' : 'display: none;' }}"
+                             class="mt-1.5 text-xs text-red-600 font-medium">
+                            Terlalu banyak percobaan. Silakan coba lagi dalam <span x-text='seconds'></span> detik.
+                        </div>
                     </div>
 
                     <!-- Password -->

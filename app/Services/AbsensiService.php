@@ -27,16 +27,19 @@ class AbsensiService
             return collect(); // Minggu atau tidak valid
         }
 
-        return Jadwal::with(['kelas', 'mapel'])
+        return Jadwal::with([
+            'kelas',
+            'mapel',
+            'sesiAbsensi' => function ($q) use ($tanggal) {
+                $q->where('tanggal', $tanggal->toDateString())->with('detailAbsensi');
+            },
+        ])
             ->where('guru_id', $guru->id)
             ->where('hari', $hari)
             ->orderBy('jam_mulai')
             ->get()
-            ->map(function ($jadwal) use ($tanggal) {
-                $jadwal->sesi_hari_ini = SesiAbsensi::with('detailAbsensi')
-                    ->where('jadwal_id', $jadwal->id)
-                    ->where('tanggal', $tanggal->toDateString())
-                    ->first();
+            ->map(function ($jadwal) {
+                $jadwal->sesi_hari_ini = $jadwal->sesiAbsensi->first();
 
                 return $jadwal;
             });

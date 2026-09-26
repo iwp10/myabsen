@@ -14,7 +14,15 @@
                     <h3 class="text-lg font-medium mb-4">Persentase Kehadiran per Mata Pelajaran</h3>
                     
                     @if($persentasePerMapel->isEmpty())
-                        <p class="text-gray-500">Belum ada data kehadiran.</p>
+                        <div class="py-6 text-center">
+                            <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 mb-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Belum ada data kehadiran</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Persentase kehadiran per mata pelajaran akan muncul setelah absensi tercatat.</p>
+                        </div>
                     @else
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             @foreach($persentasePerMapel as $rekap)
@@ -65,7 +73,15 @@
                     </form>
 
                     @if($riwayat->isEmpty())
-                        <p class="text-gray-500">Tidak ada riwayat kehadiran yang ditemukan.</p>
+                        <div class="py-8 text-center">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 mb-3">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                                </svg>
+                            </div>
+                            <p class="text-base font-medium text-gray-900 dark:text-gray-100">Tidak ada riwayat kehadiran</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Belum ada catatan kehadiran yang sesuai dengan filter pencarian.</p>
+                        </div>
                     @else
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

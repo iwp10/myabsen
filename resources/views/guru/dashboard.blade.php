@@ -19,7 +19,15 @@
                     <h3 class="text-lg font-medium mb-4">Jadwal Mengajar Hari Ini ({{ $tanggal->isoFormat('dddd, D MMMM YYYY') }})</h3>
                     
                     @if($jadwalHariIni->isEmpty())
-                        <p class="text-gray-500 dark:text-gray-400">Tidak ada jadwal mengajar untuk hari ini.</p>
+                        <div class="py-8 text-center">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 mb-3">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-base font-medium text-gray-900 dark:text-gray-100">Tidak ada jadwal mengajar hari ini</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Anda tidak memiliki jadwal mata pelajaran yang aktif untuk hari ini.</p>
+                        </div>
                     @else
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             @foreach($jadwalHariIni as $jadwal)

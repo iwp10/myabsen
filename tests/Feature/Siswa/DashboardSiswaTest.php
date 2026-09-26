@@ -21,6 +21,7 @@ beforeEach(function () {
 });
 
 test('siswa dapat melihat dashboard dengan jadwal hari ini dan status', function () {
+    Carbon::setTestNow('2026-09-21 08:00:00'); // Senin
     $hariIni = strtolower(Carbon::now()->locale('id')->isoFormat('dddd'));
     $tanggalHariIni = Carbon::today()->format('Y-m-d');
 

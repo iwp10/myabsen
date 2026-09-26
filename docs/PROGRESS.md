@@ -17,7 +17,7 @@ Cara pakai:
 | 4 | Absensi guru | Agent | fitur/fase-4-absensi-guru | selesai |
 | 5 | Tampilan siswa | Agent | fitur/fase-5-tampilan-siswa | selesai |
 | 6 | Rekap dan ekspor | Agent | fitur/fase-6-rekap-ekspor | selesai |
-| 7 | Hardening | | | ditunda |
+| 7 | Hardening | Agent | fitur/fase-7-hardening | selesai |
 | 8 | Siap produksi dan deploy | | | ditunda |
 
 ## Checklist per fase
@@ -68,11 +68,11 @@ Cara pakai:
 - [x] Guru hanya melihat kelas yang ia ajar
 
 ### Fase 7: Hardening
-- [ ] Audit N+1 dan index
-- [ ] Rate limiting login
-- [ ] Pesan validasi dan halaman error Bahasa Indonesia
-- [ ] Empty state dan tampilan mobile
-- [ ] README (cara install dan akun demo)
+- [x] Audit N+1 dan index
+- [x] Rate limiting login
+- [x] Pesan validasi dan halaman error Bahasa Indonesia
+- [x] Empty state dan tampilan mobile
+- [x] README (cara install dan akun demo)
 
 ### Fase 8: Siap produksi
 - [ ] AdminSeeder khusus produksi (tanpa data demo)

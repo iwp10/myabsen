@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\DetailAbsensi;
 use App\Models\Jadwal;
 use App\Models\Mapel;
-use App\Models\SesiAbsensi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -20,24 +19,25 @@ class DashboardController extends Controller
         $hariIni = strtolower(Carbon::now()->locale('id')->isoFormat('dddd'));
         $tanggalHariIni = Carbon::today()->format('Y-m-d');
 
-        $jadwals = Jadwal::with(['mapel', 'guru.user'])
+        $jadwals = Jadwal::with([
+            'mapel',
+            'guru.user',
+            'sesiAbsensi' => function ($q) use ($tanggalHariIni, $siswa) {
+                $q->where('tanggal', $tanggalHariIni)
+                    ->with(['detailAbsensi' => function ($dq) use ($siswa) {
+                        $dq->where('siswa_id', $siswa->id);
+                    }]);
+            },
+        ])
             ->where('kelas_id', $siswa->kelas_id)
             ->where('hari', $hariIni)
             ->orderBy('jam_mulai')
             ->get();
 
-        $statusHariIni = $jadwals->map(function ($jadwal) use ($tanggalHariIni, $siswa) {
-            $sesi = SesiAbsensi::where('jadwal_id', $jadwal->id)
-                ->where('tanggal', $tanggalHariIni)
-                ->first();
-
-            $status = null;
-            if ($sesi) {
-                $detail = DetailAbsensi::where('sesi_absensi_id', $sesi->id)
-                    ->where('siswa_id', $siswa->id)
-                    ->first();
-                $status = $detail ? $detail->status : null;
-            }
+        $statusHariIni = $jadwals->map(function ($jadwal) {
+            $sesi = $jadwal->sesiAbsensi->first();
+            $detail = $sesi?->detailAbsensi?->first();
+            $status = $detail ? $detail->status : null;
 
             return [
                 'jadwal' => $jadwal,
