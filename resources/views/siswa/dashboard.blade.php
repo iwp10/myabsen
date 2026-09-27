@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
             <!-- Banner Sambutan & Identitas -->
-            <div class="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-sm relative overflow-hidden">
+            <div class="bg-blue-600 dark:bg-blue-700 rounded-2xl p-6 text-white shadow-md relative overflow-hidden" style="background-color: #2563eb;">
                 <div class="absolute -right-8 -bottom-10 opacity-10 pointer-events-none">
                     <svg class="w-56 h-56 text-white" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
@@ -20,14 +20,14 @@
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/20 text-white mb-2">
                             SMK Mandiri 02 Balaraja
                         </span>
-                        <h1 class="text-2xl font-bold tracking-tight">Halo, {{ Auth::user()->name }}!</h1>
-                        <p class="text-blue-100 text-sm mt-1">
+                        <h1 class="text-2xl font-bold tracking-tight text-white">Halo, {{ Auth::user()->name }}!</h1>
+                        <p class="text-white text-sm mt-1">
                             Kelas: <span class="font-semibold text-white">{{ Auth::user()->siswa?->kelas?->nama ?? '-' }}</span> &bull; 
                             NIS: <span class="font-semibold text-white">{{ Auth::user()->siswa?->nis ?? Auth::user()->username }}</span>
                         </p>
                     </div>
                     <div class="sm:text-right flex-shrink-0">
-                        <span class="text-xs text-blue-200 block uppercase font-medium tracking-wider">Tanggal Hari Ini</span>
+                        <span class="text-xs text-white block uppercase font-medium tracking-wider">Tanggal Hari Ini</span>
                         <span class="text-sm font-semibold text-white">
                             {{ \Illuminate\Support\Carbon::now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
                         </span>
@@ -124,12 +124,9 @@
                                 <div class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
                                     {{ $ringkasanKehadiran['total_hadir'] }}
                                 </div>
-                                <div class="mt-1 flex items-center gap-1.5">
-                                    <span class="text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded">
-                                        Hadir
-                                    </span>
-                                    <span class="text-[11px] text-gray-400 dark:text-gray-500">Mengikuti KBM</span>
-                                </div>
+                                <p class="mt-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Mengikuti KBM
+                                </p>
                             </div>
                         </div>
 
@@ -147,11 +144,9 @@
                                 <div class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
                                     {{ $ringkasanKehadiran['total_izin'] }}
                                 </div>
-                                <div class="mt-1 flex items-center gap-1.5">
-                                    <span class="text-[10px] font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/50 px-1.5 py-0.5 rounded">
-                                        Dihitung Hadir
-                                    </span>
-                                </div>
+                                <p class="mt-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Dihitung Hadir
+                                </p>
                             </div>
                         </div>
 
@@ -169,11 +164,9 @@
                                 <div class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
                                     {{ $ringkasanKehadiran['total_sakit'] }}
                                 </div>
-                                <div class="mt-1 flex items-center gap-1.5">
-                                    <span class="text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 px-1.5 py-0.5 rounded">
-                                        Dihitung Hadir
-                                    </span>
-                                </div>
+                                <p class="mt-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Dihitung Hadir
+                                </p>
                             </div>
                         </div>
 
@@ -191,11 +184,9 @@
                                 <div class="text-2xl sm:text-3xl font-bold {{ $ringkasanKehadiran['total_alpa'] > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-gray-900 dark:text-gray-100' }}">
                                     {{ $ringkasanKehadiran['total_alpa'] }}
                                 </div>
-                                <div class="mt-1 flex items-center gap-1.5">
-                                    <span class="text-[10px] font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/50 px-1.5 py-0.5 rounded">
-                                        Mengurangi %
-                                    </span>
-                                </div>
+                                <p class="mt-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Mengurangi %
+                                </p>
                             </div>
                         </div>
                     </div>
