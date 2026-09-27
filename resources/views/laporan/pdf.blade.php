@@ -75,8 +75,12 @@
         <tbody>
             @forelse($data as $index => $row)
                 @php
-                    $totalSesi = $row->total_sesi > 0 ? $row->total_sesi : 1;
-                    $persentase = round(($row->hadir / $totalSesi) * 100, 2);
+                    $persentase = app(\App\Services\AbsensiService::class)->hitungPersentaseKehadiran(
+                        (int) $row->hadir,
+                        (int) $row->izin,
+                        (int) $row->sakit,
+                        (int) $row->total_sesi
+                    );
                 @endphp
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>

@@ -13,7 +13,7 @@ Cara pakai:
 | 0 | Perencanaan | Agent | main | selesai |
 | 1 | Database (migration, model, seeder) | Agent | main | selesai |
 | 2 | Auth dan role | Agent | fitur/fase-2-auth-role | selesai |
-| 3 | Master data admin | Agent | fitur/fase-3-master-data | dikerjakan |
+| 3 | Master data admin | Agent | fitur/fase-3-master-data | selesai |
 | 4 | Absensi guru | Agent | fitur/fase-4-absensi-guru | selesai |
 | 5 | Tampilan siswa | Agent | fitur/fase-5-tampilan-siswa | selesai |
 | 6 | Rekap dan ekspor | Agent | fitur/fase-6-rekap-ekspor | selesai |
@@ -60,6 +60,7 @@ Cara pakai:
 - [x] Riwayat dengan filter
 - [x] Persentase kehadiran (AB-07)
 - [x] Test akses data milik sendiri (AB-08)
+- [x] Menyesuaikan perhitungan persentase (Izin & Sakit dihitung Hadir) dan menambahkan breakdown detail kehadiran transparan di dashboard siswa.
 
 ### Fase 6: Rekap dan ekspor
 - [x] Rekap per kelas, mapel, periode (agregasi SQL)
@@ -71,6 +72,7 @@ Cara pakai:
 - [x] Audit N+1 dan index
 - [x] Rate limiting login
 - [x] Pesan validasi dan halaman error Bahasa Indonesia
+- [x] Validasi form sisi server dan penonaktifan validasi bawaan browser (`novalidate`)
 - [x] Empty state dan tampilan mobile
 - [x] README (cara install dan akun demo)
 
@@ -90,3 +92,4 @@ Cara pakai:
 ## Catatan dan hambatan
 Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-09-21 | 3,6,7,8 | Fase 3, 6, 7, 8 ditunda untuk fokus MVP/BETA (Fase 1, 2, 4, 5). Master data digenerate via Seeder.
+2026-09-27 | 3,5,6,7,9 | Fase 3 (Master Data), Fase 6 (Ekspor Excel & PDF), dan Fase 7 (Hardening, Rate Limiting, Validasi Bahasa, novalidate) telah selesai. Layout utama menggunakan Sidebar Menu bertema biru dan halaman login telah dikustomisasi untuk SMK Mandiri 02 Balaraja. Perhitungan persentase kehadiran siswa disesuaikan (Izin & Sakit dihitung hadir) serta dilengkapi rincian breakdown transparan pada dashboard siswa.

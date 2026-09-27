@@ -42,8 +42,13 @@ class LaporanAbsensiExport implements FromCollection, WithHeadings, WithMapping
 
     public function map($row): array
     {
-        $totalSesi = $row->total_sesi > 0 ? $row->total_sesi : 1; // avoid division by zero
-        $persentase = round(($row->hadir / $totalSesi) * 100, 2);
+        $absensiService = app(AbsensiService::class);
+        $persentase = $absensiService->hitungPersentaseKehadiran(
+            (int) $row->hadir,
+            (int) $row->izin,
+            (int) $row->sakit,
+            (int) $row->total_sesi
+        );
 
         return [
             $row->nis,

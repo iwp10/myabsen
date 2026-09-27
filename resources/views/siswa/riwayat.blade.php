@@ -26,13 +26,25 @@
                     @else
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             @foreach($persentasePerMapel as $rekap)
-                                <div class="border dark:border-gray-700 rounded-lg p-4">
-                                    <div class="font-medium text-lg">{{ $rekap->mapel }}</div>
-                                    <div class="mt-2 text-3xl font-bold {{ $rekap->persentase >= 80 ? 'text-green-600' : ($rekap->persentase >= 60 ? 'text-yellow-600' : 'text-red-600') }}">
+                                <div class="border dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800">
+                                    <div class="flex items-center justify-between">
+                                        <div class="font-medium text-lg text-gray-900 dark:text-gray-100">{{ $rekap->mapel }}</div>
+                                        <span class="text-xs px-2 py-0.5 rounded-full {{ $rekap->persentase >= 80 ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300' }}">
+                                            {{ $rekap->persentase >= 80 ? 'Memenuhi' : 'Di Bawah Target' }}
+                                        </span>
+                                    </div>
+                                    <div class="mt-2 text-3xl font-bold {{ $rekap->persentase >= 80 ? 'text-green-600 dark:text-green-400' : ($rekap->persentase >= 60 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400') }}">
                                         {{ $rekap->persentase }}%
                                     </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                        Hadir {{ $rekap->total_hadir }} dari {{ $rekap->total_sesi }} sesi
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 flex flex-wrap items-center gap-x-2 gap-y-1">
+                                        <span>H: <strong class="text-gray-700 dark:text-gray-300">{{ $rekap->total_hadir }}</strong></span>
+                                        <span>&bull;</span>
+                                        <span>I: <strong class="text-gray-700 dark:text-gray-300">{{ $rekap->total_izin }}</strong></span>
+                                        <span>&bull;</span>
+                                        <span>S: <strong class="text-gray-700 dark:text-gray-300">{{ $rekap->total_sakit }}</strong></span>
+                                        <span>&bull;</span>
+                                        <span>A: <strong class="{{ $rekap->total_alpa > 0 ? 'text-red-600 dark:text-red-400 font-bold' : 'text-gray-700 dark:text-gray-300' }}">{{ $rekap->total_alpa }}</strong></span>
+                                        <span class="ml-auto text-[11px] text-gray-400 dark:text-gray-500">Total {{ $rekap->total_sesi }} Sesi</span>
                                     </div>
                                 </div>
                             @endforeach

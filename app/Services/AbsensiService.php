@@ -186,4 +186,53 @@ class AbsensiService
 
         return $query->get();
     }
+
+    /**
+     * Hitung persentase kehadiran siswa.
+     * Rumus: ((Hadir + Izin + Sakit) / Total Pertemuan) * 100
+     * Kategori Alpa adalah satu-satunya yang mengurangi persentase.
+     */
+    public function hitungPersentaseKehadiran(int $hadir, int $izin, int $sakit, int $totalSesi): float
+    {
+        if ($totalSesi <= 0) {
+            return 0.0;
+        }
+
+        $positif = $hadir + $izin + $sakit;
+
+        return round(($positif / $totalSesi) * 100, 2);
+    }
+
+    /**
+     * Mendapatkan rincian breakdown data kehadiran siswa secara keseluruhan.
+     */
+    public function getRingkasanKehadiranSiswa(int $siswaId): array
+    {
+        $counts = DetailAbsensi::where('siswa_id', $siswaId)
+            ->select(
+                DB::raw("SUM(CASE WHEN status = 'hadir' THEN 1 ELSE 0 END) as total_hadir"),
+                DB::raw("SUM(CASE WHEN status = 'izin' THEN 1 ELSE 0 END) as total_izin"),
+                DB::raw("SUM(CASE WHEN status = 'sakit' THEN 1 ELSE 0 END) as total_sakit"),
+                DB::raw("SUM(CASE WHEN status = 'alpa' THEN 1 ELSE 0 END) as total_alpa"),
+                DB::raw('COUNT(id) as total_sesi')
+            )
+            ->first();
+
+        $totalHadir = (int) ($counts->total_hadir ?? 0);
+        $totalIzin = (int) ($counts->total_izin ?? 0);
+        $totalSakit = (int) ($counts->total_sakit ?? 0);
+        $totalAlpa = (int) ($counts->total_alpa ?? 0);
+        $totalSesi = (int) ($counts->total_sesi ?? 0);
+
+        $persentase = $this->hitungPersentaseKehadiran($totalHadir, $totalIzin, $totalSakit, $totalSesi);
+
+        return [
+            'total_hadir' => $totalHadir,
+            'total_izin' => $totalIzin,
+            'total_sakit' => $totalSakit,
+            'total_alpa' => $totalAlpa,
+            'total_sesi' => $totalSesi,
+            'persentase' => $persentase,
+        ];
+    }
 }

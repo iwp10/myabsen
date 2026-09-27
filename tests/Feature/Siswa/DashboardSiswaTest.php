@@ -92,23 +92,49 @@ test('siswa dapat melihat riwayat dan memfilter berdasarkan tanggal dan mapel', 
     $response->assertDontSee('01/09/2026');
 });
 
-test('siswa dapat melihat persentase kehadiran dengan benar (AB-07)', function () {
+test('siswa dapat melihat persentase kehadiran dengan benar (AB-07: Hadir, Izin, Sakit dihitung positif)', function () {
     $mapel = Mapel::factory()->create(['nama' => 'Kimia']);
     $jadwal = Jadwal::factory()->create(['kelas_id' => $this->kelas->id, 'mapel_id' => $mapel->id]);
 
-    // 3 Sesi: 2 Hadir, 1 Sakit -> 66.67%
+    // 4 Sesi: 2 Hadir, 1 Sakit, 1 Alpa -> ((2 + 1) / 4) * 100 = 75%
     $sesi1 = SesiAbsensi::factory()->create(['jadwal_id' => $jadwal->id, 'tanggal' => '2026-09-01']);
     $sesi2 = SesiAbsensi::factory()->create(['jadwal_id' => $jadwal->id, 'tanggal' => '2026-09-02']);
     $sesi3 = SesiAbsensi::factory()->create(['jadwal_id' => $jadwal->id, 'tanggal' => '2026-09-03']);
+    $sesi4 = SesiAbsensi::factory()->create(['jadwal_id' => $jadwal->id, 'tanggal' => '2026-09-04']);
 
     DetailAbsensi::factory()->create(['sesi_absensi_id' => $sesi1->id, 'siswa_id' => $this->siswa->id, 'status' => StatusKehadiran::HADIR]);
     DetailAbsensi::factory()->create(['sesi_absensi_id' => $sesi2->id, 'siswa_id' => $this->siswa->id, 'status' => StatusKehadiran::HADIR]);
     DetailAbsensi::factory()->create(['sesi_absensi_id' => $sesi3->id, 'siswa_id' => $this->siswa->id, 'status' => StatusKehadiran::SAKIT]);
+    DetailAbsensi::factory()->create(['sesi_absensi_id' => $sesi4->id, 'siswa_id' => $this->siswa->id, 'status' => StatusKehadiran::ALPA]);
 
     $response = $this->actingAs($this->user)->get(route('siswa.riwayat'));
     $response->assertStatus(200);
     $response->assertSee('Kimia');
-    $response->assertSee('66.67%');
+    $response->assertSee('75%');
+});
+
+test('siswa dapat melihat rincian breakdown kehadiran dan persentase di dashboard', function () {
+    $mapel = Mapel::factory()->create(['nama' => 'Fisika']);
+    $jadwal = Jadwal::factory()->create(['kelas_id' => $this->kelas->id, 'mapel_id' => $mapel->id]);
+
+    $sesi1 = SesiAbsensi::factory()->create(['jadwal_id' => $jadwal->id, 'tanggal' => '2026-09-01']);
+    $sesi2 = SesiAbsensi::factory()->create(['jadwal_id' => $jadwal->id, 'tanggal' => '2026-09-02']);
+    $sesi3 = SesiAbsensi::factory()->create(['jadwal_id' => $jadwal->id, 'tanggal' => '2026-09-03']);
+    $sesi4 = SesiAbsensi::factory()->create(['jadwal_id' => $jadwal->id, 'tanggal' => '2026-09-04']);
+
+    DetailAbsensi::factory()->create(['sesi_absensi_id' => $sesi1->id, 'siswa_id' => $this->siswa->id, 'status' => StatusKehadiran::HADIR]);
+    DetailAbsensi::factory()->create(['sesi_absensi_id' => $sesi2->id, 'siswa_id' => $this->siswa->id, 'status' => StatusKehadiran::IZIN]);
+    DetailAbsensi::factory()->create(['sesi_absensi_id' => $sesi3->id, 'siswa_id' => $this->siswa->id, 'status' => StatusKehadiran::SAKIT]);
+    DetailAbsensi::factory()->create(['sesi_absensi_id' => $sesi4->id, 'siswa_id' => $this->siswa->id, 'status' => StatusKehadiran::ALPA]);
+
+    // 4 Sesi: 1 Hadir, 1 Izin, 1 Sakit, 1 Alpa -> ((1 + 1 + 1) / 4) * 100 = 75%
+    $response = $this->actingAs($this->user)->get(route('siswa.dashboard'));
+    $response->assertStatus(200);
+    $response->assertSee('Total Hadir');
+    $response->assertSee('Total Izin');
+    $response->assertSee('Total Sakit');
+    $response->assertSee('Total Alpa');
+    $response->assertSee('75%');
 });
 
 test('siswa hanya dapat melihat datanya sendiri (AB-08)', function () {
