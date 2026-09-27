@@ -84,6 +84,7 @@ Cara pakai:
 - [x] Otentikasi: Sistem login fleksibel menggunakan Username, NIP (Guru), atau NIS (Siswa).
 - [x] UI/UX: Penambahan toggle Mode Terang/Gelap menggunakan Alpine.js dan Tailwind, dengan Mode Terang sebagai setelan bawaan (default).
 - [x] UI/UX: Merombak halaman login dengan background kustom yang ringan.
+- [x] UI/UX: Merombak layout utama menjadi Sidebar Menu dengan tema biru dan identitas SMK Mandiri 02 Balaraja.
 
 
 ## Catatan dan hambatan
