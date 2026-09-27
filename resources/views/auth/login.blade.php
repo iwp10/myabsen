@@ -66,7 +66,11 @@
                                autofocus
                                autocomplete="username"
                                placeholder="Masukkan Username, NIP, atau NIS"
-                               class="w-full px-3.5 py-2.5 bg-white border @error('username') border-red-500 @else border-gray-300 @enderror rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 text-sm shadow-sm">
+                               @class([
+                                   'w-full px-3.5 py-2.5 bg-white border rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 text-sm shadow-sm',
+                                   'border-red-500' => $errors->has('username'),
+                                   'border-gray-300' => ! $errors->has('username'),
+                               ])>
                         @error('username')
                             @if (!$errors->has('seconds_left'))
                                 <p class="mt-1.5 text-xs text-red-600 font-medium">{{ $message }}</p>
@@ -93,7 +97,11 @@
                                required
                                autocomplete="current-password"
                                placeholder="Masukkan kata sandi"
-                               class="w-full px-3.5 py-2.5 bg-white border @error('password') border-red-500 @else border-gray-300 @enderror rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 text-sm shadow-sm">
+                               @class([
+                                   'w-full px-3.5 py-2.5 bg-white border rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 text-sm shadow-sm',
+                                   'border-red-500' => $errors->has('password'),
+                                   'border-gray-300' => ! $errors->has('password'),
+                               ])>
                         @error('password')
                             <p class="mt-1.5 text-xs text-red-600 font-medium">{{ $message }}</p>
                         @enderror
