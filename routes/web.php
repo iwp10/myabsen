@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\MapelController;
 use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\Guru\AbsensiController;
+use App\Http\Controllers\Guru\JadwalController as GuruJadwalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Siswa\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -50,6 +51,7 @@ Route::middleware('auth')->group(function () {
     // Guru Routes
     Route::middleware('role:guru')->prefix('guru')->name('guru.')->group(function () {
         Route::get('/dashboard', [AbsensiController::class, 'dashboard'])->name('dashboard');
+        Route::get('/jadwal', [GuruJadwalController::class, 'index'])->name('jadwal');
         Route::get('/riwayat', [AbsensiController::class, 'riwayat'])->name('riwayat');
         Route::get('/laporan/export', [AbsensiController::class, 'export'])->name('laporan.export');
         Route::get('/laporan/export-pdf', [AbsensiController::class, 'exportPdf'])->name('laporan.exportPdf');

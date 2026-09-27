@@ -8,7 +8,7 @@ Cara pakai:
 
 ## Ringkasan
 
-Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Mandiri 02 Balaraja, form login kustom responsif dengan rate-limiting Alpine.js, ekspor data (Excel/PDF), hardening N+1, lokalisasi Bahasa Indonesia, serta perombakan UX yang transparan untuk Dashboard Siswa dan Guru.
+Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Mandiri 02 Balaraja, form login kustom responsif dengan rate-limiting Alpine.js, ekspor data (Excel/PDF), hardening N+1, lokalisasi Bahasa Indonesia, serta perombakan UX yang transparan untuk Dashboard Siswa dan Guru. Antarmuka sekarang menggunakan font Inter untuk kenyamanan visual semua kalangan umur, serta penambahan visibilitas jadwal penuh untuk guru.
 
 | Fase | Isi | Penanggung jawab | Branch | Status |
 |---|---|---|---|---|
@@ -91,9 +91,11 @@ Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Man
 - [x] UI/UX: Migrasi layout utama menjadi Sidebar Menu bertema biru dengan identitas SMK Mandiri 02 Balaraja.
 - [x] UI/UX: Perbaikan Dashboard Siswa (kontras warna, persentase kehadiran positif Izin & Sakit, serta breakdown transparan).
 - [x] UI/UX: Perombakan Dashboard Guru (banner sapaan solid blue, kartu statistik total kelas/mapel/jadwal, dan tombol navigasi pintar saat jadwal kosong).
+- [x] UI/UX: Mengganti font utama sistem menjadi Inter untuk meningkatkan aksesibilitas dan kenyamanan membaca.
+- [x] Fitur Guru: Menambahkan menu dan halaman khusus agar guru dapat melihat seluruh jadwal mengajar mereka dalam seminggu.
 
 
 ## Catatan dan hambatan
 Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-09-21 | 3,6,7,8 | Fase 3, 6, 7, 8 ditunda untuk fokus MVP/BETA (Fase 1, 2, 4, 5). Master data digenerate via Seeder.
-2026-09-27 | 3,5,6,7,9 | Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Mandiri 02 Balaraja, form login kustom responsif dengan rate-limiting Alpine.js, ekspor data (Excel/PDF), hardening N+1, lokalisasi Bahasa Indonesia, serta perombakan UX yang transparan untuk Dashboard Siswa dan Guru.
+2026-09-27 | 3,5,6,7,9 | Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Mandiri 02 Balaraja, form login kustom responsif dengan rate-limiting Alpine.js, ekspor data (Excel/PDF), hardening N+1, lokalisasi Bahasa Indonesia, serta perombakan UX yang transparan untuk Dashboard Siswa dan Guru. Antarmuka sekarang menggunakan font Inter untuk kenyamanan visual semua kalangan umur, serta penambahan visibilitas jadwal penuh untuk guru.
