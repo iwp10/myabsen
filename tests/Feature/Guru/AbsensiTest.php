@@ -86,6 +86,44 @@ test('dashboard hanya menampilkan jadwal hari ini milik guru itu', function () {
     });
 });
 
+test('dashboard menampilkan banner sapaan dan statistik mengajar guru', function () {
+    Carbon::setTestNow('2026-09-21 08:00:00'); // Senin
+
+    $kelas2 = Kelas::factory()->create();
+    $mapel2 = Mapel::factory()->create();
+
+    // Buat jadwal kedua untuk guru ini dengan kelas berbeda dan mapel berbeda
+    Jadwal::create([
+        'kelas_id' => $kelas2->id,
+        'mapel_id' => $mapel2->id,
+        'guru_id' => $this->guru->id,
+        'hari' => 'rabu',
+        'jam_mulai' => '09:00:00',
+        'jam_selesai' => '10:30:00',
+        'tahun_ajaran' => '2026/2027',
+    ]);
+
+    $response = $this->actingAs($this->guruUser)->get(route('guru.dashboard'));
+
+    $response->assertStatus(200);
+    $response->assertSee('Halo, '.$this->guruUser->name.'!');
+    $response->assertSee('Selamat datang di Dashboard Guru MyAbsen');
+    $response->assertViewHas('total_kelas', 2);
+    $response->assertViewHas('total_mapel', 2);
+    $response->assertViewHas('total_jadwal', 2);
+});
+
+test('dashboard menampilkan tombol pintar lihat riwayat ketika jadwal hari ini kosong', function () {
+    Carbon::setTestNow('2026-09-27 08:00:00'); // Minggu (tidak ada jadwal)
+
+    $response = $this->actingAs($this->guruUser)->get(route('guru.dashboard'));
+
+    $response->assertStatus(200);
+    $response->assertSee('Tidak ada jadwal mengajar hari ini');
+    $response->assertSee('Lihat Riwayat Absensi');
+    $response->assertSee(route('guru.riwayat'));
+});
+
 test('AB-02: sebelum disimpan tidak ada baris detail, dan dashboard menampilkan Belum diabsen', function () {
     Carbon::setTestNow('2026-09-21 08:00:00'); // Senin
 

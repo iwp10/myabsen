@@ -32,9 +32,24 @@ class AbsensiController extends Controller
         $tanggal = Carbon::now('Asia/Jakarta');
         $jadwalHariIni = $this->absensiService->getJadwalHariIni($request->user()->id, $tanggal);
 
+        $guru = Guru::where('user_id', $request->user()->id)->first();
+
+        $totalKelas = 0;
+        $totalMapel = 0;
+        $totalJadwal = 0;
+
+        if ($guru) {
+            $totalKelas = Jadwal::where('guru_id', $guru->id)->distinct()->count('kelas_id');
+            $totalMapel = Jadwal::where('guru_id', $guru->id)->distinct()->count('mapel_id');
+            $totalJadwal = Jadwal::where('guru_id', $guru->id)->count();
+        }
+
         return view('guru.dashboard', [
             'jadwalHariIni' => $jadwalHariIni,
             'tanggal' => $tanggal,
+            'total_kelas' => $totalKelas,
+            'total_mapel' => $totalMapel,
+            'total_jadwal' => $totalJadwal,
         ]);
     }
 
