@@ -94,6 +94,7 @@ Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Man
 - [x] UI/UX: Mengganti font utama sistem menjadi Inter untuk meningkatkan aksesibilitas dan kenyamanan membaca.
 - [x] Fitur Guru: Menambahkan menu dan halaman khusus agar guru dapat melihat seluruh jadwal mengajar mereka dalam seminggu.
 - [x] UI/UX: Merombak Dashboard Admin dengan banner sapaan, statistik master data (Siswa, Guru, Kelas, Mapel), dan pintasan aksi cepat.
+- [x] UI/UX: Menerapkan font Inter secara global untuk meningkatkan modernitas UI dan kenyamanan membaca.
 
 
 ## Catatan dan hambatan
