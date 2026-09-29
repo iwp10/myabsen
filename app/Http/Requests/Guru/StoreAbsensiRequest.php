@@ -14,7 +14,9 @@ class StoreAbsensiRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; // Dihandle oleh Policy
+        $jadwal = $this->route('jadwal');
+
+        return $jadwal && $this->user()?->can('absen', $jadwal);
     }
 
     /**

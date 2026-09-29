@@ -48,6 +48,13 @@ Aplikasi ini memiliki tiga peran utama dengan batasan akses masing-masing, serta
 Proyek ini dibangun menggunakan *stack* teknologi berikut (sesuai dengan aturan proyek):
 
 - **Backend:** Laravel 12, PHP 8.3+
+- **Pola Arsitektur (Separation of Concerns):**
+  - **Thin Controller:** Menerima request HTTP, mendelegasikan proses ke Service, dan mengembalikan response atau view.
+  - **FormRequest:** Khusus memvalidasi integritas input pengguna di sisi server.
+  - **Policy (`JadwalPolicy`):** Memusatkan otorisasi hak akses guru dan hak koreksi historis admin.
+  - **Service Pattern (`AbsensiService`):** Pusat seluruh *business logic*, transaksi absensi, kalkulasi persentase kehadiran, dan helper waktu server `Asia/Jakarta`.
+  - **Model:** Khusus menangani *relationships*, *query scopes*, dan *persistence concerns* (termasuk *soft deletes*).
+  - **View:** Blade Templating dengan Tailwind CSS dan Alpine.js untuk layer presentasi.
 - **Database:** MySQL 8
 - **Frontend:** Blade Templating, Tailwind CSS, Alpine.js
 - **Autentikasi:** Laravel Breeze (Blade)

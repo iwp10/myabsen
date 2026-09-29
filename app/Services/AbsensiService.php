@@ -7,7 +7,9 @@ use App\Models\DetailAbsensi;
 use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\SesiAbsensi;
+use App\Models\Siswa;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AbsensiService
@@ -71,7 +73,7 @@ class AbsensiService
             $siswaList = $jadwal->kelas->siswa()->get();
 
             $detailRecords = [];
-            $now = now();
+            $now = Carbon::now('Asia/Jakarta');
 
             foreach ($siswaList as $siswa) {
                 $status = $dataDetail[$siswa->id]['status'] ?? StatusKehadiran::HADIR->value;
@@ -99,6 +101,127 @@ class AbsensiService
     }
 
     /**
+     * Menyiapkan data form absensi untuk jadwal dan tanggal tertentu.
+     */
+    public function getFormAbsensiData(Jadwal $jadwal, Carbon $tanggal): array
+    {
+        $jadwal->load([
+            'kelas.siswa' => function ($query) {
+                $query->join('users', 'siswa.user_id', '=', 'users.id')
+                    ->select('siswa.*')
+                    ->orderBy('users.name');
+            },
+            'kelas.siswa.user',
+            'mapel',
+        ]);
+
+        $sesi = SesiAbsensi::with('detailAbsensi')
+            ->where('jadwal_id', $jadwal->id)
+            ->where('tanggal', $tanggal->toDateString())
+            ->first();
+
+        $detailExisting = [];
+        if ($sesi) {
+            foreach ($sesi->detailAbsensi as $detail) {
+                $detailExisting[$detail->siswa_id] = [
+                    'status' => $detail->status->value,
+                    'keterangan' => $detail->keterangan,
+                ];
+            }
+        }
+
+        return [
+            'sesi' => $sesi,
+            'detailExisting' => $detailExisting,
+        ];
+    }
+
+    /**
+     * Mendapatkan statistik ringkas mengajar untuk guru.
+     */
+    public function getStatistikGuru(int $guruId): array
+    {
+        return [
+            'total_kelas' => Jadwal::where('guru_id', $guruId)->distinct()->count('kelas_id'),
+            'total_mapel' => Jadwal::where('guru_id', $guruId)->distinct()->count('mapel_id'),
+            'total_jadwal' => Jadwal::where('guru_id', $guruId)->count(),
+        ];
+    }
+
+    /**
+     * Mendapatkan daftar status kehadiran siswa hari ini per jadwal pelajaran.
+     */
+    public function getStatusHariIniSiswa(Siswa $siswa, Carbon $tanggal): Collection
+    {
+        $hari = self::getHariServer($tanggal);
+        if (! $hari) {
+            return collect();
+        }
+
+        $tanggalStr = $tanggal->toDateString();
+
+        $jadwals = Jadwal::with([
+            'mapel',
+            'guru.user',
+            'sesiAbsensi' => function ($q) use ($tanggalStr, $siswa) {
+                $q->where('tanggal', $tanggalStr)
+                    ->with(['detailAbsensi' => function ($dq) use ($siswa) {
+                        $dq->where('siswa_id', $siswa->id);
+                    }]);
+            },
+        ])
+            ->where('kelas_id', $siswa->kelas_id)
+            ->where('hari', $hari)
+            ->orderBy('jam_mulai')
+            ->get();
+
+        return $jadwals->map(function ($jadwal) {
+            $sesi = $jadwal->sesiAbsensi->first();
+            $detail = $sesi?->detailAbsensi?->first();
+            $status = $detail ? $detail->status : null;
+
+            return [
+                'jadwal' => $jadwal,
+                'status_label' => $status ? $status->label() : 'Belum diabsen',
+                'status_value' => $status ? $status->value : null,
+            ];
+        });
+    }
+
+    /**
+     * Mendapatkan rekap persentase kehadiran siswa per mata pelajaran.
+     */
+    public function getRekapPerMapelSiswa(int $siswaId): Collection
+    {
+        return DB::table('detail_absensi')
+            ->join('sesi_absensi', 'detail_absensi.sesi_absensi_id', '=', 'sesi_absensi.id')
+            ->join('jadwal', 'sesi_absensi.jadwal_id', '=', 'jadwal.id')
+            ->join('mapel', 'jadwal.mapel_id', '=', 'mapel.id')
+            ->where('detail_absensi.siswa_id', $siswaId)
+            ->select(
+                'mapel.id',
+                'mapel.nama as mapel',
+                DB::raw('COUNT(detail_absensi.id) as total_sesi'),
+                DB::raw("SUM(CASE WHEN detail_absensi.status = 'hadir' THEN 1 ELSE 0 END) as total_hadir"),
+                DB::raw("SUM(CASE WHEN detail_absensi.status = 'izin' THEN 1 ELSE 0 END) as total_izin"),
+                DB::raw("SUM(CASE WHEN detail_absensi.status = 'sakit' THEN 1 ELSE 0 END) as total_sakit"),
+                DB::raw("SUM(CASE WHEN detail_absensi.status = 'alpa' THEN 1 ELSE 0 END) as total_alpa")
+            )
+            ->groupBy('mapel.id', 'mapel.nama')
+            ->get()
+            ->map(function ($item) {
+                $item->persentase = $this->hitungPersentaseKehadiran(
+                    (int) $item->total_hadir,
+                    (int) $item->total_izin,
+                    (int) $item->total_sakit,
+                    (int) $item->total_sesi
+                );
+
+                return $item;
+            });
+    }
+
+    /**
      * Mendapatkan riwayat sesi untuk guru.
      */
     public function getRiwayatSesi(int $userId)
@@ -122,7 +245,23 @@ class AbsensiService
     /**
      * Konversi dayOfWeek dari Carbon (0 = Minggu, 1 = Senin) ke enum hari.
      */
-    private function getHariIndonesia(int $dayOfWeek): ?string
+    public static function getHariServer(?Carbon $date = null): ?string
+    {
+        $date = $date ?? Carbon::now('Asia/Jakarta');
+
+        $hari = [
+            1 => 'senin',
+            2 => 'selasa',
+            3 => 'rabu',
+            4 => 'kamis',
+            5 => 'jumat',
+            6 => 'sabtu',
+        ];
+
+        return $hari[$date->dayOfWeek] ?? null;
+    }
+
+    public function getHariIndonesia(int $dayOfWeek): ?string
     {
         $hari = [
             1 => 'senin',

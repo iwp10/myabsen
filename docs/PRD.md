@@ -73,6 +73,13 @@ Index: `siswa(kelas_id)`, `jadwal(guru_id, hari)`, `jadwal(kelas_id, hari)`, `se
 Catatan: `diabsen_oleh` dan `diubah_oleh` merujuk ke `users.id`.
 
 ## 6. Kebutuhan non-fungsional
+- **Arsitektur Teknis:** Pemisahan tanggung jawab (*Separation of Concerns*) secara ketat antar layer:
+  - **Controller:** Berperan tipis (*Thin Controller*) yang bertugas menerima request HTTP, memanggil Service yang sesuai, dan mengembalikan response JSON atau view Blade.
+  - **FormRequest:** Khusus untuk validasi input data dari pengguna di sisi server dan menghubungkan pemeriksaan otorisasi awal.
+  - **Policy:** Khusus untuk memusatkan otorisasi hak akses (*authorization rules*), termasuk batasan jadwal mengajar guru dan hak koreksi historis admin.
+  - **Service Pattern (`AbsensiService`):** Sebagai pusat seluruh logika bisnis (*business logic*), kalkulasi persentase kehadiran, agregasi rekapitulasi, dan eksekusi transaksi absensi.
+  - **Model:** Khusus menangani pemetaan relasi Eloquent (*relationships*), query scopes, dan kekhawatiran persistensi (*persistence concern*).
+  - **View:** Khusus untuk layer presentasi UI menggunakan Blade Templating, Tailwind CSS, dan Alpine.js.
 - **Performa:** halaman absensi untuk kelas 40 siswa terbuka kurang dari 2 detik. Rekap memakai agregasi SQL, tanpa N+1.
 - **Keamanan:** password di-hash, proteksi CSRF, otorisasi lewat Policy, rate limiting pada login, validasi di sisi server.
 - **Tampilan:** responsif, nyaman dipakai guru dari HP.

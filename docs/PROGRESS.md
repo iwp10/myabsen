@@ -98,8 +98,19 @@ Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Man
 - [x] UI/UX: Standarisasi seluruh ikon aplikasi menggunakan Tabler Icons (inline SVG) untuk tampilan yang lebih modern, konsisten, dan ringan.
 
 
+### Tahap Improvement: Refactor Arsitektur
+- [x] Pemisahan Tanggung Jawab (Separation of Concerns): Controller tipis (*Thin Controller*), FormRequest khusus validasi input, Policy khusus otorisasi hak akses, Service sebagai pusat seluruh *business logic*, Model khusus relasi & persistensi data, dan View khusus layer presentasi.
+- [x] Pembersihan Fat Controller: Memindahkan query agregasi rekap per mapel dan status harian siswa dari `Siswa\DashboardController` ke `AbsensiService`.
+- [x] Implementasi Service Pattern: Memusatkan logika statistik guru dan penyiapan form absensi dari `Guru\AbsensiController` ke `AbsensiService`.
+- [x] Pemusatan Otorisasi ke Policy: Menegakkan otorisasi absensi jadwal secara terpusat melalui `JadwalPolicy::absen()`, diintegrasikan langsung pada `StoreAbsensiRequest`.
+- [x] Eliminasi Duplikasi Logika: Sentralisasi penentuan nama hari server berbasis `Asia/Jakarta` melalui method statis tunggal `AbsensiService::getHariServer()`.
+- [x] Standarisasi Timezone: Menyelaraskan seluruh pencatatan waktu dan instansiasi Carbon mutlak menggunakan `Asia/Jakarta`.
+- [x] Pencegahan N+1 Query & Eager Loading pada seluruh relasi domain siswa, guru, kelas, dan jadwal.
+
 ## Catatan dan hambatan
 Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-09-21 | 3,6,7,8 | Fase 3, 6, 7, 8 ditunda untuk fokus MVP/BETA (Fase 1, 2, 4, 5). Master data digenerate via Seeder.
 2026-09-27 | 3,5,6,7,9 | Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Mandiri 02 Balaraja, form login kustom responsif dengan rate-limiting Alpine.js, ekspor data (Excel/PDF), hardening N+1, lokalisasi Bahasa Indonesia, serta perombakan UX yang transparan untuk Dashboard Siswa dan Guru. Antarmuka sekarang menggunakan font Inter untuk kenyamanan visual semua kalangan umur, serta penambahan visibilitas jadwal penuh untuk guru.
 2026-09-29 | 2 | Fase 2 (Refactor Dokumen & Test ke Keputusan Bisnis Aktual) telah selesai dilakukan berdasarkan hasil temuan Audit. PRD dan Test diselaraskan dengan aturan bisnis aktual: AB-03 (hak koreksi historis admin), AB-05 (perlindungan soft delete histori master data), AB-07 (kalkulasi persentase kehadiran: Hadir, Izin, dan Sakit dihitung positif; Alpa sebagai pengurang), dan standar timezone Asia/Jakarta. Seluruh 100 pengujian otomatis lulus (PASS).
+2026-09-29 | 3 | Tahap Improvement (Refactor Arsitektur) selesai: Pemisahan tegas tanggung jawab Controller-Service-Policy-FormRequest, eliminasi duplikasi hari/tanggal, standarisasi mutlak Asia/Jakarta, dan pembersihan Fat Controllers. Seluruh 100 test lulus (PASS).
+

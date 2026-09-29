@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Guru\StoreAbsensiRequest;
 use App\Models\Guru;
 use App\Models\Jadwal;
-use App\Models\SesiAbsensi;
 use App\Services\AbsensiService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -33,23 +32,16 @@ class AbsensiController extends Controller
         $jadwalHariIni = $this->absensiService->getJadwalHariIni($request->user()->id, $tanggal);
 
         $guru = Guru::where('user_id', $request->user()->id)->first();
-
-        $totalKelas = 0;
-        $totalMapel = 0;
-        $totalJadwal = 0;
-
-        if ($guru) {
-            $totalKelas = Jadwal::where('guru_id', $guru->id)->distinct()->count('kelas_id');
-            $totalMapel = Jadwal::where('guru_id', $guru->id)->distinct()->count('mapel_id');
-            $totalJadwal = Jadwal::where('guru_id', $guru->id)->count();
-        }
+        $stats = $guru
+            ? $this->absensiService->getStatistikGuru($guru->id)
+            : ['total_kelas' => 0, 'total_mapel' => 0, 'total_jadwal' => 0];
 
         return view('guru.dashboard', [
             'jadwalHariIni' => $jadwalHariIni,
             'tanggal' => $tanggal,
-            'total_kelas' => $totalKelas,
-            'total_mapel' => $totalMapel,
-            'total_jadwal' => $totalJadwal,
+            'total_kelas' => $stats['total_kelas'],
+            'total_mapel' => $stats['total_mapel'],
+            'total_jadwal' => $stats['total_jadwal'],
         ]);
     }
 
@@ -61,39 +53,13 @@ class AbsensiController extends Controller
         Gate::authorize('absen', $jadwal);
 
         $tanggal = Carbon::now('Asia/Jakarta');
-
-        // Eager load siswa
-        $jadwal->load([
-            'kelas.siswa' => function ($query) {
-                $query->join('users', 'siswa.user_id', '=', 'users.id')
-                    ->select('siswa.*')
-                    ->orderBy('users.name');
-            },
-            'kelas.siswa.user',
-            'mapel',
-        ]);
-
-        // Cek sesi yang sudah ada
-        $sesi = SesiAbsensi::with('detailAbsensi')
-            ->where('jadwal_id', $jadwal->id)
-            ->where('tanggal', $tanggal->toDateString())
-            ->first();
-
-        $detailExisting = [];
-        if ($sesi) {
-            foreach ($sesi->detailAbsensi as $detail) {
-                $detailExisting[$detail->siswa_id] = [
-                    'status' => $detail->status->value,
-                    'keterangan' => $detail->keterangan,
-                ];
-            }
-        }
+        $formData = $this->absensiService->getFormAbsensiData($jadwal, $tanggal);
 
         return view('guru.absensi', [
             'jadwal' => $jadwal,
             'tanggal' => $tanggal,
-            'sesi' => $sesi,
-            'detailExisting' => $detailExisting,
+            'sesi' => $formData['sesi'],
+            'detailExisting' => $formData['detailExisting'],
         ]);
     }
 

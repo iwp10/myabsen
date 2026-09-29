@@ -5,7 +5,7 @@ namespace App\Policies;
 use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\User;
-use Carbon\Carbon;
+use App\Services\AbsensiService;
 use Illuminate\Auth\Access\Response;
 
 class JadwalPolicy
@@ -31,18 +31,7 @@ class JadwalPolicy
             }
 
             // Cek apakah hari jadwal cocok dengan hari ini di server
-            $hariIni = Carbon::now('Asia/Jakarta');
-
-            $hariMap = [
-                1 => 'senin',
-                2 => 'selasa',
-                3 => 'rabu',
-                4 => 'kamis',
-                5 => 'jumat',
-                6 => 'sabtu',
-            ];
-
-            $hariServer = $hariMap[$hariIni->dayOfWeek] ?? null;
+            $hariServer = AbsensiService::getHariServer();
 
             if ($jadwal->hari !== $hariServer) {
                 return Response::deny('Anda hanya dapat mengabsen jadwal pada hari yang sama.');

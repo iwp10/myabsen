@@ -4,12 +4,10 @@ namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
 use App\Models\DetailAbsensi;
-use App\Models\Jadwal;
 use App\Models\Mapel;
 use App\Services\AbsensiService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -23,40 +21,11 @@ class DashboardController extends Controller
     public function dashboard(Request $request)
     {
         $siswa = $request->user()->siswa;
+        $tanggalHariIni = Carbon::now('Asia/Jakarta');
 
-        $hariIni = strtolower(Carbon::now()->locale('id')->isoFormat('dddd'));
-        $tanggalHariIni = Carbon::today()->format('Y-m-d');
-
-        $statusHariIni = collect();
-
-        if ($siswa) {
-            $jadwals = Jadwal::with([
-                'mapel',
-                'guru.user',
-                'sesiAbsensi' => function ($q) use ($tanggalHariIni, $siswa) {
-                    $q->where('tanggal', $tanggalHariIni)
-                        ->with(['detailAbsensi' => function ($dq) use ($siswa) {
-                            $dq->where('siswa_id', $siswa->id);
-                        }]);
-                },
-            ])
-                ->where('kelas_id', $siswa->kelas_id)
-                ->where('hari', $hariIni)
-                ->orderBy('jam_mulai')
-                ->get();
-
-            $statusHariIni = $jadwals->map(function ($jadwal) {
-                $sesi = $jadwal->sesiAbsensi->first();
-                $detail = $sesi?->detailAbsensi?->first();
-                $status = $detail ? $detail->status : null;
-
-                return [
-                    'jadwal' => $jadwal,
-                    'status_label' => $status ? $status->label() : 'Belum diabsen',
-                    'status_value' => $status ? $status->value : null,
-                ];
-            });
-        }
+        $statusHariIni = $siswa
+            ? $this->absensiService->getStatusHariIniSiswa($siswa, $tanggalHariIni)
+            : collect();
 
         $ringkasanKehadiran = $siswa
             ? $this->absensiService->getRingkasanKehadiranSiswa($siswa->id)
@@ -75,6 +44,14 @@ class DashboardController extends Controller
     public function riwayat(Request $request)
     {
         $siswa = $request->user()->siswa;
+
+        if (! $siswa) {
+            $riwayat = collect();
+            $mapels = collect();
+            $persentasePerMapel = collect();
+
+            return view('siswa.riwayat', compact('riwayat', 'mapels', 'persentasePerMapel'));
+        }
 
         $query = DetailAbsensi::with(['sesiAbsensi.jadwal.mapel', 'sesiAbsensi.jadwal.guru.user'])
             ->where('siswa_id', $siswa->id);
@@ -103,33 +80,8 @@ class DashboardController extends Controller
             $q->where('kelas_id', $siswa->kelas_id);
         })->get();
 
-        // Rekap per mapel menggunakan agregasi SQL
-        $persentasePerMapel = DB::table('detail_absensi')
-            ->join('sesi_absensi', 'detail_absensi.sesi_absensi_id', '=', 'sesi_absensi.id')
-            ->join('jadwal', 'sesi_absensi.jadwal_id', '=', 'jadwal.id')
-            ->join('mapel', 'jadwal.mapel_id', '=', 'mapel.id')
-            ->where('detail_absensi.siswa_id', $siswa->id)
-            ->select(
-                'mapel.id',
-                'mapel.nama as mapel',
-                DB::raw('COUNT(detail_absensi.id) as total_sesi'),
-                DB::raw("SUM(CASE WHEN detail_absensi.status = 'hadir' THEN 1 ELSE 0 END) as total_hadir"),
-                DB::raw("SUM(CASE WHEN detail_absensi.status = 'izin' THEN 1 ELSE 0 END) as total_izin"),
-                DB::raw("SUM(CASE WHEN detail_absensi.status = 'sakit' THEN 1 ELSE 0 END) as total_sakit"),
-                DB::raw("SUM(CASE WHEN detail_absensi.status = 'alpa' THEN 1 ELSE 0 END) as total_alpa")
-            )
-            ->groupBy('mapel.id', 'mapel.nama')
-            ->get()
-            ->map(function ($item) {
-                $item->persentase = $this->absensiService->hitungPersentaseKehadiran(
-                    (int) $item->total_hadir,
-                    (int) $item->total_izin,
-                    (int) $item->total_sakit,
-                    (int) $item->total_sesi
-                );
-
-                return $item;
-            });
+        // Rekap per mapel didelegasikan ke AbsensiService
+        $persentasePerMapel = $this->absensiService->getRekapPerMapelSiswa($siswa->id);
 
         return view('siswa.riwayat', compact('riwayat', 'mapels', 'persentasePerMapel'));
     }
