@@ -155,9 +155,12 @@ test('AB-03: guru lain dan jadwal hari lain mendapat 403, admin diizinkan', func
     $response2 = $this->actingAs($this->guruUser)->get(route('guru.absensi.show', $jadwalSelasa->id));
     $response2->assertStatus(403);
 
-    // Admin diizinkan
+    // Admin diizinkan pada jadwal hari ini maupun jadwal hari lain (koreksi historis)
     $response3 = $this->actingAs($this->adminUser)->get(route('guru.absensi.show', $this->jadwal->id));
     $response3->assertStatus(200);
+
+    $response4 = $this->actingAs($this->adminUser)->get(route('guru.absensi.show', $jadwalSelasa->id));
+    $response4->assertStatus(200);
 });
 
 test('AB-04 dan AB-09: semua siswa kelas mendapat baris detail, dan field log terisi', function () {

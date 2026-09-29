@@ -13,7 +13,7 @@ Pembeda utama: absensi per mata pelajaran (bukan per hari), sehingga siswa yang 
 |---|---|---|---|
 | Kelola master data (jurusan, kelas, mapel, guru, siswa) | Ya | Tidak | Tidak |
 | Kelola jadwal | Ya | Tidak | Tidak |
-| Mengabsen | Ya (koreksi kapan saja) | Ya (jadwal sendiri, hari yang sama) | Tidak |
+| Mengabsen | Ya (koreksi historis kapan saja pada tanggal lampau) | Ya (jadwal sendiri, hari yang sama) | Tidak |
 | Melihat rekap | Semua kelas | Kelas yang ia ajar | Milik sendiri |
 | Ekspor Excel/PDF | Ya | Ya | Tidak |
 
@@ -24,7 +24,7 @@ Pembeda utama: absensi per mata pelajaran (bukan per hari), sehingga siswa yang 
 - CRUD jurusan, kelas, mapel, guru, siswa. Akun user dibuat otomatis, password awal bisa direset.
 - Impor siswa dari Excel, dengan laporan baris yang gagal.
 - CRUD jadwal (kelas + mapel + guru + hari + jam) dengan pencegahan bentrok.
-- Melihat semua rekap dan mengoreksi absensi.
+- Melihat semua rekap dan melakukan koreksi historis absensi (mengubah data absensi pada tanggal di masa lampau kapan saja).
 
 ### Guru
 - Dashboard: daftar jadwal mengajar hari ini.
@@ -42,25 +42,26 @@ Setiap aturan di bawah harus punya test.
 
 - **AB-01** Satu sesi unik per (jadwal, tanggal). Jika sesinya sudah ada, sistem membuka sesi itu untuk diedit, tidak membuat duplikat.
 - **AB-02** "Belum diabsen" berarti belum ada baris `detail_absensi`. Tidak pernah disimpan sebagai alpa.
-- **AB-03** Guru hanya bisa mengabsen jadwalnya sendiri, dan hanya pada tanggal hari ini yang cocok dengan hari jadwal. Guru hanya bisa mengedit sesi yang tanggalnya hari ini. Admin bisa mengoreksi kapan saja. MVP tidak membatasi jam, hanya hari.
+- **AB-03** Guru hanya bisa mengabsen jadwalnya sendiri, dan hanya pada tanggal hari ini yang cocok dengan hari jadwal. Guru hanya bisa mengedit sesi yang tanggalnya hari ini. Role Admin secara eksplisit diizinkan melakukan koreksi historis (mengubah data absensi pada tanggal di masa lampau kapan saja). MVP tidak membatasi jam, hanya hari.
 - **AB-04** Saat sesi disimpan, semua siswa kelas mendapat satu baris `detail_absensi` (default hadir kecuali diubah), dalam satu transaksi database.
-- **AB-05** Data siswa, guru, kelas, dan mapel yang sudah punya riwayat absensi tidak dihapus permanen (soft delete).
+- **AB-05** Mekanisme Master Data & Integritas Histori: Seluruh penghapusan master data (Siswa, Guru, Kelas, Mapel, Jadwal) yang sudah memiliki riwayat absensi tidak dihapus permanen melainkan menggunakan mekanisme `SoftDeletes` (atau diproteksi dari hard-delete) untuk menjamin histori absensi masa lalu tetap utuh dan valid.
 - **AB-06** Satu guru tidak boleh punya dua jadwal yang jamnya beririsan di hari yang sama. Berlaku juga untuk satu kelas.
-- **AB-07** Persentase kehadiran = jumlah status Hadir dibagi jumlah sesi yang sudah diabsen untuk siswa itu (per mapel atau periode), dikali 100. Izin dan sakit tidak dihitung sebagai hadir.
+- **AB-07** Kalkulasi Persentase Kehadiran: Persentase = ((Hadir + Izin + Sakit) / Total Sesi) * 100. Status "Hadir", "Izin", dan "Sakit" dihitung sebagai pembilang (positif/valid), sedangkan "Alpa" sebagai satu-satunya pengurang persentase kehadiran.
 - **AB-08** Siswa hanya bisa melihat data miliknya. Guru hanya bisa melihat kelas yang ia ajar (berdasarkan jadwal).
 - **AB-09** Setiap sesi mencatat siapa yang mengabsen (`diabsen_oleh`) dan siapa yang terakhir mengubah (`diubah_oleh`).
 - **AB-10** Akun hanya dibuat admin, tidak ada registrasi publik. Login memakai `username` (NIS untuk siswa, NIP atau username yang ditetapkan admin untuk guru dan admin).
+- **AB-11** Standar Waktu: Seluruh sistem, operasi tanggal, pencatatan sesi, dan jam absensi menggunakan standar zona waktu `Asia/Jakarta`.
 
 ## 5. Skema database
 
 ```
 users(id, name, username unique, email null, password, role enum[admin,guru,siswa])
 jurusan(id, nama, kode)
-kelas(id, jurusan_id, nama, tingkat, tahun_ajaran, deleted_at)
-guru(id, user_id, nip null, deleted_at)
-siswa(id, user_id, kelas_id, nis unique, deleted_at)
-mapel(id, nama, kode, deleted_at)
-jadwal(id, kelas_id, mapel_id, guru_id, hari enum[senin..sabtu], jam_mulai, jam_selesai, tahun_ajaran)
+kelas(id, jurusan_id, nama, tingkat, tahun_ajaran, deleted_at null)
+guru(id, user_id, nip null, deleted_at null)
+siswa(id, user_id, kelas_id, nis unique, deleted_at null)
+mapel(id, nama, kode, deleted_at null)
+jadwal(id, kelas_id, mapel_id, guru_id, hari enum[senin..sabtu], jam_mulai, jam_selesai, tahun_ajaran, deleted_at null)
 sesi_absensi(id, jadwal_id, tanggal, diabsen_oleh, diubah_oleh null, catatan null, timestamps)
   UNIQUE(jadwal_id, tanggal)
 detail_absensi(id, sesi_absensi_id, siswa_id, status enum[hadir,izin,sakit,alpa], keterangan null, timestamps)
@@ -76,7 +77,7 @@ Catatan: `diabsen_oleh` dan `diubah_oleh` merujuk ke `users.id`.
 - **Keamanan:** password di-hash, proteksi CSRF, otorisasi lewat Policy, rate limiting pada login, validasi di sisi server.
 - **Tampilan:** responsif, nyaman dipakai guru dari HP.
 - **Bahasa:** seluruh antarmuka Bahasa Indonesia.
-- **Waktu:** Asia/Jakarta.
+- **Waktu:** Standar sistem menggunakan timezone `Asia/Jakarta` secara konsisten pada seluruh pencatatan dan perhitungan absensi.
 
 ## 7. Di luar MVP (tahap lanjut)
 Tidak dikerjakan sebelum MVP stabil dan diuji di sekolah:

@@ -26,20 +26,20 @@ Aplikasi ini memiliki tiga peran utama dengan batasan akses masing-masing, serta
 - **Aksesibilitas Visual:** Dilengkapi *toggle* Light Mode dan Dark Mode untuk kenyamanan mata pengguna dari berbagai rentang usia (default: Light Mode).
 
 ### 👑 Admin
-- **Master Data:** Mengelola data jurusan, kelas, mata pelajaran, guru, dan siswa.
+- **Master Data:** Mengelola data jurusan, kelas, mata pelajaran, guru, dan siswa dengan perlindungan riwayat data (soft delete).
 - **Manajemen Jadwal:** Mengatur jadwal pelajaran dengan validasi pencegahan jadwal bentrok.
 - **Import Data:** Memasukkan data siswa secara massal melalui file Excel.
-- **Pemantauan & Koreksi:** Melihat seluruh rekap absensi sekolah dan hak untuk mengoreksi absensi.
+- **Pemantauan & Koreksi Historis:** Melihat seluruh rekap absensi sekolah dan hak istimewa untuk mengoreksi absensi historis kapan saja.
 
 ### 👨‍🏫 Guru
-- **Dashboard Cerdas:** Menampilkan jadwal mengajar pada hari tersebut.
+- **Dashboard Cerdas:** Menampilkan jadwal mengajar pada hari tersebut serta ringkasan total mengajar.
 - **Absensi Cepat:** Sistem memberikan status default **Hadir** untuk seluruh kelas. Guru hanya mengubah status siswa yang *Izin*, *Sakit*, atau *Alpa*.
 - **Manajemen Sesi:** Dapat mengedit kembali sesi absensi pada hari yang sama.
-- **Laporan:** Mengekspor rekap kelas dalam format Excel.
+- **Laporan:** Mengekspor rekap absensi kelas dalam format Excel dan PDF.
 
 ### 🎓 Siswa (Read-Only)
-- **Monitoring Pribadi:** Melihat status kehadiran harian per mata pelajaran.
-- **Statistik & Riwayat:** Melacak persentase tingkat kehadiran dan riwayat lengkapnya.
+- **Monitoring Pribadi:** Melihat status kehadiran harian per mata pelajaran secara langsung.
+- **Statistik & Riwayat:** Melacak persentase tingkat kehadiran (kalkulasi positif: Hadir, Izin, dan Sakit; Alpa sebagai pengurang) dan riwayat lengkap per mata pelajaran.
 
 ---
 

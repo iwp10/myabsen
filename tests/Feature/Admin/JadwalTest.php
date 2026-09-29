@@ -6,6 +6,7 @@ use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\Mapel;
+use App\Models\SesiAbsensi;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -132,5 +133,27 @@ class JadwalTest extends TestCase
             'hari' => 'jumat',
             'jam_mulai' => '08:00',
         ]);
+    }
+
+    public function test_admin_can_delete_jadwal_without_attendance_history()
+    {
+        $jadwal = Jadwal::factory()->create();
+
+        $response = $this->actingAs($this->admin)->delete(route('admin.jadwal.destroy', $jadwal));
+
+        $response->assertRedirect(route('admin.jadwal.index'));
+        $this->assertDatabaseMissing('jadwal', ['id' => $jadwal->id]);
+    }
+
+    public function test_admin_cannot_delete_jadwal_with_attendance_history()
+    {
+        $jadwal = Jadwal::factory()->create();
+        SesiAbsensi::factory()->create(['jadwal_id' => $jadwal->id]);
+
+        $response = $this->actingAs($this->admin)->delete(route('admin.jadwal.destroy', $jadwal));
+
+        $response->assertRedirect(route('admin.jadwal.index'));
+        $response->assertSessionHas('error');
+        $this->assertDatabaseHas('jadwal', ['id' => $jadwal->id]);
     }
 }
