@@ -19,15 +19,21 @@ Pembeda utama: absensi per mata pelajaran (bukan per hari), sehingga siswa yang 
 
 ## 3. Fitur MVP
 
+### Umum
+- Layout sidebar responsif dengan navigasi per role.
+- Antarmuka modern dan konsisten menggunakan font Inter dan Tabler Icons.
+
 ### Admin
-- Login dengan username dan password.
+- Dashboard: ringkasan statistik master data (siswa, guru, kelas, mapel) dan pintasan aksi cepat.
+- Login fleksibel dengan username, NIP (guru), atau NIS (siswa) dan password.
 - CRUD jurusan, kelas, mapel, guru, siswa. Akun user dibuat otomatis, password awal bisa direset.
 - Impor siswa dari Excel, dengan laporan baris yang gagal.
 - CRUD jadwal (kelas + mapel + guru + hari + jam) dengan pencegahan bentrok.
 - Melihat semua rekap dan melakukan koreksi historis absensi (mengubah data absensi pada tanggal di masa lampau kapan saja).
 
 ### Guru
-- Dashboard: daftar jadwal mengajar hari ini.
+- Dashboard: ringkasan statistik (kelas, mapel, jadwal) dan daftar jadwal mengajar hari ini.
+- Halaman jadwal mingguan: melihat seluruh jadwal mengajar dalam seminggu.
 - Halaman absensi: semua siswa kelas tampil dengan status default **Hadir**. Guru mengubah yang berbeda menjadi Izin, Sakit, atau Alpa, keterangan opsional, lalu menyimpan.
 - Membuka kembali sesi yang sudah ada untuk diedit (hanya di hari yang sama).
 - Riwayat sesi dan rekap per kelas, mapel, dan periode, dengan ekspor Excel dan PDF.
@@ -46,10 +52,10 @@ Setiap aturan di bawah harus punya test.
 - **AB-04** Saat sesi disimpan, semua siswa kelas mendapat satu baris `detail_absensi` (default hadir kecuali diubah), dalam satu transaksi database.
 - **AB-05** Mekanisme Master Data & Integritas Histori: Seluruh penghapusan master data (Siswa, Guru, Kelas, Mapel, Jadwal) yang sudah memiliki riwayat absensi tidak dihapus permanen melainkan menggunakan mekanisme `SoftDeletes` (atau diproteksi dari hard-delete) untuk menjamin histori absensi masa lalu tetap utuh dan valid.
 - **AB-06** Satu guru tidak boleh punya dua jadwal yang jamnya beririsan di hari yang sama. Berlaku juga untuk satu kelas.
-- **AB-07** Kalkulasi Persentase Kehadiran: Persentase = ((Hadir + Izin + Sakit) / Total Sesi) * 100. Status "Hadir", "Izin", dan "Sakit" dihitung sebagai pembilang (positif/valid), sedangkan "Alpa" sebagai satu-satunya pengurang persentase kehadiran.
+- **AB-07** Kalkulasi Persentase Kehadiran: Persentase = ((Hadir + Izin + Sakit) / Total Sesi Diabsen) * 100. Status Hadir, Izin, dan Sakit dihitung sebagai hadir. Alpa tidak dihitung. Pembagi adalah jumlah sesi yang sudah diabsen untuk siswa itu (sesi yang belum diabsen tidak dihitung).
 - **AB-08** Siswa hanya bisa melihat data miliknya. Guru hanya bisa melihat kelas yang ia ajar (berdasarkan jadwal).
 - **AB-09** Setiap sesi mencatat siapa yang mengabsen (`diabsen_oleh`) dan siapa yang terakhir mengubah (`diubah_oleh`).
-- **AB-10** Akun hanya dibuat admin, tidak ada registrasi publik. Login memakai `username` (NIS untuk siswa, NIP atau username yang ditetapkan admin untuk guru dan admin).
+- **AB-10** Akun hanya dibuat admin, tidak ada registrasi publik. Login resmi fleksibel memakai `username` ATAU `NIP` (guru) ATAU `NIS` (siswa).
 - **AB-11** Standar Waktu: Seluruh sistem, operasi tanggal, pencatatan sesi, dan jam absensi menggunakan standar zona waktu `Asia/Jakarta`.
 
 ## 5. Skema database
@@ -82,7 +88,7 @@ Catatan: `diabsen_oleh` dan `diubah_oleh` merujuk ke `users.id`.
   - **View:** Khusus untuk layer presentasi UI menggunakan Blade Templating, Tailwind CSS, dan Alpine.js.
 - **Performa:** halaman absensi untuk kelas 40 siswa terbuka kurang dari 2 detik. Rekap memakai agregasi SQL, tanpa N+1.
 - **Keamanan:** password di-hash, proteksi CSRF, otorisasi lewat Policy, rate limiting pada login, validasi di sisi server.
-- **Tampilan:** responsif, nyaman dipakai guru dari HP.
+- **Tampilan:** responsif, nyaman dipakai guru dari HP, layout sidebar, font Inter, ikon Tabler, serta toggle Mode Terang/Gelap menggunakan Alpine.js dan Tailwind (dengan Mode Terang sebagai setelan bawaan/default).
 - **Bahasa:** seluruh antarmuka Bahasa Indonesia.
 - **Waktu:** Standar sistem menggunakan timezone `Asia/Jakarta` secara konsisten pada seluruh pencatatan dan perhitungan absensi.
 
@@ -105,7 +111,4 @@ Tidak dikerjakan sebelum MVP stabil dan diuji di sekolah:
 | 2026-09-21 | Semua siswa default Hadir, guru hanya mengubah yang berbeda |
 | 2026-09-21 | Stack: Laravel 12, Blade + Tailwind + Alpine, MySQL 8 |
 | 2026-09-21 | Login memakai username (NIS/NIP), bukan email |
-
-## 9. Update
-- Otentikasi: Sistem login fleksibel menggunakan Username, NIP (Guru), atau NIS (Siswa).
-- UI/UX: Penambahan toggle Mode Terang/Gelap menggunakan Alpine.js dan Tailwind, dengan Mode Terang sebagai setelan bawaan (default).
+| 2026-10-02 | Perubahan AB-07 (status Hadir, Izin, dan Sakit dihitung hadir, Alpa tidak dihitung; pembagi = jumlah sesi yang sudah diabsen untuk siswa), login resmi fleksibel memakai username ATAU NIP (guru) ATAU NIS (siswa), serta penambahan fitur MVP (halaman jadwal mingguan guru, dashboard admin statistik + pintasan, dashboard guru statistik + jadwal hari ini, layout sidebar, font Inter, ikon Tabler) |

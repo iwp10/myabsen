@@ -12,7 +12,7 @@ Baca keduanya sebelum mengerjakan tugas apa pun. Jika kode bertentangan dengan P
 ## Stack (jangan diganti tanpa persetujuan)
 - Laravel 12, PHP 8.3, MySQL 8
 - Blade + Tailwind CSS + Alpine.js (tanpa React, Vue, atau Livewire)
-- Auth: Laravel Breeze (Blade), tanpa registrasi publik, login memakai `username`
+- Auth: Laravel Breeze (Blade), tanpa registrasi publik, login memakai username/NIP/NIS
 - Excel: maatwebsite/excel. PDF: barryvdh/laravel-dompdf
 - Test: feature test (Pest atau PHPUnit)
 - Paket baru di luar daftar ini: tanya dulu, jangan langsung dipasang.
