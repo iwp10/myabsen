@@ -21,6 +21,7 @@ Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Man
 | 6 | Rekap dan ekspor | Agent | fitur/fase-6-rekap-ekspor | selesai |
 | 7 | Hardening | Agent | fitur/fase-7-hardening | selesai |
 | 8 | Siap produksi dan deploy | | | ditunda |
+| 9 | Tambahan | Agent | main | selesai |
 
 ## Checklist per fase
 
@@ -62,7 +63,7 @@ Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Man
 - [x] Riwayat dengan filter
 - [x] Persentase kehadiran (AB-07)
 - [x] Test akses data milik sendiri (AB-08)
-- [x] Menyesuaikan perhitungan persentase (Izin & Sakit dihitung Hadir) dan menambahkan breakdown detail kehadiran transparan di dashboard siswa.
+- [x] Menyesuaikan perhitungan persentase (status Hadir, Izin, dan Sakit dihitung sebagai hadir, Alpa tidak dihitung, pembagi = jumlah sesi yang sudah diabsen untuk siswa itu) dan menambahkan breakdown detail kehadiran transparan di dashboard siswa.
 
 ### Fase 6: Rekap dan ekspor
 - [x] Rekap per kelas, mapel, periode (agregasi SQL)
@@ -94,7 +95,6 @@ Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Man
 - [x] UI/UX: Mengganti font utama sistem menjadi Inter untuk meningkatkan aksesibilitas dan kenyamanan membaca.
 - [x] Fitur Guru: Menambahkan menu dan halaman khusus agar guru dapat melihat seluruh jadwal mengajar mereka dalam seminggu.
 - [x] UI/UX: Merombak Dashboard Admin dengan banner sapaan, statistik master data (Siswa, Guru, Kelas, Mapel), dan pintasan aksi cepat.
-- [x] UI/UX: Menerapkan font Inter secara global untuk meningkatkan modernitas UI dan kenyamanan membaca.
 - [x] UI/UX: Standarisasi seluruh ikon aplikasi menggunakan Tabler Icons (inline SVG) untuk tampilan yang lebih modern, konsisten, dan ringan.
 
 
@@ -113,4 +113,6 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-09-27 | 3,5,6,7,9 | Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Mandiri 02 Balaraja, form login kustom responsif dengan rate-limiting Alpine.js, ekspor data (Excel/PDF), hardening N+1, lokalisasi Bahasa Indonesia, serta perombakan UX yang transparan untuk Dashboard Siswa dan Guru. Antarmuka sekarang menggunakan font Inter untuk kenyamanan visual semua kalangan umur, serta penambahan visibilitas jadwal penuh untuk guru.
 2026-09-29 | 2 | Fase 2 (Refactor Dokumen & Test ke Keputusan Bisnis Aktual) telah selesai dilakukan berdasarkan hasil temuan Audit. PRD dan Test diselaraskan dengan aturan bisnis aktual: AB-03 (hak koreksi historis admin), AB-05 (perlindungan soft delete histori master data), AB-07 (kalkulasi persentase kehadiran: Hadir, Izin, dan Sakit dihitung positif; Alpa sebagai pengurang), dan standar timezone Asia/Jakarta. Seluruh 100 pengujian otomatis lulus (PASS).
 2026-09-29 | 3 | Tahap Improvement (Refactor Arsitektur) selesai: Pemisahan tegas tanggung jawab Controller-Service-Policy-FormRequest, eliminasi duplikasi hari/tanggal, standarisasi mutlak Asia/Jakarta, dan pembersihan Fat Controllers. Seluruh 100 test lulus (PASS).
+2026-10-02 | 3,6,7 | Catatan 2026-09-21 yang menunda Fase 3, 6, 7 sudah tidak berlaku (dikerjakan kemudian, lihat catatan 2026-09-27).
+2026-10-02 | 2,3,4,5,7 | Perlu audit: test untuk AB-05, 06, 07, 09, 10 dan rate limiting login sisi server belum terverifikasi.
 
