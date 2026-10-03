@@ -225,18 +225,42 @@ class AbsensiService
     /**
      * Mendapatkan riwayat sesi untuk guru.
      */
-    public function getRiwayatSesi(int $userId)
+    public function getRiwayatSesi(int $userId, array $filters = [])
     {
         $guru = Guru::where('user_id', $userId)->first();
         if (! $guru) {
             return collect();
         }
 
-        return SesiAbsensi::with(['jadwal.kelas', 'jadwal.mapel', 'detailAbsensi'])
-            ->whereHas('jadwal', function ($query) use ($guru) {
-                $query->where('guru_id', $guru->id);
-            })
-            ->orderBy('tanggal', 'desc')
+        $query = SesiAbsensi::with(['jadwal.kelas', 'jadwal.mapel', 'detailAbsensi'])
+            ->whereHas('jadwal', function ($q) use ($guru, $filters) {
+                $q->where('guru_id', $guru->id);
+                if (!empty($filters['kelas_mapel'])) {
+                    $parts = explode('-', $filters['kelas_mapel']);
+                    if (count($parts) === 2) {
+                        $q->where('kelas_id', $parts[0])->where('mapel_id', $parts[1]);
+                    }
+                }
+                if (!empty($filters['hari']) && is_array($filters['hari'])) {
+                    $q->whereIn('hari', $filters['hari']);
+                }
+            });
+
+        if (!empty($filters['tanggal_awal'])) {
+            $query->where('tanggal', '>=', $filters['tanggal_awal']);
+        }
+        if (!empty($filters['tanggal_akhir'])) {
+            $query->where('tanggal', '<=', $filters['tanggal_akhir']);
+        }
+        if (!empty($filters['bulan'])) {
+            $parts = explode('-', $filters['bulan']);
+            if (count($parts) === 2) {
+                $query->whereYear('tanggal', $parts[0])
+                      ->whereMonth('tanggal', $parts[1]);
+            }
+        }
+
+        return $query->orderBy('tanggal', 'desc')
             ->orderBy(Jadwal::select('jam_mulai')
                 ->whereColumn('jadwal.id', 'sesi_absensi.jadwal_id')
                 ->limit(1), 'desc')

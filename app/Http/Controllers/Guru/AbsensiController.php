@@ -107,23 +107,85 @@ class AbsensiController extends Controller
     }
 
     /**
-     * Menampilkan riwayat absensi.
+     * Menampilkan riwayat absensi per kelas & mapel.
      */
     public function riwayat(Request $request)
     {
-        $riwayatSesi = $this->absensiService->getRiwayatSesi($request->user()->id);
+        $guru = Guru::where('user_id', $request->user()->id)->first();
+        if (! $guru) {
+            return view('guru.riwayat', ['kelompokRiwayat' => collect()]);
+        }
+
+        $tanggalAwal = $request->input('tanggal_awal');
+        $tanggalAkhir = $request->input('tanggal_akhir');
+
+        // Ambil semua jadwal milik guru, unik per kelas+mapel
+        $jadwalList = Jadwal::with(['kelas', 'mapel'])
+            ->where('guru_id', $guru->id)
+            ->get()
+            ->unique(fn($j) => $j->kelas_id . '-' . $j->mapel_id);
+
+        // Untuk setiap kelas+mapel, ambil sesi absensi beserta detail siswa
+        $kelompokRiwayat = $jadwalList->map(function ($jadwal) use ($guru, $tanggalAwal, $tanggalAkhir) {
+            $jadwalIds = Jadwal::where('guru_id', $guru->id)
+                ->where('kelas_id', $jadwal->kelas_id)
+                ->where('mapel_id', $jadwal->mapel_id)
+                ->pluck('id');
+
+            $sesiQuery = \App\Models\SesiAbsensi::with([
+                    'detailAbsensi.siswa.user',
+                ])
+                ->whereIn('jadwal_id', $jadwalIds)
+                ->orderBy('tanggal', 'asc');
+
+            if ($tanggalAwal) $sesiQuery->where('tanggal', '>=', $tanggalAwal);
+            if ($tanggalAkhir) $sesiQuery->where('tanggal', '<=', $tanggalAkhir);
+
+            $sesiList = $sesiQuery->get();
+
+            // Ambil daftar siswa di kelas ini
+            $siswaList = \App\Models\Siswa::with('user')
+                ->where('kelas_id', $jadwal->kelas_id)
+                ->whereNull('deleted_at')
+                ->get()
+                ->sortBy('user.name');
+
+            return [
+                'jadwal'    => $jadwal,
+                'sesiList'  => $sesiList,
+                'siswaList' => $siswaList,
+            ];
+        })->values();
 
         return view('guru.riwayat', [
-            'riwayatSesi' => $riwayatSesi,
+            'kelompokRiwayat' => $kelompokRiwayat,
+            'tanggalAwal'     => $tanggalAwal,
+            'tanggalAkhir'    => $tanggalAkhir,
         ]);
     }
 
     /**
      * Mengunduh rekap absensi untuk guru dalam format Excel.
      */
-    public function export(ExportLaporanRequest $request)
+    public function export(Request $request)
     {
-        return $this->laporanService->exportExcel($request->user(), $request->validated());
+        $guru = $request->user()->guru;
+        if (!$guru) {
+            abort(403);
+        }
+
+        $filters = $request->only([
+            'kelas_mapel', 'tanggal_awal', 'tanggal_akhir', 'bulan', 'mode',
+        ]);
+        // Jumlah pertemuan tetap 30, tidak perlu input dari user
+        $filters['jumlah_pertemuan'] = 30;
+        $filters['mode'] = $filters['mode'] ?? 'data';
+
+        $filename = 'Rekap_Absensi_' . str_replace(' ', '_', $guru->user->name) . '_' . date('Ymd') . '.xlsx';
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\LaporanAbsensiGuruExport($guru->id, $filters),
+            $filename
+        );
     }
 
     /**
