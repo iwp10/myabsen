@@ -574,6 +574,176 @@ test('status tidak valid dan siswa dari kelas lain ditolak', function () {
     $response2->assertSessionHasErrors(['siswa.'.$this->siswaLain->id]);
 });
 
+test('AB-03: guru melihat halaman jadwal & koreksi absensi dan hanya jadwal miliknya dalam 7 hari terakhir tanpa tanggal masa depan atau lewat batas', function () {
+    Carbon::setTestNow('2026-10-03 10:00:00'); // Sabtu
+
+    // Jadwal guru ini pada hari Sabtu (jatuh pada hari ini 2026-10-03)
+    $jadwalSabtu = Jadwal::create([
+        'kelas_id' => $this->kelas->id,
+        'mapel_id' => $this->mapel->id,
+        'guru_id' => $this->guru->id,
+        'hari' => 'sabtu',
+        'jam_mulai' => '08:00:00',
+        'jam_selesai' => '09:30:00',
+        'tahun_ajaran' => '2026/2027',
+    ]);
+
+    // Jadwal guru LAIN pada hari Senin
+    $jadwalGuruLain = Jadwal::create([
+        'kelas_id' => $this->kelas->id,
+        'mapel_id' => $this->mapel->id,
+        'guru_id' => $this->lainGuru->id,
+        'hari' => 'senin',
+        'jam_mulai' => '10:00:00',
+        'jam_selesai' => '11:30:00',
+        'tahun_ajaran' => '2026/2027',
+    ]);
+
+    $response = $this->actingAs($this->guruUser)->get(route('guru.koreksi-absensi'));
+
+    $response->assertStatus(200);
+    $response->assertViewHas('daftarHari', function ($daftarHari) use ($jadwalSabtu, $jadwalGuruLain) {
+        if (count($daftarHari) !== 7) {
+            return false;
+        }
+
+        // Tanggal teratas adalah hari ini (2026-10-03)
+        if ($daftarHari[0]['tanggal'] !== '2026-10-03' || ! $daftarHari[0]['is_hari_ini']) {
+            return false;
+        }
+
+        // Tanggal paling akhir adalah H-6 (2026-09-27)
+        if ($daftarHari[6]['tanggal'] !== '2026-09-27') {
+            return false;
+        }
+
+        // Tidak boleh ada tanggal di masa depan atau lebih lama dari H-6
+        foreach ($daftarHari as $item) {
+            if ($item['tanggal'] > '2026-10-03' || $item['tanggal'] < '2026-09-27') {
+                return false;
+            }
+        }
+
+        // Jadwal Sabtu ada di hari Sabtu
+        $hariSabtuItem = $daftarHari[0];
+        $jadwalIdsSabtu = $hariSabtuItem['jadwals']->pluck('id')->all();
+        if (! in_array($jadwalSabtu->id, $jadwalIdsSabtu)) {
+            return false;
+        }
+
+        // Jadwal Senin milik guru ada di hari Senin (2026-09-28, index 5)
+        $hariSeninItem = $daftarHari[5];
+        $jadwalIdsSenin = $hariSeninItem['jadwals']->pluck('id')->all();
+        if (! in_array($this->jadwal->id, $jadwalIdsSenin)) {
+            return false;
+        }
+
+        // Jadwal milik guru lain TIDAK boleh ada
+        if (in_array($jadwalGuruLain->id, $jadwalIdsSenin)) {
+            return false;
+        }
+
+        return true;
+    });
+
+    // Tanggal tanpa jadwal menampilkan "Tidak ada jadwal"
+    $response->assertSee('Tidak ada jadwal');
+});
+
+test('AB-03: badge status sesuai kondisi sesi (sudah diabsen / belum diabsen)', function () {
+    Carbon::setTestNow('2026-10-03 10:00:00'); // Sabtu (2026-10-03)
+
+    // Sesi sudah ada untuk jadwal Senin (2026-09-28)
+    SesiAbsensi::create([
+        'jadwal_id' => $this->jadwal->id,
+        'tanggal' => '2026-09-28',
+        'diabsen_oleh' => $this->guruUser->id,
+    ]);
+
+    // Jadwal guru di hari Sabtu (2026-10-03) belum ada sesi
+    $jadwalSabtu = Jadwal::create([
+        'kelas_id' => $this->kelas->id,
+        'mapel_id' => $this->mapel->id,
+        'guru_id' => $this->guru->id,
+        'hari' => 'sabtu',
+        'jam_mulai' => '08:00:00',
+        'jam_selesai' => '09:30:00',
+        'tahun_ajaran' => '2026/2027',
+    ]);
+
+    $response = $this->actingAs($this->guruUser)->get(route('guru.koreksi-absensi'));
+
+    $response->assertStatus(200);
+    $response->assertSee('Sudah diabsen');
+    $response->assertSee('Belum diabsen');
+    $response->assertSee('Hari ini');
+
+    $response->assertViewHas('daftarHari', function ($daftarHari) use ($jadwalSabtu) {
+        $hariSabtu = $daftarHari[0]; // 2026-10-03
+        $jSabtu = $hariSabtu['jadwals']->firstWhere('id', $jadwalSabtu->id);
+        if ($jSabtu->status_absensi !== 'Belum diabsen' || ! $jSabtu->is_hari_ini) {
+            return false;
+        }
+
+        $hariSenin = $daftarHari[5]; // 2026-09-28
+        $jSenin = $hariSenin['jadwals']->firstWhere('id', $this->jadwal->id);
+        if ($jSenin->status_absensi !== 'Sudah diabsen') {
+            return false;
+        }
+
+        return true;
+    });
+});
+
+test('AB-03: link tiap jadwal mengarah ke tanggal yang benar', function () {
+    Carbon::setTestNow('2026-10-03 10:00:00'); // Sabtu (2026-10-03)
+
+    // Jadwal Senin jatuh pada 2026-09-28
+    $expectedUrl = route('guru.absensi.show', [
+        'jadwal' => $this->jadwal->id,
+        'tanggal' => '2026-09-28',
+    ]);
+
+    $response = $this->actingAs($this->guruUser)->get(route('guru.koreksi-absensi'));
+
+    $response->assertStatus(200);
+    $response->assertSee($expectedUrl, false);
+});
+
+test('AB-03: admin dan siswa tidak bisa mengakses halaman jadwal & koreksi absensi guru (403)', function () {
+    // Admin mencoba akses
+    $responseAdmin = $this->actingAs($this->adminUser)->get(route('guru.koreksi-absensi'));
+    $responseAdmin->assertStatus(403);
+
+    // Siswa mencoba akses
+    $responseSiswa = $this->actingAs($this->siswa1User)->get(route('guru.koreksi-absensi'));
+    $responseSiswa->assertStatus(403);
+});
+
+test('AB-03: menu jadwal & koreksi absensi muncul di sidebar guru tepat setelah jadwal mengajar', function () {
+    $response = $this->actingAs($this->guruUser)->get(route('guru.dashboard'));
+
+    $response->assertStatus(200);
+    $response->assertSee('Jadwal Mengajar');
+    $response->assertSee('Jadwal & Koreksi Absensi', false);
+    $response->assertSee('Riwayat');
+
+    $html = $response->getContent();
+    $posDashboard = strpos($html, route('guru.dashboard'));
+    $posJadwal = strpos($html, route('guru.jadwal'));
+    $posKoreksi = strpos($html, route('guru.koreksi-absensi'));
+    $posRiwayat = strpos($html, route('guru.riwayat'));
+
+    expect($posDashboard)->not->toBeFalse();
+    expect($posJadwal)->not->toBeFalse();
+    expect($posKoreksi)->not->toBeFalse();
+    expect($posRiwayat)->not->toBeFalse();
+
+    expect($posDashboard)->toBeLessThan($posJadwal);
+    expect($posJadwal)->toBeLessThan($posKoreksi);
+    expect($posKoreksi)->toBeLessThan($posRiwayat);
+});
+
 afterEach(function () {
     Carbon::setTestNow(); // Reset time
 });

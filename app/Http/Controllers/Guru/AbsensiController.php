@@ -47,6 +47,20 @@ class AbsensiController extends Controller
     }
 
     /**
+     * Menampilkan halaman Jadwal & Koreksi Absensi untuk guru dalam 7 hari terakhir.
+     */
+    public function koreksiAbsensi(Request $request)
+    {
+        $guru = Guru::where('user_id', $request->user()->id)->first();
+        $daftarHari = $this->absensiService->getJadwalKoreksiTujuhHariGuru($request->user()->id);
+
+        return view('guru.koreksi_absensi', [
+            'guru' => $guru,
+            'daftarHari' => $daftarHari,
+        ]);
+    }
+
+    /**
      * Menampilkan halaman absensi untuk jadwal tertentu.
      */
     public function show(Jadwal $jadwal, ShowAbsensiRequest $request)
