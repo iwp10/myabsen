@@ -65,21 +65,24 @@
                         </div>
                     @else
                         <div>
-                            <x-input-label for="tanggal_guru" :value="__('Pilih Tanggal Sesi / Koreksi')" />
-                            <select id="tanggal_guru" onchange="window.location.href='{{ route('guru.absensi.show', $jadwal->id) }}?tanggal=' + this.value" class="mt-1 block border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm text-sm">
-                                @forelse($tanggalBolehDikoreksi as $tgl)
-                                    @php
-                                        $isHariIni = $tgl === \Carbon\Carbon::now('Asia/Jakarta')->toDateString();
-                                        $label = \Carbon\Carbon::parse($tgl, 'Asia/Jakarta')->isoFormat('dddd, D MMMM YYYY') . ($isHariIni ? ' (Hari Ini)' : ' (Koreksi)');
-                                    @endphp
-                                    <option value="{{ $tgl }}" {{ $tanggal->toDateString() === $tgl ? 'selected' : '' }}>
-                                        {{ $label }}
-                                    </option>
-                                @empty
-                                    <option value="{{ $tanggal->toDateString() }}">{{ $tanggal->isoFormat('dddd, D MMMM YYYY') }}</option>
-                                @endforelse
-                            </select>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Dibatasi maksimal 7 hari terakhir yang cocok dengan hari {{ ucfirst($jadwal->hari) }}.</p>
+                            <x-input-label :value="__('Tanggal Sesi Absensi')" />
+                            <div class="mt-1 flex flex-wrap items-center gap-2">
+                                <span class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-semibold rounded-md border border-gray-200 dark:border-gray-600">
+                                    {{ $tanggal->isoFormat('dddd, D MMMM YYYY') }}
+                                </span>
+                                <a href="{{ route('guru.koreksi-absensi') }}" class="inline-flex items-center text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 gap-1 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1.5 rounded-md border border-blue-200 dark:border-blue-800 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                        <path d="M11.5 21h-5.5a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v6" />
+                                        <path d="M16 3v4" />
+                                        <path d="M8 3v4" />
+                                        <path d="M4 11h16" />
+                                        <path d="M15 19l2 2l4 -4" />
+                                    </svg>
+                                    <span>Pilih Tanggal Lain di Jadwal & Koreksi Absensi &rarr;</span>
+                                </a>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Sesi absensi guru dibatasi 7 hari terakhir (hari ini s.d. H-6).</p>
                         </div>
                     @endif
 

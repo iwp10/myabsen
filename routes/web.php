@@ -53,6 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:guru')->prefix('guru')->name('guru.')->group(function () {
         Route::get('/dashboard', [AbsensiController::class, 'dashboard'])->name('dashboard');
         Route::get('/jadwal', [GuruJadwalController::class, 'index'])->name('jadwal');
+        Route::get('/koreksi-absensi', [AbsensiController::class, 'koreksiAbsensi'])->name('koreksi-absensi');
         Route::get('/riwayat', [AbsensiController::class, 'riwayat'])->name('riwayat');
         Route::get('/laporan/export', [AbsensiController::class, 'export'])->name('laporan.export');
         Route::get('/laporan/export-pdf', [AbsensiController::class, 'exportPdf'])->name('laporan.exportPdf');

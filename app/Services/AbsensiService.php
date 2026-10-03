@@ -449,6 +449,91 @@ class AbsensiService
     }
 
     /**
+     * Mendapatkan daftar jadwal guru dalam jendela 7 hari terakhir (hari ini sampai H-6)
+     * berurutan dari yang terbaru ke terlama, beserta status absensi masing-masing jadwal.
+     *
+     * @return array<int, array{
+     *     date: Carbon,
+     *     tanggal: string,
+     *     hari: ?string,
+     *     hari_label: string,
+     *     tanggal_label: string,
+     *     is_hari_ini: bool,
+     *     jadwals: Collection
+     * }>
+     */
+    public function getJadwalKoreksiTujuhHariGuru(int $userId): array
+    {
+        $guru = Guru::where('user_id', $userId)->first();
+        if (! $guru) {
+            return [];
+        }
+
+        $today = Carbon::now('Asia/Jakarta')->startOfDay();
+        $batasHari = (int) config('absensi.batas_koreksi_hari', 7);
+
+        // Ambil semua jadwal milik guru tersebut
+        $semuaJadwal = Jadwal::with(['kelas.jurusan', 'mapel'])
+            ->where('guru_id', $guru->id)
+            ->orderBy('jam_mulai')
+            ->get();
+
+        // Siapkan rentang 7 hari terakhir (hari ini mundur sampai H-6)
+        $daftarHari = [];
+        $daftarTanggalStr = [];
+        for ($i = 0; $i < $batasHari; $i++) {
+            $date = $today->copy()->subDays($i);
+            $tanggalStr = $date->toDateString();
+            $daftarTanggalStr[] = $tanggalStr;
+            $hariServer = self::getHariServer($date);
+
+            $daftarHari[] = [
+                'date' => $date,
+                'tanggal' => $tanggalStr,
+                'hari' => $hariServer,
+                'hari_label' => $hariServer ? ucfirst($hariServer) : $date->locale('id')->isoFormat('dddd'),
+                'tanggal_label' => $date->locale('id')->isoFormat('dddd, D MMMM YYYY'),
+                'is_hari_ini' => ($i === 0),
+            ];
+        }
+
+        // Ambil sesi absensi untuk semua jadwal guru pada 7 tanggal tersebut sekaligus (mencegah N+1)
+        $sesiList = SesiAbsensi::whereIn('jadwal_id', $semuaJadwal->pluck('id'))
+            ->whereIn('tanggal', $daftarTanggalStr)
+            ->get()
+            ->keyBy(fn ($item) => $item->jadwal_id.'_'.$item->tanggal);
+
+        // Pasangkan jadwal yang sesuai ke tiap tanggal
+        foreach ($daftarHari as &$hariItem) {
+            $hari = $hariItem['hari'];
+            $tgl = $hariItem['tanggal'];
+            $isHariIni = $hariItem['is_hari_ini'];
+
+            if (! $hari) {
+                $hariItem['jadwals'] = collect();
+
+                continue;
+            }
+
+            $jadwalHariIni = $semuaJadwal->where('hari', $hari)->map(function ($j) use ($sesiList, $tgl, $isHariIni) {
+                $item = clone $j;
+                $sesi = $sesiList[$item->id.'_'.$tgl] ?? null;
+                $item->sesi_absensi = $sesi;
+                $item->status_absensi = $sesi ? 'Sudah diabsen' : 'Belum diabsen';
+                $item->tanggal_target = $tgl;
+                $item->is_hari_ini = $isHariIni;
+
+                return $item;
+            })->values();
+
+            $hariItem['jadwals'] = $jadwalHariIni;
+        }
+        unset($hariItem);
+
+        return $daftarHari;
+    }
+
+    /**
      * Mendapatkan daftar jadwal untuk fitur Koreksi Absensi Admin pada tanggal dan kelas tertentu.
      */
     public function getJadwalKoreksiAdmin(string $tanggal, ?int $kelasId = null): Collection

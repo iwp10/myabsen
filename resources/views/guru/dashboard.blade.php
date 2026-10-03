@@ -81,7 +81,7 @@
                         <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
                             {{ $total_jadwal }}
                         </div>
-                        <a href="{{ route('guru.jadwal') }}" class="mt-1 inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 gap-1">
+                        <a href="{{ route('guru.koreksi-absensi') }}" class="mt-1 inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 gap-1">
                             Jadwal & Koreksi Absensi &rarr;
                         </a>
                     </div>
@@ -113,13 +113,14 @@
                         <span class="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2.5 py-1 rounded-md">
                             {{ $tanggal->isoFormat('dddd') }}
                         </span>
-                        <a href="{{ route('guru.jadwal') }}" class="inline-flex items-center px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs transition gap-1.5">
+                        <a href="{{ route('guru.koreksi-absensi') }}" class="inline-flex items-center px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs transition gap-1.5">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                                <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" />
+                                <path d="M11.5 21h-5.5a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v6" />
                                 <path d="M16 3v4" />
                                 <path d="M8 3v4" />
                                 <path d="M4 11h16" />
+                                <path d="M15 19l2 2l4 -4" />
                             </svg>
                             <span>Jadwal & Koreksi Absensi</span>
                         </a>
@@ -144,15 +145,14 @@
                                 Anda tidak memiliki jadwal mata pelajaran yang aktif untuk hari ini. Anda dapat memeriksa rekapan atau riwayat absensi sebelumnya.
                             </p>
                             <div class="mt-5 flex flex-wrap justify-center gap-3">
-                                <a href="{{ route('guru.jadwal') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold uppercase tracking-widest rounded-lg shadow-xs transition gap-2">
+                                <a href="{{ route('guru.koreksi-absensi') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold uppercase tracking-widest rounded-lg shadow-xs transition gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
                                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                                        <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
-                                        <path d="M18 18m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
-                                        <path d="M15 3v4" />
-                                        <path d="M7 3v4" />
-                                        <path d="M3 11h16" />
-                                        <path d="M18 16.496v1.504l1 1" />
+                                        <path d="M11.5 21h-5.5a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v6" />
+                                        <path d="M16 3v4" />
+                                        <path d="M8 3v4" />
+                                        <path d="M4 11h16" />
+                                        <path d="M15 19l2 2l4 -4" />
                                     </svg>
                                     Jadwal & Koreksi Absensi
                                 </a>
