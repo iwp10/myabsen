@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\GuruController;
 use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\Admin\JurusanController;
 use App\Http\Controllers\Admin\KelasController;
+use App\Http\Controllers\Admin\KoreksiAbsensiController;
 use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\MapelController;
 use App\Http\Controllers\Admin\SiswaController;
@@ -42,6 +43,7 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('jadwal', JadwalController::class)->except(['show']);
 
+        Route::get('koreksi-absensi', [KoreksiAbsensiController::class, 'index'])->name('koreksi-absensi.index');
         Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
         Route::get('laporan/export', [LaporanController::class, 'export'])->name('laporan.export');
         Route::get('laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');

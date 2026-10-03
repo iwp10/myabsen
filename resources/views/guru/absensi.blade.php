@@ -10,9 +10,25 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6 text-gray-900 dark:text-gray-100 flex justify-between items-center flex-wrap gap-4">
                     <div>
-                        <h3 class="font-bold text-lg">{{ $jadwal->mapel->nama }}</h3>
-                        <p class="text-gray-600 dark:text-gray-400">
-                            {{ $tanggal->isoFormat('dddd, D MMMM YYYY') }} &bull; {{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }}
+                        <div class="flex items-center gap-2 flex-wrap mb-1">
+                            <h3 class="font-bold text-xl">{{ $jadwal->mapel->nama }}</h3>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
+                                Kelas {{ $jadwal->kelas->nama }}
+                            </span>
+                            @if($sesi)
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                                    Mode Koreksi
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                                    Pengisian Susulan / Baru
+                                </span>
+                            @endif
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-400 font-medium flex items-center gap-2 flex-wrap">
+                            <span>Tanggal Sesi: <strong class="text-gray-900 dark:text-gray-100">{{ $tanggal->isoFormat('dddd, D MMMM YYYY') }}</strong></span>
+                            <span>&bull;</span>
+                            <span>{{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }} WIB</span>
                         </p>
                     </div>
                     
@@ -38,6 +54,58 @@
                 </div>
             </div>
 
+            <!-- Pemilih Tanggal Sesi / Batas Koreksi -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    @if(Auth::user()->role === 'admin')
+                        <div>
+                            <x-input-label for="tanggal_admin" :value="__('Tanggal Sesi (Koreksi Admin)')" />
+                            <input type="date" id="tanggal_admin" value="{{ $tanggal->toDateString() }}" max="{{ \Carbon\Carbon::now('Asia/Jakarta')->toDateString() }}" onchange="window.location.href='{{ route('guru.absensi.show', $jadwal->id) }}?tanggal=' + this.value" class="mt-1 block border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm text-sm">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Admin bebas memilih tanggal historis (tidak boleh masa depan).</p>
+                        </div>
+                    @else
+                        <div>
+                            <x-input-label for="tanggal_guru" :value="__('Pilih Tanggal Sesi / Koreksi')" />
+                            <select id="tanggal_guru" onchange="window.location.href='{{ route('guru.absensi.show', $jadwal->id) }}?tanggal=' + this.value" class="mt-1 block border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm text-sm">
+                                @forelse($tanggalBolehDikoreksi as $tgl)
+                                    @php
+                                        $isHariIni = $tgl === \Carbon\Carbon::now('Asia/Jakarta')->toDateString();
+                                        $label = \Carbon\Carbon::parse($tgl, 'Asia/Jakarta')->isoFormat('dddd, D MMMM YYYY') . ($isHariIni ? ' (Hari Ini)' : ' (Koreksi)');
+                                    @endphp
+                                    <option value="{{ $tgl }}" {{ $tanggal->toDateString() === $tgl ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @empty
+                                    <option value="{{ $tanggal->toDateString() }}">{{ $tanggal->isoFormat('dddd, D MMMM YYYY') }}</option>
+                                @endforelse
+                            </select>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Dibatasi maksimal 7 hari terakhir yang cocok dengan hari {{ ucfirst($jadwal->hari) }}.</p>
+                        </div>
+                    @endif
+
+                    @if($sesi)
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            <div class="flex items-center gap-1.5 text-green-600 dark:text-green-400 font-semibold">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                Sesi sudah pernah disimpan
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                @if($sesi->diubah_oleh)
+                                    Terakhir dikoreksi oleh user #{{ $sesi->diubah_oleh }} pada {{ $sesi->updated_at?->format('H:i') }}
+                                @else
+                                    Diabsen pertama kali oleh user #{{ $sesi->diabsen_oleh }} pada {{ $sesi->created_at?->format('H:i') }}
+                                @endif
+                            </div>
+                        </div>
+                    @else
+                        <div class="text-sm text-amber-600 dark:text-amber-400 flex items-center gap-1.5 font-medium">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Belum ada data absensi untuk tanggal ini
+                        </div>
+                    @endif
+                </div>
+            </div>
+
             @if ($errors->any())
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
                     <ul class="list-disc list-inside">
@@ -50,6 +118,7 @@
 
             <form method="POST" action="{{ route('guru.absensi.store', $jadwal->id) }}">
                 @csrf
+                <input type="hidden" name="tanggal" value="{{ $tanggal->toDateString() }}">
                 
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                     <div class="p-6">
@@ -125,7 +194,7 @@
                         Batal
                     </a>
                     <button type="submit" class="inline-flex justify-center items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                        Simpan Absensi
+                        {{ $sesi ? 'Simpan Koreksi' : 'Simpan Absensi' }}
                     </button>
                 </div>
             </form>
