@@ -2,27 +2,24 @@
 
 namespace App\Http\Controllers\Guru;
 
-use App\Exports\LaporanAbsensiExport;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ExportLaporanRequest;
 use App\Http\Requests\Guru\ShowAbsensiRequest;
 use App\Http\Requests\Guru\StoreAbsensiRequest;
 use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Services\AbsensiService;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\LaporanService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Maatwebsite\Excel\Facades\Excel;
 
 class AbsensiController extends Controller
 {
-    protected AbsensiService $absensiService;
-
-    public function __construct(AbsensiService $absensiService)
-    {
-        $this->absensiService = $absensiService;
-    }
+    public function __construct(
+        protected AbsensiService $absensiService,
+        protected LaporanService $laporanService
+    ) {}
 
     /**
      * Menampilkan dashboard (jadwal hari ini).
@@ -122,63 +119,18 @@ class AbsensiController extends Controller
     }
 
     /**
-     * Mengunduh rekap absensi untuk guru.
+     * Mengunduh rekap absensi untuk guru dalam format Excel.
      */
-    public function export(Request $request)
+    public function export(ExportLaporanRequest $request)
     {
-        $guru = Guru::where('user_id', $request->user()->id)->first();
-
-        $filters = [
-            'guru_id' => $guru ? $guru->id : null,
-            'bulan' => $request->query('bulan'),
-        ];
-
-        $filename = 'rekap_absensi_guru';
-        if (! empty($filters['bulan'])) {
-            $filename .= '_'.$filters['bulan'];
-        } else {
-            $filename .= '_'.date('Y-m');
-        }
-        $filename .= '.xlsx';
-
-        return Excel::download(new LaporanAbsensiExport($filters), $filename);
+        return $this->laporanService->exportExcel($request->user(), $request->validated());
     }
 
     /**
      * Mengunduh rekap absensi untuk guru dalam format PDF.
      */
-    public function exportPdf(Request $request)
+    public function exportPdf(ExportLaporanRequest $request)
     {
-        $guru = Guru::where('user_id', $request->user()->id)->first();
-
-        $filters = [
-            'guru_id' => $guru ? $guru->id : null,
-            'bulan' => $request->query('bulan'),
-        ];
-
-        $absensiService = app(AbsensiService::class);
-        $data = $absensiService->getRekapLaporan($filters);
-
-        $filename = 'rekap_absensi_guru';
-        if (! empty($filters['bulan'])) {
-            $filename .= '_'.$filters['bulan'];
-        } else {
-            $filename .= '_'.date('Y-m');
-        }
-        $filename .= '.pdf';
-
-        $periode = ! empty($filters['bulan'])
-            ? Carbon::createFromFormat('Y-m', $filters['bulan'])->translatedFormat('F Y')
-            : 'Semua Periode';
-
-        $viewName = view()->exists('admin.laporan.pdf') ? 'admin.laporan.pdf' : 'laporan.pdf';
-
-        $pdf = Pdf::loadView($viewName, [
-            'data' => $data,
-            'filters' => $filters,
-            'periode' => $periode,
-        ])->setPaper('a4', 'landscape');
-
-        return $pdf->download($filename);
+        return $this->laporanService->exportPdf($request->user(), $request->validated());
     }
 }
