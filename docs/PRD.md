@@ -13,7 +13,7 @@ Pembeda utama: absensi per mata pelajaran (bukan per hari), sehingga siswa yang 
 |---|---|---|---|
 | Kelola master data (jurusan, kelas, mapel, guru, siswa) | Ya | Tidak | Tidak |
 | Kelola jadwal | Ya | Tidak | Tidak |
-| Mengabsen | Ya (koreksi historis kapan saja pada tanggal lampau) | Ya (jadwal sendiri, hari yang sama) | Tidak |
+| Mengabsen | Ya (koreksi historis kapan saja pada tanggal lampau, bukan masa depan) | Ya (jadwal sendiri, tanggal dalam 7 hari terakhir yang cocok dengan hari jadwal; termasuk susulan) | Tidak |
 | Melihat rekap | Semua kelas | Kelas yang ia ajar | Milik sendiri |
 | Ekspor Excel/PDF | Ya | Ya | Tidak |
 
@@ -30,12 +30,13 @@ Pembeda utama: absensi per mata pelajaran (bukan per hari), sehingga siswa yang 
 - Impor siswa dari Excel, dengan laporan baris yang gagal.
 - CRUD jadwal (kelas + mapel + guru + hari + jam) dengan pencegahan bentrok.
 - Melihat semua rekap dan melakukan koreksi historis absensi (mengubah data absensi pada tanggal di masa lampau kapan saja).
+- Menu Koreksi Absensi: memilih tanggal (tidak boleh masa depan) dan kelas untuk melihat jadwal beserta status sesi (sudah/belum diabsen), lalu membuka form absensi untuk koreksi/susulan.
 
 ### Guru
-- Dashboard: ringkasan statistik (kelas, mapel, jadwal) dan daftar jadwal mengajar hari ini.
-- Halaman jadwal mingguan: melihat seluruh jadwal mengajar dalam seminggu.
-- Halaman absensi: semua siswa kelas tampil dengan status default **Hadir**. Guru mengubah yang berbeda menjadi Izin, Sakit, atau Alpa, keterangan opsional, lalu menyimpan.
-- Membuka kembali sesi yang sudah ada untuk diedit (hanya di hari yang sama).
+- Dashboard: ringkasan statistik (kelas, mapel, jadwal), daftar jadwal mengajar hari ini, dan tombol "Jadwal & Koreksi Absensi" yang selalu terlihat.
+- Halaman jadwal mingguan interaktif: kartu jadwal mingguan menampilkan tanggal dalam jendela 7 hari terakhir yang cocok dengan hari jadwal, badge status ("Hari ini", "Sudah diabsen", atau "Belum diabsen"), dan bisa diklik untuk membuka absensi (koreksi/susulan).
+- Halaman absensi: semua siswa kelas tampil dengan status default **Hadir**. Guru mengubah yang berbeda menjadi Izin, Sakit, atau Alpa, keterangan opsional, lalu menyimpan. Menampilkan dengan jelas tanggal sesi yang sedang dibuka.
+- Membuka kembali sesi yang sudah ada untuk diedit atau diisi susulan (dalam batas koreksi 7 hari terakhir yang cocok dengan hari jadwal).
 - Riwayat sesi dan rekap per kelas, mapel, dan periode, dengan ekspor Excel dan PDF.
 
 ### Siswa (read-only)
@@ -48,7 +49,7 @@ Setiap aturan di bawah harus punya test.
 
 - **AB-01** Satu sesi unik per (jadwal, tanggal). Jika sesinya sudah ada, sistem membuka sesi itu untuk diedit, tidak membuat duplikat.
 - **AB-02** "Belum diabsen" berarti belum ada baris `detail_absensi`. Tidak pernah disimpan sebagai alpa.
-- **AB-03** Guru hanya bisa mengabsen jadwalnya sendiri, dan hanya pada tanggal hari ini yang cocok dengan hari jadwal. Guru hanya bisa mengedit sesi yang tanggalnya hari ini. Role Admin secara eksplisit diizinkan melakukan koreksi historis (mengubah data absensi pada tanggal di masa lampau kapan saja). MVP tidak membatasi jam, hanya hari.
+- **AB-03** Guru hanya mengabsen jadwal miliknya, pada tanggal yang jatuh di hari jadwal tersebut dan dalam 7 hari terakhir (hari ini dan 6 hari sebelumnya, Asia/Jakarta); jadwal yang belum diabsen boleh diisi susulan dalam batas itu; admin boleh koreksi tanggal apa pun; tanggal masa depan ditolak untuk semua role. MVP tidak membatasi jam, hanya hari.
 - **AB-04** Saat sesi disimpan, semua siswa kelas mendapat satu baris `detail_absensi` (default hadir kecuali diubah), dalam satu transaksi database.
 - **AB-05** Mekanisme Master Data & Integritas Histori: Seluruh penghapusan master data (Siswa, Guru, Kelas, Mapel, Jadwal) yang sudah memiliki riwayat absensi tidak dihapus permanen melainkan menggunakan mekanisme `SoftDeletes` (atau diproteksi dari hard-delete) untuk menjamin histori absensi masa lalu tetap utuh dan valid.
 - **AB-06** Satu guru tidak boleh punya dua jadwal yang jamnya beririsan di hari yang sama. Berlaku juga untuk satu kelas.
@@ -112,3 +113,4 @@ Tidak dikerjakan sebelum MVP stabil dan diuji di sekolah:
 | 2026-09-21 | Stack: Laravel 12, Blade + Tailwind + Alpine, MySQL 8 |
 | 2026-09-21 | Login memakai username (NIS/NIP), bukan email |
 | 2026-10-02 | Perubahan AB-07 (status Hadir, Izin, dan Sakit dihitung hadir, Alpa tidak dihitung; pembagi = jumlah sesi yang sudah diabsen untuk siswa), login resmi fleksibel memakai username ATAU NIP (guru) ATAU NIS (siswa), serta penambahan fitur MVP (halaman jadwal mingguan guru, dashboard admin statistik + pintasan, dashboard guru statistik + jadwal hari ini, layout sidebar, font Inter, ikon Tabler) |
+| 2026-10-03 | Perubahan AB-03: Guru diizinkan mengabsen, mengisi susulan, dan mengoreksi absensi jadwal miliknya pada tanggal dalam 7 hari terakhir (hari ini dan 6 hari sebelumnya, Asia/Jakarta) yang harinya cocok dengan jadwal; admin boleh koreksi tanggal lampau apa pun; tanggal masa depan ditolak untuk semua role; penambahan halaman jadwal mingguan guru interaktif dan menu Koreksi Absensi admin |

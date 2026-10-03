@@ -134,14 +134,48 @@ test('AB-02: sebelum disimpan tidak ada baris detail, dan dashboard menampilkan 
     $this->assertDatabaseEmpty('detail_absensi');
 });
 
-test('AB-03: guru lain dan jadwal hari lain mendapat 403, admin diizinkan', function () {
+test('AB-03: guru bisa mengabsen/koreksi jadwalnya sendiri hari ini', function () {
     Carbon::setTestNow('2026-09-21 08:00:00'); // Senin
 
-    // Guru lain akses 403
-    $response = $this->actingAs($this->lainUser)->get(route('guru.absensi.show', $this->jadwal->id));
-    $response->assertStatus(403);
+    // Show form di tanggal hari ini
+    $response = $this->actingAs($this->guruUser)->get(route('guru.absensi.show', [
+        'jadwal' => $this->jadwal->id,
+        'tanggal' => '2026-09-21',
+    ]));
+    $response->assertStatus(200);
 
-    // Hari selasa (hari tidak sama dengan server (senin))
+    // Simpan absensi pertama
+    $responseStore = $this->actingAs($this->guruUser)->post(route('guru.absensi.store', $this->jadwal->id), [
+        'tanggal' => '2026-09-21',
+        'siswa' => [
+            $this->siswa1->id => ['status' => 'hadir'],
+        ],
+    ]);
+    $responseStore->assertRedirect(route('guru.dashboard'));
+
+    $this->assertDatabaseHas('sesi_absensi', [
+        'jadwal_id' => $this->jadwal->id,
+        'tanggal' => '2026-09-21',
+        'diabsen_oleh' => $this->guruUser->id,
+        'diubah_oleh' => null,
+    ]);
+
+    // Koreksi absensi di hari yang sama
+    $responseKoreksi = $this->actingAs($this->guruUser)->post(route('guru.absensi.store', $this->jadwal->id), [
+        'tanggal' => '2026-09-21',
+        'siswa' => [
+            $this->siswa1->id => ['status' => 'sakit', 'keterangan' => 'Demam'],
+        ],
+    ]);
+    $responseKoreksi->assertRedirect(route('guru.dashboard'));
+
+    $sesi = SesiAbsensi::where('jadwal_id', $this->jadwal->id)->where('tanggal', '2026-09-21')->first();
+    $this->assertEquals($this->guruUser->id, $sesi->diubah_oleh);
+});
+
+test('AB-03: guru bisa koreksi tanggal 6 hari lalu yang hari-nya cocok', function () {
+    Carbon::setTestNow('2026-09-21 08:00:00'); // Senin (21 Sept 2026)
+    // 6 hari lalu adalah Selasa, 15 Sept 2026
     $jadwalSelasa = Jadwal::create([
         'kelas_id' => $this->kelas->id,
         'mapel_id' => $this->mapel->id,
@@ -152,15 +186,293 @@ test('AB-03: guru lain dan jadwal hari lain mendapat 403, admin diizinkan', func
         'tahun_ajaran' => '2026/2027',
     ]);
 
-    $response2 = $this->actingAs($this->guruUser)->get(route('guru.absensi.show', $jadwalSelasa->id));
-    $response2->assertStatus(403);
+    // Buka form absensi pada 6 hari lalu
+    $response = $this->actingAs($this->guruUser)->get(route('guru.absensi.show', [
+        'jadwal' => $jadwalSelasa->id,
+        'tanggal' => '2026-09-15',
+    ]));
+    $response->assertStatus(200);
 
-    // Admin diizinkan pada jadwal hari ini maupun jadwal hari lain (koreksi historis)
-    $response3 = $this->actingAs($this->adminUser)->get(route('guru.absensi.show', $this->jadwal->id));
-    $response3->assertStatus(200);
+    // Simpan absensi koreksi 6 hari lalu
+    $responseStore = $this->actingAs($this->guruUser)->post(route('guru.absensi.store', $jadwalSelasa->id), [
+        'tanggal' => '2026-09-15',
+        'siswa' => [
+            $this->siswa1->id => ['status' => 'hadir'],
+        ],
+    ]);
+    $responseStore->assertRedirect(route('guru.dashboard'));
 
-    $response4 = $this->actingAs($this->adminUser)->get(route('guru.absensi.show', $jadwalSelasa->id));
-    $response4->assertStatus(200);
+    $this->assertDatabaseHas('sesi_absensi', [
+        'jadwal_id' => $jadwalSelasa->id,
+        'tanggal' => '2026-09-15',
+        'diabsen_oleh' => $this->guruUser->id,
+    ]);
+});
+
+test('AB-03: guru ditolak untuk 8 hari lalu atau lebih lama, tanggal masa depan, hari tidak cocok, dan jadwal guru lain', function () {
+    Carbon::setTestNow('2026-09-21 08:00:00'); // Senin (21 Sept 2026)
+
+    // 1. 8 hari lalu atau lebih lama (14 hari lalu: 2026-09-07, Senin)
+    $res8HariShow = $this->actingAs($this->guruUser)->get(route('guru.absensi.show', [
+        'jadwal' => $this->jadwal->id,
+        'tanggal' => '2026-09-07',
+    ]));
+    $res8HariShow->assertStatus(403);
+
+    $res8HariStore = $this->actingAs($this->guruUser)->post(route('guru.absensi.store', $this->jadwal->id), [
+        'tanggal' => '2026-09-07',
+        'siswa' => [$this->siswa1->id => ['status' => 'hadir']],
+    ]);
+    $res8HariStore->assertStatus(403);
+
+    // 2. Tanggal masa depan (2026-09-28)
+    $resFutureShow = $this->actingAs($this->guruUser)->get(route('guru.absensi.show', [
+        'jadwal' => $this->jadwal->id,
+        'tanggal' => '2026-09-28',
+    ]));
+    $resFutureShow->assertStatus(403);
+
+    $resFutureStore = $this->actingAs($this->guruUser)->post(route('guru.absensi.store', $this->jadwal->id), [
+        'tanggal' => '2026-09-28',
+        'siswa' => [$this->siswa1->id => ['status' => 'hadir']],
+    ]);
+    $resFutureStore->assertStatus(403);
+
+    // 3. Hari pada tanggal tidak cocok dengan hari jadwal (Jumat 2026-09-18 vs Senin)
+    $resBedaHariShow = $this->actingAs($this->guruUser)->get(route('guru.absensi.show', [
+        'jadwal' => $this->jadwal->id,
+        'tanggal' => '2026-09-18',
+    ]));
+    $resBedaHariShow->assertStatus(403);
+
+    $resBedaHariStore = $this->actingAs($this->guruUser)->post(route('guru.absensi.store', $this->jadwal->id), [
+        'tanggal' => '2026-09-18',
+        'siswa' => [$this->siswa1->id => ['status' => 'hadir']],
+    ]);
+    $resBedaHariStore->assertStatus(403);
+
+    // 4. Jadwal milik guru lain
+    $jadwalLain = Jadwal::create([
+        'kelas_id' => $this->kelas->id,
+        'mapel_id' => $this->mapel->id,
+        'guru_id' => $this->lainGuru->id,
+        'hari' => 'senin',
+        'jam_mulai' => '07:00:00',
+        'jam_selesai' => '08:30:00',
+        'tahun_ajaran' => '2026/2027',
+    ]);
+
+    $resJadwalLainShow = $this->actingAs($this->guruUser)->get(route('guru.absensi.show', [
+        'jadwal' => $jadwalLain->id,
+        'tanggal' => '2026-09-21',
+    ]));
+    $resJadwalLainShow->assertStatus(403);
+
+    $resJadwalLainStore = $this->actingAs($this->guruUser)->post(route('guru.absensi.store', $jadwalLain->id), [
+        'tanggal' => '2026-09-21',
+        'siswa' => [$this->siswa1->id => ['status' => 'hadir']],
+    ]);
+    $resJadwalLainStore->assertStatus(403);
+});
+
+test('AB-03: guru bisa mengisi susulan jadwal yang belum diabsen dalam batas', function () {
+    Carbon::setTestNow('2026-09-21 08:00:00'); // Senin (21 Sept 2026)
+    // Jadwal Selasa belum pernah diabsen sama sekali
+    $jadwalSelasa = Jadwal::create([
+        'kelas_id' => $this->kelas->id,
+        'mapel_id' => $this->mapel->id,
+        'guru_id' => $this->guru->id,
+        'hari' => 'selasa',
+        'jam_mulai' => '07:00:00',
+        'jam_selesai' => '08:30:00',
+        'tahun_ajaran' => '2026/2027',
+    ]);
+
+    // Buka form susulan 6 hari lalu (Selasa, 15 Sept 2026)
+    $response = $this->actingAs($this->guruUser)->get(route('guru.absensi.show', [
+        'jadwal' => $jadwalSelasa->id,
+        'tanggal' => '2026-09-15',
+    ]));
+    $response->assertStatus(200);
+    $response->assertSee('Belum ada data absensi untuk tanggal ini');
+
+    // Simpan absensi susulan
+    $responseStore = $this->actingAs($this->guruUser)->post(route('guru.absensi.store', $jadwalSelasa->id), [
+        'tanggal' => '2026-09-15',
+        'catatan' => 'Absensi susulan oleh guru',
+        'siswa' => [
+            $this->siswa1->id => ['status' => 'hadir'],
+            $this->siswa2->id => ['status' => 'izin', 'keterangan' => 'Lomba'],
+        ],
+    ]);
+    $responseStore->assertRedirect(route('guru.dashboard'));
+
+    $this->assertDatabaseHas('sesi_absensi', [
+        'jadwal_id' => $jadwalSelasa->id,
+        'tanggal' => '2026-09-15',
+        'diabsen_oleh' => $this->guruUser->id,
+        'catatan' => 'Absensi susulan oleh guru',
+    ]);
+
+    $this->assertDatabaseHas('detail_absensi', [
+        'siswa_id' => $this->siswa2->id,
+        'status' => 'izin',
+        'keterangan' => 'Lomba',
+    ]);
+});
+
+test('AB-03: admin bisa koreksi tanggal 30 hari lalu, tetapi tidak masa depan', function () {
+    Carbon::setTestNow('2026-09-21 08:00:00'); // Senin (21 Sept 2026)
+    // 30 hari lalu: 2026-08-22
+    $responseShow = $this->actingAs($this->adminUser)->get(route('guru.absensi.show', [
+        'jadwal' => $this->jadwal->id,
+        'tanggal' => '2026-08-22',
+    ]));
+    $responseShow->assertStatus(200);
+
+    $responseStore = $this->actingAs($this->adminUser)->post(route('guru.absensi.store', $this->jadwal->id), [
+        'tanggal' => '2026-08-22',
+        'siswa' => [
+            $this->siswa1->id => ['status' => 'hadir'],
+        ],
+    ]);
+    $responseStore->assertRedirect(route('guru.dashboard'));
+
+    $this->assertDatabaseHas('sesi_absensi', [
+        'jadwal_id' => $this->jadwal->id,
+        'tanggal' => '2026-08-22',
+        'diabsen_oleh' => $this->adminUser->id,
+    ]);
+
+    // Admin ditolak untuk tanggal masa depan (misal: 2026-09-28)
+    $responseFutureShow = $this->actingAs($this->adminUser)->get(route('guru.absensi.show', [
+        'jadwal' => $this->jadwal->id,
+        'tanggal' => '2026-09-28',
+    ]));
+    $responseFutureShow->assertStatus(403);
+
+    $responseFutureStore = $this->actingAs($this->adminUser)->post(route('guru.absensi.store', $this->jadwal->id), [
+        'tanggal' => '2026-09-28',
+        'siswa' => [
+            $this->siswa1->id => ['status' => 'hadir'],
+        ],
+    ]);
+    $responseFutureStore->assertStatus(403);
+});
+
+test('AB-03: koreksi tidak membuat sesi ganda dan mengisi diubah_oleh', function () {
+    Carbon::setTestNow('2026-09-21 08:00:00'); // Senin
+
+    // Jadwal Selasa dan sesi dibuat 6 hari lalu (2026-09-15) oleh admin
+    $jadwalSelasa = Jadwal::create([
+        'kelas_id' => $this->kelas->id,
+        'mapel_id' => $this->mapel->id,
+        'guru_id' => $this->guru->id,
+        'hari' => 'selasa',
+        'jam_mulai' => '07:00:00',
+        'jam_selesai' => '08:30:00',
+        'tahun_ajaran' => '2026/2027',
+    ]);
+
+    $sesiLama = SesiAbsensi::create([
+        'jadwal_id' => $jadwalSelasa->id,
+        'tanggal' => '2026-09-15',
+        'diabsen_oleh' => $this->adminUser->id,
+        'catatan' => 'Sesi awal',
+    ]);
+
+    // Guru mengoreksi sesi 6 hari lalu tersebut
+    $response = $this->actingAs($this->guruUser)->post(route('guru.absensi.store', $jadwalSelasa->id), [
+        'tanggal' => '2026-09-15',
+        'catatan' => 'Sesi dikoreksi guru',
+        'siswa' => [
+            $this->siswa1->id => ['status' => 'izin', 'keterangan' => 'Sakit mendadak'],
+        ],
+    ]);
+    $response->assertRedirect(route('guru.dashboard'));
+
+    // Sesi tidak ganda (tetap 1 baris)
+    $this->assertDatabaseCount('sesi_absensi', 1);
+
+    $sesiLama->refresh();
+    $this->assertEquals($this->adminUser->id, $sesiLama->diabsen_oleh);
+    $this->assertEquals($this->guruUser->id, $sesiLama->diubah_oleh);
+    $this->assertEquals('Sesi dikoreksi guru', $sesiLama->catatan);
+
+    $this->assertDatabaseHas('detail_absensi', [
+        'sesi_absensi_id' => $sesiLama->id,
+        'siswa_id' => $this->siswa1->id,
+        'status' => 'izin',
+        'keterangan' => 'Sakit mendadak',
+    ]);
+});
+
+test('AB-03: halaman jadwal guru memuat link ke tanggal yang benar dan badge status yang sesuai', function () {
+    Carbon::setTestNow('2026-09-21 08:00:00'); // Senin (21 Sept 2026)
+
+    // $this->jadwal adalah hari Senin (target tanggal: hari ini 2026-09-21), belum diabsen
+    // Jadwal Selasa (target tanggal: 6 hari lalu 2026-09-15), belum diabsen
+    $jadwalSelasa = Jadwal::create([
+        'kelas_id' => $this->kelas->id,
+        'mapel_id' => $this->mapel->id,
+        'guru_id' => $this->guru->id,
+        'hari' => 'selasa',
+        'jam_mulai' => '09:00:00',
+        'jam_selesai' => '10:30:00',
+        'tahun_ajaran' => '2026/2027',
+    ]);
+
+    // Jadwal Rabu (target tanggal: 5 hari lalu 2026-09-16), SUDAH diabsen
+    $mapelRabu = Mapel::create(['nama' => 'Matematika Terapan', 'kode' => 'MTK']);
+    $jadwalRabu = Jadwal::create([
+        'kelas_id' => $this->kelas->id,
+        'mapel_id' => $mapelRabu->id,
+        'guru_id' => $this->guru->id,
+        'hari' => 'rabu',
+        'jam_mulai' => '07:00:00',
+        'jam_selesai' => '08:30:00',
+        'tahun_ajaran' => '2026/2027',
+    ]);
+
+    SesiAbsensi::create([
+        'jadwal_id' => $jadwalRabu->id,
+        'tanggal' => '2026-09-16',
+        'diabsen_oleh' => $this->guruUser->id,
+    ]);
+
+    $response = $this->actingAs($this->guruUser)->get(route('guru.jadwal'));
+    $response->assertStatus(200);
+
+    // Jadwal Senin: link ke tanggal 2026-09-21 dan badge Hari ini
+    $response->assertSee(route('guru.absensi.show', ['jadwal' => $this->jadwal->id, 'tanggal' => '2026-09-21']));
+    $response->assertSee('Hari ini');
+
+    // Jadwal Selasa: link ke tanggal 2026-09-15 dan badge Belum diabsen
+    $response->assertSee(route('guru.absensi.show', ['jadwal' => $jadwalSelasa->id, 'tanggal' => '2026-09-15']));
+    $response->assertSee('Belum diabsen');
+
+    // Jadwal Rabu: link ke tanggal 2026-09-16 dan badge Sudah diabsen
+    $response->assertSee(route('guru.absensi.show', ['jadwal' => $jadwalRabu->id, 'tanggal' => '2026-09-16']));
+    $response->assertSee('Sudah diabsen');
+});
+
+test('AB-03: menu Koreksi Absensi hanya bisa diakses admin (guru dan siswa 403)', function () {
+    // 1. Guest diarahkan ke login
+    $responseGuest = $this->get(route('admin.koreksi-absensi.index'));
+    $responseGuest->assertRedirect(route('login'));
+
+    // 2. Guru ditolak (403)
+    $responseGuru = $this->actingAs($this->guruUser)->get(route('admin.koreksi-absensi.index'));
+    $responseGuru->assertStatus(403);
+
+    // 3. Siswa ditolak (403)
+    $responseSiswa = $this->actingAs($this->siswa1User)->get(route('admin.koreksi-absensi.index'));
+    $responseSiswa->assertStatus(403);
+
+    // 4. Admin berhasil (200)
+    $responseAdmin = $this->actingAs($this->adminUser)->get(route('admin.koreksi-absensi.index'));
+    $responseAdmin->assertStatus(200);
+    $responseAdmin->assertSee('Koreksi Absensi');
 });
 
 test('AB-04 dan AB-09: semua siswa kelas mendapat baris detail, dan field log terisi', function () {

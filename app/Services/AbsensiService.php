@@ -8,6 +8,7 @@ use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\SesiAbsensi;
 use App\Models\Siswa;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -273,6 +274,214 @@ class AbsensiService
         ];
 
         return $hari[$dayOfWeek] ?? null;
+    }
+
+    /**
+     * Memeriksa apakah tanggal berada di masa depan (Asia/Jakarta).
+     */
+    public function isTanggalMasaDepan(Carbon|string $tanggal): bool
+    {
+        $date = $tanggal instanceof Carbon
+            ? $tanggal->copy()->setTimezone('Asia/Jakarta')->startOfDay()
+            : Carbon::parse($tanggal, 'Asia/Jakarta')->startOfDay();
+
+        $today = Carbon::now('Asia/Jakarta')->startOfDay();
+
+        return $date->greaterThan($today);
+    }
+
+    /**
+     * Memeriksa apakah tanggal berada dalam batas koreksi (default 7 hari terakhir: hari ini dan 6 hari sebelumnya).
+     */
+    public function isTanggalDalamBatasKoreksi(Carbon|string $tanggal): bool
+    {
+        $date = $tanggal instanceof Carbon
+            ? $tanggal->copy()->setTimezone('Asia/Jakarta')->startOfDay()
+            : Carbon::parse($tanggal, 'Asia/Jakarta')->startOfDay();
+
+        $today = Carbon::now('Asia/Jakarta')->startOfDay();
+
+        if ($date->greaterThan($today)) {
+            return false;
+        }
+
+        $batasHari = (int) config('absensi.batas_koreksi_hari', 7);
+        $batasTanggal = $today->copy()->subDays($batasHari - 1);
+
+        return $date->greaterThanOrEqualTo($batasTanggal);
+    }
+
+    /**
+     * Memeriksa apakah hari pada tanggal cocok dengan hari jadwal.
+     */
+    public function isHariCocokDenganJadwal(Jadwal $jadwal, Carbon|string $tanggal): bool
+    {
+        $date = $tanggal instanceof Carbon
+            ? $tanggal->copy()->setTimezone('Asia/Jakarta')
+            : Carbon::parse($tanggal, 'Asia/Jakarta');
+
+        $hariTanggal = self::getHariServer($date);
+
+        return $jadwal->hari === $hariTanggal;
+    }
+
+    /**
+     * Memeriksa apakah tanggal berada dalam batas koreksi untuk role tertentu.
+     * Admin: boleh tanggal lampau kapan saja (tidak boleh masa depan).
+     * Guru: harus dalam batas 7 hari terakhir (hari ini dan 6 hari sebelumnya, tidak boleh masa depan).
+     */
+    public function isTanggalDalamBatasKoreksiRole(User|string $userOrRole, Carbon|string $tanggal): bool
+    {
+        $role = $userOrRole instanceof User ? $userOrRole->role : $userOrRole;
+
+        if ($this->isTanggalMasaDepan($tanggal)) {
+            return false;
+        }
+
+        if ($role === 'admin') {
+            return true;
+        }
+
+        if ($role === 'guru') {
+            return $this->isTanggalDalamBatasKoreksi($tanggal);
+        }
+
+        return false;
+    }
+
+    /**
+     * Mendapatkan tanggal terakhir dalam jendela 7 hari yang cocok dengan hari sebuah jadwal.
+     */
+    public function getTanggalTerakhirJadwal(Jadwal $jadwal, ?Carbon $referensi = null): ?string
+    {
+        $today = $referensi
+            ? ($referensi instanceof Carbon ? $referensi->copy()->setTimezone('Asia/Jakarta')->startOfDay() : Carbon::parse($referensi, 'Asia/Jakarta')->startOfDay())
+            : Carbon::now('Asia/Jakarta')->startOfDay();
+
+        $batasHari = (int) config('absensi.batas_koreksi_hari', 7);
+
+        for ($i = 0; $i < $batasHari; $i++) {
+            $checkDate = $today->copy()->subDays($i);
+            if ($this->isHariCocokDenganJadwal($jadwal, $checkDate)) {
+                return $checkDate->toDateString();
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Mendapatkan daftar tanggal yang valid untuk koreksi jadwal (dalam batas koreksi dan cocok harinya).
+     *
+     * @return array<string>
+     */
+    public function getTanggalBolehDikoreksi(Jadwal $jadwal): array
+    {
+        $tanggal = $this->getTanggalTerakhirJadwal($jadwal);
+
+        return $tanggal ? [$tanggal] : [];
+    }
+
+    /**
+     * Mendapatkan jadwal mingguan guru beserta tanggal target dalam jendela 7 hari dan status absensinya.
+     */
+    public function getJadwalMingguanGuru(int $userId): Collection
+    {
+        $guru = Guru::where('user_id', $userId)->first();
+        if (! $guru) {
+            return collect();
+        }
+
+        $jadwals = Jadwal::with(['kelas.jurusan', 'mapel'])
+            ->where('guru_id', $guru->id)
+            ->orderByRaw("CASE hari 
+                WHEN 'senin' THEN 1 
+                WHEN 'selasa' THEN 2 
+                WHEN 'rabu' THEN 3 
+                WHEN 'kamis' THEN 4 
+                WHEN 'jumat' THEN 5 
+                WHEN 'sabtu' THEN 6 
+                ELSE 7 END")
+            ->orderBy('jam_mulai', 'asc')
+            ->get();
+
+        if ($jadwals->isEmpty()) {
+            return collect();
+        }
+
+        $today = Carbon::now('Asia/Jakarta')->startOfDay();
+        $todayStr = $today->toDateString();
+
+        // Cari tanggal target untuk setiap jadwal
+        $targetDates = [];
+        foreach ($jadwals as $jadwal) {
+            $tgl = $this->getTanggalTerakhirJadwal($jadwal, $today);
+            $jadwal->target_tanggal = $tgl;
+            if ($tgl) {
+                $targetDates[$tgl] = true;
+            }
+        }
+
+        // Eager load SesiAbsensi untuk pasangan jadwal dan tanggal target
+        $sesiList = SesiAbsensi::whereIn('jadwal_id', $jadwals->pluck('id'))
+            ->whereIn('tanggal', array_keys($targetDates))
+            ->get()
+            ->keyBy(fn ($item) => $item->jadwal_id.'_'.$item->tanggal);
+
+        foreach ($jadwals as $jadwal) {
+            $tgl = $jadwal->target_tanggal;
+            $sesi = $tgl ? ($sesiList[$jadwal->id.'_'.$tgl] ?? null) : null;
+            $jadwal->sesi_terakhir = $sesi;
+
+            $isHariIni = ($tgl === $todayStr);
+            $jadwal->is_hari_ini = $isHariIni;
+
+            if ($sesi) {
+                $jadwal->status_absensi = 'Sudah diabsen';
+            } elseif ($isHariIni) {
+                $jadwal->status_absensi = 'Hari ini';
+            } else {
+                $jadwal->status_absensi = 'Belum diabsen';
+            }
+        }
+
+        return $jadwals;
+    }
+
+    /**
+     * Mendapatkan daftar jadwal untuk fitur Koreksi Absensi Admin pada tanggal dan kelas tertentu.
+     */
+    public function getJadwalKoreksiAdmin(string $tanggal, ?int $kelasId = null): Collection
+    {
+        $tanggalObj = Carbon::parse($tanggal, 'Asia/Jakarta');
+        $hari = self::getHariServer($tanggalObj);
+        if (! $hari) {
+            return collect();
+        }
+
+        $query = Jadwal::with([
+            'kelas.jurusan',
+            'mapel',
+            'guru.user',
+            'sesiAbsensi' => function ($q) use ($tanggal) {
+                $q->where('tanggal', $tanggal)->with('detailAbsensi');
+            },
+        ])
+            ->where('hari', $hari)
+            ->orderBy('jam_mulai');
+
+        if ($kelasId) {
+            $query->where('kelas_id', $kelasId);
+        }
+
+        return $query->get()->map(function ($jadwal) use ($tanggal) {
+            $sesi = $jadwal->sesiAbsensi->first();
+            $jadwal->sesi_koreksi = $sesi;
+            $jadwal->status_absensi = $sesi ? 'Sudah diabsen' : 'Belum diabsen';
+            $jadwal->tanggal_koreksi = $tanggal;
+
+            return $jadwal;
+        });
     }
 
     /**

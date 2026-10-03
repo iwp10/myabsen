@@ -114,7 +114,7 @@
                     </div>
                 </div>
 
-                <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Pintasan Laporan -->
                     <a href="{{ route('admin.laporan.index') }}"
                        class="group p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 bg-gray-50/50 dark:bg-gray-900/40 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 transition duration-150 flex flex-col justify-between">
@@ -136,6 +136,34 @@
                         </div>
                         <div class="mt-4 pt-3 border-t border-gray-200/60 dark:border-gray-700/60 flex items-center text-xs font-semibold text-blue-600 dark:text-blue-400">
                             <span>Buka Laporan</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M9 6l6 6l-6 6" />
+                            </svg>
+                        </div>
+                    </a>
+
+                    <!-- Pintasan Koreksi Absensi -->
+                    <a href="{{ route('admin.koreksi-absensi.index') }}"
+                       class="group p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-500 dark:hover:border-purple-500 bg-gray-50/50 dark:bg-gray-900/40 hover:bg-purple-50/50 dark:hover:bg-purple-950/20 transition duration-150 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-purple-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 5h10l2 2l-2 2h-10a2 2 0 0 1 -2 -2a2 2 0 0 1 2 -2" /><path d="M13 13h6l2 2l-2 2h-6a2 2 0 0 1 -2 -2a2 2 0 0 1 2 -2" /><path d="M7 21h8l2 2l-2 2h-8a2 2 0 0 1 -2 -2a2 2 0 0 1 2 -2" /></svg>
+                                </div>
+                                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300">
+                                    Koreksi
+                                </span>
+                            </div>
+                            <h4 class="mt-3 text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                                Koreksi Absensi
+                            </h4>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Ubah atau lengkapi data absensi siswa pada tanggal lampau per kelas.
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-gray-200/60 dark:border-gray-700/60 flex items-center text-xs font-semibold text-purple-600 dark:text-purple-400">
+                            <span>Koreksi Absensi</span>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                                 <path d="M9 6l6 6l-6 6" />

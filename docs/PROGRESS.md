@@ -54,7 +54,7 @@ Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Man
 - [x] Dashboard jadwal hari ini
 - [x] Halaman absensi dengan default Hadir
 - [x] Simpan dalam satu transaksi (AB-04)
-- [x] Sesi unik dan edit di hari yang sama (AB-01, AB-03)
+- [x] Sesi unik (AB-01) dan koreksi/susulan absensi dalam batas 7 hari terakhir untuk guru / kapan saja untuk admin (AB-03), halaman jadwal mingguan interaktif, dan menu Koreksi Absensi admin
 - [x] Koreksi oleh admin, pencatatan `diabsen_oleh` dan `diubah_oleh` (AB-09)
 - [x] Test untuk AB-01 sampai AB-04
 
@@ -94,9 +94,10 @@ Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Man
 - [x] UI/UX: Perombakan Dashboard Guru (banner sapaan solid blue, kartu statistik total kelas/mapel/jadwal, dan tombol navigasi pintar saat jadwal kosong).
 - [x] UI/UX: Mengganti font utama sistem menjadi Inter untuk meningkatkan aksesibilitas dan kenyamanan membaca.
 - [x] Fitur Guru: Menambahkan menu dan halaman khusus agar guru dapat melihat seluruh jadwal mengajar mereka dalam seminggu.
+- [x] UI/UX & Fitur Guru: Halaman jadwal mingguan interaktif (kartu jadwal memuat tanggal dalam 7 hari terakhir, status absensi, dan link langsung ke form absensi/koreksi/susulan) serta tombol 'Jadwal & Koreksi Absensi' yang selalu terlihat di dashboard.
+- [x] Fitur Admin: Menu Koreksi Absensi di sidebar dan pintasan dashboard untuk mencari jadwal berdasarkan tanggal lampau dan kelas serta melakukan koreksi/susulan absensi.
 - [x] UI/UX: Merombak Dashboard Admin dengan banner sapaan, statistik master data (Siswa, Guru, Kelas, Mapel), dan pintasan aksi cepat.
 - [x] UI/UX: Standarisasi seluruh ikon aplikasi menggunakan Tabler Icons (inline SVG) untuk tampilan yang lebih modern, konsisten, dan ringan.
-
 
 ### Tahap Improvement: Refactor Arsitektur
 - [x] Pemisahan Tanggung Jawab (Separation of Concerns): Controller tipis (*Thin Controller*), FormRequest khusus validasi input, Policy khusus otorisasi hak akses, Service sebagai pusat seluruh *business logic*, Model khusus relasi & persistensi data, dan View khusus layer presentasi.
@@ -115,4 +116,5 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-09-29 | 3 | Tahap Improvement (Refactor Arsitektur) selesai: Pemisahan tegas tanggung jawab Controller-Service-Policy-FormRequest, eliminasi duplikasi hari/tanggal, standarisasi mutlak Asia/Jakarta, dan pembersihan Fat Controllers. Seluruh 100 test lulus (PASS).
 2026-10-02 | 3,6,7 | Catatan 2026-09-21 yang menunda Fase 3, 6, 7 sudah tidak berlaku (dikerjakan kemudian, lihat catatan 2026-09-27).
 2026-10-02 | 2,3,4,5,7 | Perlu audit: test untuk AB-05, 06, 07, 09, 10 dan rate limiting login sisi server belum terverifikasi.
+2026-10-03 | 4,9 | Fitur AB-03 dan kemudahan koreksi absensi selesai: Guru diizinkan mengabsen, mengisi susulan, dan mengoreksi jadwal miliknya dalam batas 7 hari terakhir (hari ini dan 6 hari sebelumnya) yang harinya cocok; tombol 'Jadwal & Koreksi Absensi' selalu tampil di dashboard guru; halaman jadwal mingguan guru interaktif dengan kartu status dan link langsung; menu 'Koreksi Absensi' ditambahkan di sidebar admin; 8 skenario test AB-03 terverifikasi lulus (PASS).
 

@@ -42,6 +42,7 @@
                                         <th class="px-4 py-3">Mata Pelajaran</th>
                                         <th class="px-4 py-3">Jam</th>
                                         <th class="px-4 py-3 text-center">Rekap (H/I/S/A)</th>
+                                        <th class="px-4 py-3 text-center">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y dark:divide-gray-700">
@@ -54,6 +55,7 @@
                                                 elseif($detail->status->value === 'sakit') $sakit++;
                                                 elseif($detail->status->value === 'alpa') $alpa++;
                                             }
+                                            $bisaKoreksi = Auth::user()->role === 'admin' || app(\App\Services\AbsensiService::class)->isTanggalDalamBatasKoreksi($sesi->tanggal);
                                         @endphp
                                         <tr class="text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                             <td class="px-4 py-3">{{ \Carbon\Carbon::parse($sesi->tanggal)->isoFormat('D MMM YYYY') }}</td>
@@ -70,6 +72,17 @@
                                                     <span class="text-gray-400">/</span>
                                                     <span class="text-red-600 font-bold" title="Alpa">{{ $alpa }}</span>
                                                 </div>
+                                            </td>
+                                            <td class="px-4 py-3 text-center">
+                                                @if($bisaKoreksi)
+                                                    <a href="{{ route('guru.absensi.show', ['jadwal' => $sesi->jadwal_id, 'tanggal' => $sesi->tanggal]) }}" class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300">
+                                                        Koreksi
+                                                    </a>
+                                                @else
+                                                    <span class="inline-flex items-center px-2 py-0.5 text-xs text-gray-400 dark:text-gray-500 font-medium">
+                                                        Terkunci
+                                                    </span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach

@@ -6,15 +6,27 @@ use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\User;
 use App\Services\AbsensiService;
+use Carbon\Carbon;
 use Illuminate\Auth\Access\Response;
 
 class JadwalPolicy
 {
+    public function __construct(protected AbsensiService $absensiService) {}
+
     /**
      * Menentukan apakah user dapat melakukan absensi pada jadwal ini.
      */
-    public function absen(User $user, Jadwal $jadwal): Response
+    public function absen(User $user, Jadwal $jadwal, Carbon|string|null $tanggal = null): Response
     {
+        $tanggalObj = $tanggal
+            ? ($tanggal instanceof Carbon ? $tanggal->copy()->setTimezone('Asia/Jakarta') : Carbon::parse($tanggal, 'Asia/Jakarta'))
+            : Carbon::now('Asia/Jakarta');
+
+        // Tanggal masa depan ditolak untuk semua role
+        if ($this->absensiService->isTanggalMasaDepan($tanggalObj)) {
+            return Response::deny('Tidak dapat mengabsen pada tanggal di masa depan.');
+        }
+
         if ($user->role === 'admin') {
             return Response::allow();
         }
@@ -30,11 +42,12 @@ class JadwalPolicy
                 return Response::deny('Anda tidak mengajar jadwal ini.');
             }
 
-            // Cek apakah hari jadwal cocok dengan hari ini di server
-            $hariServer = AbsensiService::getHariServer();
+            if (! $this->absensiService->isHariCocokDenganJadwal($jadwal, $tanggalObj)) {
+                return Response::deny('Hari pada tanggal yang dipilih tidak cocok dengan hari jadwal.');
+            }
 
-            if ($jadwal->hari !== $hariServer) {
-                return Response::deny('Anda hanya dapat mengabsen jadwal pada hari yang sama.');
+            if (! $this->absensiService->isTanggalDalamBatasKoreksiRole($user, $tanggalObj)) {
+                return Response::deny('Tanggal absensi berada di luar batas waktu koreksi.');
             }
 
             return Response::allow();

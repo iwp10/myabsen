@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Guru;
 
 use App\Exports\LaporanAbsensiExport;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Guru\ShowAbsensiRequest;
 use App\Http\Requests\Guru\StoreAbsensiRequest;
 use App\Models\Guru;
 use App\Models\Jadwal;
@@ -48,18 +49,24 @@ class AbsensiController extends Controller
     /**
      * Menampilkan halaman absensi untuk jadwal tertentu.
      */
-    public function show(Jadwal $jadwal, Request $request)
+    public function show(Jadwal $jadwal, ShowAbsensiRequest $request)
     {
-        Gate::authorize('absen', $jadwal);
+        $tanggalInput = $request->input('tanggal');
+        $tanggal = $tanggalInput
+            ? Carbon::parse($tanggalInput, 'Asia/Jakarta')
+            : Carbon::now('Asia/Jakarta');
 
-        $tanggal = Carbon::now('Asia/Jakarta');
+        Gate::authorize('absen', [$jadwal, $tanggal]);
+
         $formData = $this->absensiService->getFormAbsensiData($jadwal, $tanggal);
+        $tanggalBolehDikoreksi = $this->absensiService->getTanggalBolehDikoreksi($jadwal);
 
         return view('guru.absensi', [
             'jadwal' => $jadwal,
             'tanggal' => $tanggal,
             'sesi' => $formData['sesi'],
             'detailExisting' => $formData['detailExisting'],
+            'tanggalBolehDikoreksi' => $tanggalBolehDikoreksi,
         ]);
     }
 
@@ -68,9 +75,12 @@ class AbsensiController extends Controller
      */
     public function store(StoreAbsensiRequest $request, Jadwal $jadwal)
     {
-        Gate::authorize('absen', $jadwal);
+        $tanggal = $request->validated('tanggal')
+            ?? $request->input('tanggal')
+            ?? Carbon::now('Asia/Jakarta')->toDateString();
 
-        $tanggal = Carbon::now('Asia/Jakarta')->toDateString();
+        Gate::authorize('absen', [$jadwal, $tanggal]);
+
         $dataDetail = $request->validated('siswa') ?? [];
         $catatan = $request->validated('catatan');
 
