@@ -120,5 +120,6 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-02 | 2,3,4,5,7 | Perlu audit: test untuk AB-05, 06, 07, 09, 10 dan rate limiting login sisi server belum terverifikasi.
 2026-10-03 | 4,9 | Fitur AB-03 dan kemudahan koreksi absensi selesai: Guru diizinkan mengabsen, mengisi susulan, dan mengoreksi jadwal miliknya dalam batas 7 hari terakhir (hari ini dan 6 hari sebelumnya) yang harinya cocok; tombol 'Jadwal & Koreksi Absensi' selalu tampil di dashboard guru; halaman jadwal mingguan guru interaktif dengan kartu status dan link langsung; menu 'Koreksi Absensi' ditambahkan di sidebar admin; 8 skenario test AB-03 terverifikasi lulus (PASS).
 2026-10-03 | 4,9 | Menu sidebar guru "Jadwal & Koreksi Absensi" ditambahkan tepat di bawah "Jadwal Mengajar": Halaman daftar 7 hari terakhir (hari ini s.d. H-6) urut dari terbaru, status sesi sudah/belum diabsen, label Hari ini, empty state ringkas per tanggal tanpa jadwal, tombol dashboard terhubung, dan pemilih tanggal terintegrasi.
+2026-10-03 | 6 | Refactor ekspor laporan: Logika ekspor dipusatkan di LaporanService, FormRequest ExportLaporanRequest untuk validasi filter dan penegakan AB-08 guru, view PDF digabungkan ke laporan.pdf tanpa query Eloquent di blade, file duplikat admin/laporan/pdf.blade.php dihapus, dan 11 test LaporanTest lulus.
 
 

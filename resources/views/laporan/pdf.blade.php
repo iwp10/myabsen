@@ -41,18 +41,18 @@
     <h2>Rekapitulasi Absensi Siswa</h2>
     
     <div style="margin-bottom: 15px;">
-        <strong>Periode:</strong> {{ $periode ?? (!empty($filters['bulan']) ? \Carbon\Carbon::createFromFormat('Y-m', $filters['bulan'])->translatedFormat('F Y') : 'Semua Periode') }}<br>
+        <strong>Periode:</strong> {{ $periode ?? 'Semua Periode' }}<br>
         
-        @if(!empty($filters['kelas_id']))
-            <strong>Kelas:</strong> {{ \App\Models\Kelas::find($filters['kelas_id'])->nama ?? '-' }}<br>
+        @if(!empty($namaKelas))
+            <strong>Kelas:</strong> {{ $namaKelas }}<br>
         @endif
         
-        @if(!empty($filters['mapel_id']))
-            <strong>Mata Pelajaran:</strong> {{ \App\Models\Mapel::find($filters['mapel_id'])->nama ?? '-' }}<br>
+        @if(!empty($namaMapel))
+            <strong>Mata Pelajaran:</strong> {{ $namaMapel }}<br>
         @endif
         
-        @if(!empty($filters['guru_id']))
-            <strong>Guru:</strong> {{ \App\Models\Guru::find($filters['guru_id'])->user->name ?? '-' }}<br>
+        @if(!empty($namaGuru))
+            <strong>Guru:</strong> {{ $namaGuru }}<br>
         @endif
     </div>
     
