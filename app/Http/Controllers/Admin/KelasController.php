@@ -66,6 +66,11 @@ class KelasController extends Controller
 
     public function destroy(Kelas $kelas)
     {
+        if ($kelas->jadwal()->exists()) {
+            return redirect()->route('admin.kelas.index')
+                ->with('error', 'Kelas tidak dapat dihapus karena masih memiliki jadwal aktif.');
+        }
+
         $kelas->delete();
 
         return redirect()->route('admin.kelas.index')

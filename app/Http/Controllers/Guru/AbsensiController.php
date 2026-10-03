@@ -2,17 +2,23 @@
 
 namespace App\Http\Controllers\Guru;
 
+use App\Exports\LaporanAbsensiGuruExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ExportLaporanRequest;
 use App\Http\Requests\Guru\ShowAbsensiRequest;
 use App\Http\Requests\Guru\StoreAbsensiRequest;
 use App\Models\Guru;
 use App\Models\Jadwal;
+use App\Models\Kelas;
+use App\Models\Mapel;
+use App\Models\SesiAbsensi;
+use App\Models\Siswa;
 use App\Services\AbsensiService;
 use App\Services\LaporanService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AbsensiController extends Controller
 {
@@ -113,54 +119,62 @@ class AbsensiController extends Controller
     {
         $guru = Guru::where('user_id', $request->user()->id)->first();
         if (! $guru) {
-            return view('guru.riwayat', ['kelompokRiwayat' => collect()]);
+            return view('guru.riwayat', ['jadwalList' => collect()]);
         }
-
-        $tanggalAwal = $request->input('tanggal_awal');
-        $tanggalAkhir = $request->input('tanggal_akhir');
 
         // Ambil semua jadwal milik guru, unik per kelas+mapel
         $jadwalList = Jadwal::with(['kelas', 'mapel'])
             ->where('guru_id', $guru->id)
             ->get()
-            ->unique(fn($j) => $j->kelas_id . '-' . $j->mapel_id);
-
-        // Untuk setiap kelas+mapel, ambil sesi absensi beserta detail siswa
-        $kelompokRiwayat = $jadwalList->map(function ($jadwal) use ($guru, $tanggalAwal, $tanggalAkhir) {
-            $jadwalIds = Jadwal::where('guru_id', $guru->id)
-                ->where('kelas_id', $jadwal->kelas_id)
-                ->where('mapel_id', $jadwal->mapel_id)
-                ->pluck('id');
-
-            $sesiQuery = \App\Models\SesiAbsensi::with([
-                    'detailAbsensi.siswa.user',
-                ])
-                ->whereIn('jadwal_id', $jadwalIds)
-                ->orderBy('tanggal', 'asc');
-
-            if ($tanggalAwal) $sesiQuery->where('tanggal', '>=', $tanggalAwal);
-            if ($tanggalAkhir) $sesiQuery->where('tanggal', '<=', $tanggalAkhir);
-
-            $sesiList = $sesiQuery->get();
-
-            // Ambil daftar siswa di kelas ini
-            $siswaList = \App\Models\Siswa::with('user')
-                ->where('kelas_id', $jadwal->kelas_id)
-                ->whereNull('deleted_at')
-                ->get()
-                ->sortBy('user.name');
-
-            return [
-                'jadwal'    => $jadwal,
-                'sesiList'  => $sesiList,
-                'siswaList' => $siswaList,
-            ];
-        })->values();
+            ->unique(fn ($j) => $j->kelas_id.'-'.$j->mapel_id)
+            ->values();
 
         return view('guru.riwayat', [
-            'kelompokRiwayat' => $kelompokRiwayat,
-            'tanggalAwal'     => $tanggalAwal,
-            'tanggalAkhir'    => $tanggalAkhir,
+            'jadwalList' => $jadwalList,
+        ]);
+    }
+
+    /**
+     * Menampilkan riwayat absensi untuk satu kelas & mapel tertentu.
+     */
+    public function riwayatDetail(Request $request, Kelas $kelas, Mapel $mapel)
+    {
+        $guru = Guru::where('user_id', $request->user()->id)->first();
+        if (! $guru) {
+            abort(403);
+        }
+
+        // Pastikan guru memang mengajar kelas & mapel ini
+        $jadwal = Jadwal::with(['kelas', 'mapel'])
+            ->where('guru_id', $guru->id)
+            ->where('kelas_id', $kelas->id)
+            ->where('mapel_id', $mapel->id)
+            ->firstOrFail();
+
+        $jadwalIds = Jadwal::where('guru_id', $guru->id)
+            ->where('kelas_id', $kelas->id)
+            ->where('mapel_id', $mapel->id)
+            ->pluck('id');
+
+        // Tampilkan semua pertemuan (tanpa filter periode)
+        $sesiList = SesiAbsensi::with('detailAbsensi')
+            ->whereIn('jadwal_id', $jadwalIds)
+            ->orderBy('tanggal', 'asc')
+            ->get();
+
+        // Ambil daftar siswa di kelas ini
+        $siswaList = Siswa::with('user')
+            ->where('kelas_id', $kelas->id)
+            ->whereNull('deleted_at')
+            ->get()
+            ->sortBy('user.name');
+
+        return view('guru.riwayat_detail', [
+            'jadwal' => $jadwal,
+            'kelas' => $kelas,
+            'mapel' => $mapel,
+            'sesiList' => $sesiList,
+            'siswaList' => $siswaList,
         ]);
     }
 
@@ -170,20 +184,18 @@ class AbsensiController extends Controller
     public function export(Request $request)
     {
         $guru = $request->user()->guru;
-        if (!$guru) {
+        if (! $guru) {
             abort(403);
         }
 
         $filters = $request->only([
-            'kelas_mapel', 'tanggal_awal', 'tanggal_akhir', 'bulan', 'mode',
+            'kelas_mapel', 'tanggal_awal', 'tanggal_akhir', 'bulan',
         ]);
-        // Jumlah pertemuan tetap 30, tidak perlu input dari user
-        $filters['jumlah_pertemuan'] = 30;
-        $filters['mode'] = $filters['mode'] ?? 'data';
 
-        $filename = 'Rekap_Absensi_' . str_replace(' ', '_', $guru->user->name) . '_' . date('Ymd') . '.xlsx';
-        return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\LaporanAbsensiGuruExport($guru->id, $filters),
+        $filename = 'Rekap_Absensi_'.str_replace(' ', '_', $guru->user->name).'_'.date('Ymd').'.xlsx';
+
+        return Excel::download(
+            new LaporanAbsensiGuruExport($guru->id, $filters),
             $filename
         );
     }

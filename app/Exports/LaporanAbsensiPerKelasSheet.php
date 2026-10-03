@@ -5,32 +5,65 @@ namespace App\Exports;
 use App\Models\Guru;
 use App\Models\Kelas;
 use App\Models\Mapel;
+use App\Services\AbsensiService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromArray;
-use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
-use PhpOffice\PhpSpreadsheet\Style\Conditional;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 
-class LaporanAbsensiPerKelasSheet implements FromArray, WithTitle, WithEvents, WithCustomStartCell
+/**
+ * Satu sheet rekap absensi untuk satu pasangan Kelas + Mapel milik guru.
+ * Tata letak disamakan dengan tabel Riwayat di web:
+ * No | NIS | Nama Siswa | P1..Pn (tanggal + hari) | H | I | S | A | %
+ * Kolom pertemuan hanya sebanyak sesi yang benar-benar ada.
+ */
+class LaporanAbsensiPerKelasSheet implements FromArray, WithCustomStartCell, WithEvents, WithStrictNullComparison, WithTitle
 {
+    /** Baris tetap pada layout. */
+    private const ROW_JUDUL = 1;
+
+    private const ROW_HEADER = 7;   // No / NIS / Nama / P1..Pn / H I S A %
+
+    private const ROW_TANGGAL = 8;  // tanggal lengkap per pertemuan
+
+    private const ROW_HARI = 9;     // nama hari per pertemuan
+
+    private const ROW_DATA = 10;    // data siswa mulai di sini
+
+    private const WARNA_STATUS = [
+        'H' => 'C6F6D5', // hijau
+        'I' => 'BEE3F8', // biru
+        'S' => 'FEFCBF', // kuning
+        'A' => 'FED7D7', // merah
+    ];
+
     protected $guruId;
+
     protected $kelasId;
+
     protected $mapelId;
+
     protected $filters;
-    protected $mode;
-    protected $jumlahPertemuan;
 
     protected $kelasNama = '';
+
     protected $mapelNama = '';
+
     protected $guruNama = '';
-    protected $tanggalSesi = [];
-    protected $hariSesi = [];
+
+    /** @var array<int, string> tanggal (Y-m-d) per pertemuan */
+    protected array $tanggalSesi = [];
+
+    protected int $jumlahSiswa = 0;
 
     public function __construct($guruId, $kelasId, $mapelId, $filters)
     {
@@ -38,16 +71,14 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithTitle, WithEvents, W
         $this->kelasId = $kelasId;
         $this->mapelId = $mapelId;
         $this->filters = $filters;
-        $this->mode = $filters['mode'] ?? 'data';
-        $this->jumlahPertemuan = (int) ($filters['jumlah_pertemuan'] ?? 24);
 
-        $kelas = Kelas::find($kelasId);
-        $mapel = Mapel::find($mapelId);
+        $kelas = Kelas::withTrashed()->find($kelasId);
+        $mapel = Mapel::withTrashed()->find($mapelId);
         $guru = Guru::with('user')->find($guruId);
 
-        $this->kelasNama = $kelas ? $kelas->nama : 'Unknown';
-        $this->mapelNama = $mapel ? $mapel->nama : 'Unknown';
-        $this->guruNama = $guru ? $guru->user->name : 'Unknown';
+        $this->kelasNama = $kelas ? $kelas->nama : '-';
+        $this->mapelNama = $mapel ? $mapel->nama : '-';
+        $this->guruNama = $guru && $guru->user ? $guru->user->name : '-';
     }
 
     public function startCell(): string
@@ -57,143 +88,144 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithTitle, WithEvents, W
 
     public function title(): string
     {
-        if ($this->kelasId == 0) return 'Data Kosong';
-        
+        if ($this->kelasId == 0) {
+            return 'Data Kosong';
+        }
+
         $abjadMapel = preg_replace('/[^A-Z]/', '', strtoupper($this->mapelNama));
-        if (empty($abjadMapel)) $abjadMapel = substr(strtoupper($this->mapelNama), 0, 3);
-        
-        $title = $this->kelasNama . ' - ' . $abjadMapel;
-        $title = str_replace(['*', ':', '?', '[', ']', '/'], '', $title);
+        if (empty($abjadMapel)) {
+            $abjadMapel = substr(strtoupper($this->mapelNama), 0, 3);
+        }
+
+        $title = $this->kelasNama.' - '.$abjadMapel;
+        $title = str_replace(['*', ':', '?', '[', ']', '/', '\\'], '', $title);
+
         return substr($title, 0, 31);
     }
 
     public function array(): array
     {
-        if ($this->kelasId == 0) return [];
+        if ($this->kelasId == 0) {
+            return [['Belum ada jadwal mengajar.']];
+        }
 
-        // 1. Ambil Siswa
-        $siswaQuery = DB::table('siswa')
+        // 1. Siswa di kelas ini
+        $siswaList = DB::table('siswa')
             ->join('users', 'siswa.user_id', '=', 'users.id')
             ->where('siswa.kelas_id', $this->kelasId)
             ->whereNull('siswa.deleted_at')
             ->select('siswa.id', 'siswa.nis', 'users.name as nama_siswa')
-            ->orderBy('users.name', 'asc')
+            ->orderBy('users.name')
+            ->get();
+        $this->jumlahSiswa = $siswaList->count();
+
+        // 2. Sesi (pertemuan) yang benar-benar ada
+        $sesiQuery = DB::table('sesi_absensi')
+            ->join('jadwal', 'sesi_absensi.jadwal_id', '=', 'jadwal.id')
+            ->where('jadwal.guru_id', $this->guruId)
+            ->where('jadwal.kelas_id', $this->kelasId)
+            ->where('jadwal.mapel_id', $this->mapelId);
+
+        if (! empty($this->filters['tanggal_awal'])) {
+            $sesiQuery->where('sesi_absensi.tanggal', '>=', $this->filters['tanggal_awal']);
+        }
+        if (! empty($this->filters['tanggal_akhir'])) {
+            $sesiQuery->where('sesi_absensi.tanggal', '<=', $this->filters['tanggal_akhir']);
+        }
+        if (! empty($this->filters['bulan'])) {
+            $parts = explode('-', $this->filters['bulan']);
+            if (count($parts) === 2) {
+                $sesiQuery->whereYear('sesi_absensi.tanggal', $parts[0])
+                    ->whereMonth('sesi_absensi.tanggal', $parts[1]);
+            }
+        }
+
+        $sesiData = $sesiQuery
+            ->select('sesi_absensi.id', 'sesi_absensi.tanggal')
+            ->orderBy('sesi_absensi.tanggal')
             ->get();
 
-        // 2. Tentukan jumlah kolom pertemuan
-        $totalPertemuan = $this->jumlahPertemuan;
-        
-        $detailMap = [];
-        if ($this->mode === 'data') {
-            $sesiQueryBase = DB::table('sesi_absensi')
-                ->join('jadwal', 'sesi_absensi.jadwal_id', '=', 'jadwal.id')
-                ->where('jadwal.guru_id', $this->guruId)
-                ->where('jadwal.kelas_id', $this->kelasId)
-                ->where('jadwal.mapel_id', $this->mapelId);
-                
-            if (!empty($this->filters['tanggal_awal'])) {
-                $sesiQueryBase->where('sesi_absensi.tanggal', '>=', $this->filters['tanggal_awal']);
-            }
-            if (!empty($this->filters['tanggal_akhir'])) {
-                $sesiQueryBase->where('sesi_absensi.tanggal', '<=', $this->filters['tanggal_akhir']);
-            }
-            if (!empty($this->filters['bulan'])) {
-                $parts = explode('-', $this->filters['bulan']);
-                if (count($parts) === 2) {
-                    $sesiQueryBase->whereYear('sesi_absensi.tanggal', $parts[0])
-                                  ->whereMonth('sesi_absensi.tanggal', $parts[1]);
-                }
-            }
+        $sesiIds = $sesiData->pluck('id')->all();
+        $this->tanggalSesi = $sesiData
+            ->map(fn ($s) => Carbon::parse($s->tanggal)->toDateString())
+            ->all();
+        $jumlahSesi = count($sesiIds);
 
-            $sesiQuery = clone $sesiQueryBase;
-            $sesiData = $sesiQuery->select('sesi_absensi.id', 'sesi_absensi.tanggal', 'jadwal.hari')
-                ->orderBy('sesi_absensi.tanggal', 'asc')
-                ->get();
-                
-            $this->tanggalSesi = $sesiData->pluck('tanggal')->toArray();
-            $this->hariSesi = $sesiData->pluck('hari')->toArray();
-            
-            // Kolom minimal menyesuaikan dengan sesi yang ada
-            if (count($this->tanggalSesi) > $totalPertemuan) {
-                $totalPertemuan = count($this->tanggalSesi);
-            }
-            
-            $detailQuery = DB::table('detail_absensi')
-                ->join('sesi_absensi', 'detail_absensi.sesi_absensi_id', '=', 'sesi_absensi.id')
-                ->join('jadwal', 'sesi_absensi.jadwal_id', '=', 'jadwal.id')
-                ->where('jadwal.kelas_id', $this->kelasId)
-                ->where('jadwal.mapel_id', $this->mapelId)
-                ->select('detail_absensi.siswa_id', 'sesi_absensi.tanggal', 'detail_absensi.status')
-                ->get();
-                
-            foreach ($detailQuery as $d) {
-                $statusMap = ['hadir'=>'H', 'izin'=>'I', 'sakit'=>'S', 'alpa'=>'A'];
-                $detailMap[$d->siswa_id][$d->tanggal] = $statusMap[$d->status] ?? '';
-            }
+        // 3. Detail absensi: [siswa_id][sesi_id] => kode
+        $kodeStatus = ['hadir' => 'H', 'izin' => 'I', 'sakit' => 'S', 'alpa' => 'A'];
+        $detailMap = [];
+        if ($jumlahSesi > 0) {
+            DB::table('detail_absensi')
+                ->whereIn('sesi_absensi_id', $sesiIds)
+                ->select('siswa_id', 'sesi_absensi_id', 'status')
+                ->get()
+                ->each(function ($d) use (&$detailMap, $kodeStatus) {
+                    $detailMap[$d->siswa_id][$d->sesi_absensi_id] = $kodeStatus[$d->status] ?? '';
+                });
         }
 
-        // 3. Bangun baris data
+        $absensiService = app(AbsensiService::class);
+
+        // 4. Bangun baris
         $rows = [];
-        // Space untuk custom header (A1..A4) lalu row Tanggal (A5), Hari (A6), Table Header (A7)
-        // Maka data siswa dimulai di baris ke-8.
-        $startRowData = 8;
-        $no = 1;
 
-        foreach ($siswaQuery as $index => $siswa) {
-            $currentRow = $startRowData + $index;
-            $row = [
-                $no++,
-                " " . $siswa->nis, // Tambahkan spasi agar excel paksa sebagai teks
-                $siswa->nama_siswa
-            ];
+        // Kop (baris 1-5), baris 6 kosong
+        $rows[] = ['REKAPITULASI ABSENSI'];
+        $rows[] = ['Kelas', '', ': '.$this->kelasNama];
+        $rows[] = ['Mata Pelajaran', '', ': '.$this->mapelNama];
+        $rows[] = ['Guru', '', ': '.$this->guruNama];
+        $rows[] = ['Periode', '', ': '.$this->teksPeriode()];
+        $rows[] = [''];
 
-            // Isi P1..Pn
-            for ($i = 0; $i < $totalPertemuan; $i++) {
-                if ($this->mode === 'data' && isset($this->tanggalSesi[$i])) {
-                    $tgl = $this->tanggalSesi[$i];
-                    $row[] = $detailMap[$siswa->id][$tgl] ?? '';
+        // Header tabel (baris 7-9)
+        $header = ['No', 'NIS', 'Nama Siswa'];
+        $barisTanggal = ['', '', ''];
+        $barisHari = ['', '', ''];
+        foreach ($this->tanggalSesi as $idx => $tgl) {
+            $c = Carbon::parse($tgl)->locale('id');
+            $header[] = 'P'.($idx + 1);
+            $barisTanggal[] = $c->format('d/m/Y');
+            $barisHari[] = $c->isoFormat('dddd');
+        }
+        array_push($header, 'H', 'I', 'S', 'A', '%');
+        $rows[] = $header;
+        $rows[] = $barisTanggal;
+        $rows[] = $barisHari;
+
+        // Data siswa (baris 10+)
+        $rekap = array_fill_keys(['H', 'I', 'S', 'A'], array_fill(0, $jumlahSesi, 0));
+
+        foreach ($siswaList as $no => $siswa) {
+            $row = [$no + 1, ' '.$siswa->nis, $siswa->nama_siswa]; // spasi: paksa NIS sebagai teks
+            $hitung = ['H' => 0, 'I' => 0, 'S' => 0, 'A' => 0];
+
+            foreach ($sesiIds as $idx => $sesiId) {
+                $kode = $detailMap[$siswa->id][$sesiId] ?? '';
+                if ($kode !== '') {
+                    $hitung[$kode]++;
+                    $rekap[$kode][$idx]++;
+                    $row[] = $kode;
                 } else {
-                    $row[] = ''; // Template kosong
+                    $row[] = '·'; // belum diabsen / bukan anggota
                 }
             }
 
-            // Rumus Excel di sisi kanan
-            $colStartRange = Coordinate::stringFromColumnIndex(4);
-            $colEndRange = Coordinate::stringFromColumnIndex(4 + $totalPertemuan - 1);
-            $range = "{$colStartRange}{$currentRow}:{$colEndRange}{$currentRow}";
+            $totalData = array_sum($hitung);
+            $persen = $absensiService->hitungPersentaseKehadiran($hitung['H'], $hitung['I'], $hitung['S'], $totalData);
 
-            $row[] = "=COUNTIF({$range}, \"H\")"; // Hadir
-            $row[] = "=COUNTIF({$range}, \"I\")"; // Izin
-            $row[] = "=COUNTIF({$range}, \"S\")"; // Sakit
-            $row[] = "=COUNTIF({$range}, \"A\")"; // Alpa
-            $row[] = "=COUNTA({$range})"; // Total Sesi
-            $row[] = "=IF(COUNTA({$range})=0, 0, COUNTIF({$range}, \"H\") / COUNTA({$range}))"; // Persen
-
+            array_push($row, $hitung['H'], $hitung['I'], $hitung['S'], $hitung['A'], $persen / 100);
             $rows[] = $row;
         }
-        
-        $totalSiswa = count($siswaQuery);
-        $barisRekapH = ['','','Rekapitulasi Hadir (H)'];
-        $barisRekapI = ['','','Rekapitulasi Izin (I)'];
-        $barisRekapS = ['','','Rekapitulasi Sakit (S)'];
-        $barisRekapA = ['','','Rekapitulasi Alpa (A)'];
-        
-        for ($i = 0; $i < $totalPertemuan; $i++) {
-            $colLetter = Coordinate::stringFromColumnIndex(4 + $i);
-            $rangeCol = "{$colLetter}8:{$colLetter}" . (7 + $totalSiswa);
-            $barisRekapH[] = "=COUNTIF({$rangeCol}, \"H\")";
-            $barisRekapI[] = "=COUNTIF({$rangeCol}, \"I\")";
-            $barisRekapS[] = "=COUNTIF({$rangeCol}, \"S\")";
-            $barisRekapA[] = "=COUNTIF({$rangeCol}, \"A\")";
+
+        // Rekap per pertemuan
+        $labelRekap = ['H' => 'Hadir (H)', 'I' => 'Izin (I)', 'S' => 'Sakit (S)', 'A' => 'Alpa (A)'];
+        foreach ($labelRekap as $kode => $label) {
+            $rows[] = array_merge([$label, '', ''], array_map(fn ($n) => $n ?: '-', $rekap[$kode]));
         }
-        
-        $rows[] = []; // Spacer
-        $rows[] = $barisRekapH;
-        $rows[] = $barisRekapI;
-        $rows[] = $barisRekapS;
-        $rows[] = $barisRekapA;
-        $rows[] = [];
-        $rows[] = ['Keterangan:', 'H = Hadir, I = Izin, S = Sakit, A = Alpa'];
+
+        // Keterangan
+        $rows[] = [''];
+        $rows[] = ['Keterangan: H = Hadir, I = Izin, S = Sakit, A = Alpa, · = Belum diabsen / bukan anggota'];
 
         return $rows;
     }
@@ -201,137 +233,168 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithTitle, WithEvents, W
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
-                if ($this->kelasId == 0) return;
-                
+            AfterSheet::class => function (AfterSheet $event) {
+                if ($this->kelasId == 0) {
+                    return;
+                }
+
                 $sheet = $event->sheet->getDelegate();
-                $totalPertemuan = $this->jumlahPertemuan;
-                if ($this->mode === 'data' && count($this->tanggalSesi) > $totalPertemuan) {
-                    $totalPertemuan = count($this->tanggalSesi);
-                }
+                $jumlahSesi = count($this->tanggalSesi);
 
-                // --- 1. Custom Header Judul (A1 - A4) ---
-                $periode = !empty($this->filters['bulan']) ? $this->filters['bulan'] : 'Periode Kustom';
-                $sheet->setCellValue('A1', 'REKAPITULASI ABSENSI');
-                $sheet->setCellValue('A2', 'Kelas : ' . $this->kelasNama);
-                $sheet->setCellValue('A3', 'Mata Pelajaran : ' . $this->mapelNama);
-                $sheet->setCellValue('A4', 'Guru : ' . $this->guruNama . ' | Periode : ' . $periode);
-                
+                $kolomAkhirIdx = 3 + $jumlahSesi + 5; // No,NIS,Nama + P + H,I,S,A,%
+                $kolomAkhir = Coordinate::stringFromColumnIndex($kolomAkhirIdx);
+                $kolomH = Coordinate::stringFromColumnIndex(4 + $jumlahSesi);
+                $kolomPersen = $kolomAkhir;
+
+                $rowDataAkhir = self::ROW_DATA + $this->jumlahSiswa - 1;
+                $rowRekapAwal = self::ROW_DATA + $this->jumlahSiswa;
+                $rowRekapAkhir = $rowRekapAwal + 3;
+                $rowKeterangan = $rowRekapAkhir + 2;
+
+                $thin = ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '9CA3AF']];
+
+                // --- Kop ---
+                $sheet->mergeCells('A1:'.$kolomAkhir.'1');
                 $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-                $sheet->mergeCells('A1:J1');
-
-                // --- 2. Header Tabel ---
-                // Baris 5: Tanggal, Baris 6: Hari, Baris 7: Header P1 dll.
-                $sheet->setCellValue('C5', 'Tanggal:');
-                $sheet->setCellValue('C6', 'Hari:');
-                $sheet->getStyle('C5:C6')->getAlignment()->setHorizontal('right');
-                
-                $sheet->setCellValue('A7', 'No');
-                $sheet->setCellValue('B7', 'NIS');
-                $sheet->setCellValue('C7', 'Nama Siswa');
-                
-                for ($i = 0; $i < $totalPertemuan; $i++) {
-                    $col = Coordinate::stringFromColumnIndex(4 + $i);
-                    $tgl = $this->mode === 'data' && isset($this->tanggalSesi[$i]) ? \Carbon\Carbon::parse($this->tanggalSesi[$i])->format('d/m') : '';
-                    $hari = $this->mode === 'data' && isset($this->hariSesi[$i]) ? substr(ucfirst($this->hariSesi[$i]), 0, 3) : '';
-                    
-                    $sheet->setCellValue($col . '5', $tgl);
-                    $sheet->setCellValue($col . '6', $hari);
-                    $sheet->setCellValue($col . '7', 'P' . ($i + 1));
-                    $sheet->getColumnDimension($col)->setWidth(5);
+                $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                for ($r = 2; $r <= 5; $r++) {
+                    $sheet->mergeCells("A{$r}:B{$r}");
+                    $sheet->getStyle("A{$r}")->getFont()->setBold(true);
                 }
 
-                $summaryCols = ['Hadir', 'Izin', 'Sakit', 'Alpa', 'Total', 'Persentase'];
-                $startSummaryCol = 4 + $totalPertemuan;
-                foreach ($summaryCols as $idx => $sc) {
-                    $col = Coordinate::stringFromColumnIndex($startSummaryCol + $idx);
-                    $sheet->setCellValue($col . '7', $sc);
-                    $sheet->getColumnDimension($col)->setAutoSize(true);
+                // --- Header tabel: No/NIS/Nama dan H/I/S/A/% digabung 3 baris ---
+                $kolomGabung = ['A', 'B', 'C'];
+                for ($i = 0; $i < 5; $i++) {
+                    $kolomGabung[] = Coordinate::stringFromColumnIndex(4 + $jumlahSesi + $i);
+                }
+                foreach ($kolomGabung as $col) {
+                    $sheet->mergeCells($col.self::ROW_HEADER.':'.$col.self::ROW_HARI);
                 }
 
-                // Styling Header (A7 sampai Ujung)
-                $endColIndex = Coordinate::stringFromColumnIndex($startSummaryCol + count($summaryCols) - 1);
-                $sheet->getStyle("A7:{$endColIndex}7")->applyFromArray([
+                $rangeHeader = 'A'.self::ROW_HEADER.':'.$kolomAkhir.self::ROW_HARI;
+                $sheet->getStyle($rangeHeader)->applyFromArray([
                     'font' => ['bold' => true],
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['rgb' => 'E5E7EB']],
-                    'alignment' => ['horizontal' => 'center'],
-                    'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                    ],
+                    'borders' => ['allBorders' => $thin],
                 ]);
+                if ($jumlahSesi > 0) {
+                    $rangeTglHari = 'D'.self::ROW_TANGGAL.':'.Coordinate::stringFromColumnIndex(3 + $jumlahSesi).self::ROW_HARI;
+                    $sheet->getStyle($rangeTglHari)->getFont()->setBold(false)->setSize(9);
+                }
 
-                // --- 3. Format NIS Text & Lebar Kolom Standar ---
+                // Warna judul kolom H/I/S/A
+                foreach (['H' => '15803D', 'I' => '1D4ED8', 'S' => 'A16207', 'A' => 'B91C1C'] as $i => $warna) {
+                    $off = array_search($i, ['H', 'I', 'S', 'A'], true);
+                    $col = Coordinate::stringFromColumnIndex(4 + $jumlahSesi + $off);
+                    $sheet->getStyle($col.self::ROW_HEADER)->getFont()->getColor()->setRGB($warna);
+                }
+
+                // --- Lebar kolom ---
                 $sheet->getColumnDimension('A')->setWidth(5);
-                $sheet->getColumnDimension('B')->setWidth(15);
-                $sheet->getColumnDimension('C')->setWidth(35);
-                
-                // Set explicitly format text for NIS column so it doesn't get scientific notation. 
-                // But we already prefixed with space, which is reliable for Excel.
-                
-                // Freeze pane di D8
-                $sheet->freezePane('D8');
+                $sheet->getColumnDimension('B')->setWidth(14);
+                $sheet->getColumnDimension('C')->setWidth(32);
+                for ($i = 0; $i < $jumlahSesi; $i++) {
+                    $sheet->getColumnDimension(Coordinate::stringFromColumnIndex(4 + $i))->setWidth(11);
+                }
+                for ($i = 0; $i < 4; $i++) {
+                    $sheet->getColumnDimension(Coordinate::stringFromColumnIndex(4 + $jumlahSesi + $i))->setWidth(6);
+                }
+                $sheet->getColumnDimension($kolomPersen)->setWidth(9);
 
-                // --- 4. Data Validation Dropdown & Conditional Formatting ---
-                $startColP = 'D';
-                $endColP = Coordinate::stringFromColumnIndex(3 + $totalPertemuan);
-                $highestRow = $sheet->getHighestRow() - 6; // exclude rekap and footer rows
-                
-                if ($highestRow >= 8) {
-                    $rangeP = "{$startColP}8:{$endColP}{$highestRow}";
-                    
-                    // Validasi Dropdown
-                    $validation = $sheet->getCell("D8")->getDataValidation();
-                    $validation->setType(DataValidation::TYPE_LIST)
-                        ->setErrorStyle(DataValidation::STYLE_STOP)
-                        ->setAllowBlank(true)
-                        ->setShowInputMessage(true)
-                        ->setShowErrorMessage(true)
-                        ->setErrorTitle('Input Error')
-                        ->setError('Hanya izinkan kode H, I, S, atau A huruf besar.')
-                        ->setFormula1('"H,I,S,A"');
+                // --- Data siswa ---
+                if ($this->jumlahSiswa > 0) {
+                    $rangeData = 'A'.self::ROW_DATA.':'.$kolomAkhir.$rowDataAkhir;
+                    $sheet->getStyle($rangeData)->getBorders()->getAllBorders()->applyFromArray($thin);
+                    $sheet->getStyle('A'.self::ROW_DATA.':A'.$rowDataAkhir)
+                        ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle('D'.self::ROW_DATA.':'.$kolomAkhir.$rowDataAkhir)
+                        ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                    $sheet->getStyle($kolomH.self::ROW_DATA.':'.$kolomAkhir.$rowDataAkhir)
+                        ->getFont()->setBold(true);
+                    $sheet->getStyle($kolomPersen.self::ROW_DATA.':'.$kolomPersen.$rowDataAkhir)
+                        ->getNumberFormat()->setFormatCode('0.##%');
 
-                    for ($row = 8; $row <= $highestRow; $row++) {
-                        for ($col = 4; $col < 4 + $totalPertemuan; $col++) {
-                            $colLetter = Coordinate::stringFromColumnIndex($col);
-                            $sheet->getCell("{$colLetter}{$row}")->setDataValidation(clone $validation);
+                    // Warna sel status per pertemuan (sama seperti web)
+                    for ($r = self::ROW_DATA; $r <= $rowDataAkhir; $r++) {
+                        for ($i = 0; $i < $jumlahSesi; $i++) {
+                            $cell = Coordinate::stringFromColumnIndex(4 + $i).$r;
+                            $nilai = (string) $sheet->getCell($cell)->getValue();
+                            if (isset(self::WARNA_STATUS[$nilai])) {
+                                $sheet->getStyle($cell)->getFill()
+                                    ->setFillType(Fill::FILL_SOLID)
+                                    ->getStartColor()->setRGB(self::WARNA_STATUS[$nilai]);
+                                $sheet->getStyle($cell)->getFont()->setBold(true);
+                            } else {
+                                $sheet->getStyle($cell)->getFont()->getColor()->setRGB('9CA3AF');
+                            }
                         }
-                    }
 
-                    // Conditional Formatting
-                    $conditionalStyles = [];
-                    $rules = [
-                        'H' => 'C6F6D5', // Hijau
-                        'I' => 'BEE3F8', // Biru
-                        'S' => 'FEFCBF', // Kuning
-                        'A' => 'FED7D7', // Merah
-                    ];
-                    foreach ($rules as $val => $color) {
-                        $cond = new Conditional();
-                        $cond->setConditionType(Conditional::CONDITION_CELLIS)
-                             ->setOperatorType(Conditional::OPERATOR_EQUAL)
-                             ->addCondition('"' . $val . '"')
-                             ->getStyle()->getFill()->setFillType(Fill::FILL_SOLID)->getEndColor()->setARGB('FF' . $color);
-                        $conditionalStyles[] = $cond;
+                        // % merah jika < 75
+                        $persen = (float) $sheet->getCell($kolomPersen.$r)->getValue();
+                        $sheet->getStyle($kolomPersen.$r)->getFont()->getColor()
+                            ->setRGB($persen >= 0.75 ? '15803D' : 'DC2626');
                     }
-                    $sheet->getStyle($rangeP)->setConditionalStyles($conditionalStyles);
-                    $sheet->getStyle($rangeP)->getAlignment()->setHorizontal('center');
                 }
 
-                // --- 5. Format Persen ---
-                $colPersen = Coordinate::stringFromColumnIndex($startSummaryCol + 5);
-                if ($highestRow >= 8) {
-                    $sheet->getStyle("{$colPersen}8:{$colPersen}{$highestRow}")->getNumberFormat()->setFormatCode('0.0%');
+                // --- Rekap per pertemuan ---
+                $warnaRekap = ['DCFCE7', 'DBEAFE', 'FEF9C3', 'FEE2E2'];
+                for ($k = 0; $k < 4; $k++) {
+                    $r = $rowRekapAwal + $k;
+                    $sheet->mergeCells("A{$r}:C{$r}");
+                    $sheet->getStyle("A{$r}:{$kolomAkhir}{$r}")->applyFromArray([
+                        'font' => ['bold' => true],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['rgb' => $warnaRekap[$k]]],
+                        'borders' => ['allBorders' => $thin],
+                    ]);
+                    $sheet->getStyle("D{$r}:{$kolomAkhir}{$r}")
+                        ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 }
-                
-                // --- 6. Set Print Layout ---
-                $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
-                $sheet->getPageSetup()->setFitToWidth(1);
-                $sheet->getPageSetup()->setFitToHeight(0);
-                $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(1, 7);
-                
-                // --- 7. Border Keliling ---
-                if ($highestRow >= 8) {
-                    $sheet->getStyle("A7:{$endColIndex}{$highestRow}")->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-                }
-            }
+
+                // --- Keterangan ---
+                $sheet->getStyle("A{$rowKeterangan}")->getFont()->setItalic(true)->setSize(9);
+
+                // --- Freeze & cetak ---
+                $sheet->freezePane('D'.self::ROW_DATA);
+                $setup = $sheet->getPageSetup();
+                $setup->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+                $setup->setPaperSize(PageSetup::PAPERSIZE_A4);
+                $setup->setFitToWidth(1);
+                $setup->setFitToHeight(0);
+                $setup->setRowsToRepeatAtTopByStartAndEnd(self::ROW_HEADER, self::ROW_HARI);
+                $sheet->getPageMargins()->setLeft(0.4)->setRight(0.4)->setTop(0.5)->setBottom(0.5);
+            },
         ];
+    }
+
+    /**
+     * Teks periode untuk kop: dari filter, atau rentang tanggal pertemuan yang ada.
+     */
+    private function teksPeriode(): string
+    {
+        $fmt = fn ($t) => Carbon::parse($t)->locale('id')->isoFormat('D MMMM YYYY');
+
+        if (! empty($this->filters['bulan'])) {
+            try {
+                return Carbon::createFromFormat('Y-m', $this->filters['bulan'])->locale('id')->isoFormat('MMMM YYYY');
+            } catch (\Throwable) {
+                // abaikan, pakai rentang sesi
+            }
+        }
+        if (! empty($this->filters['tanggal_awal']) || ! empty($this->filters['tanggal_akhir'])) {
+            $awal = ! empty($this->filters['tanggal_awal']) ? $fmt($this->filters['tanggal_awal']) : '...';
+            $akhir = ! empty($this->filters['tanggal_akhir']) ? $fmt($this->filters['tanggal_akhir']) : '...';
+
+            return "{$awal} s/d {$akhir}";
+        }
+        if (count($this->tanggalSesi) > 0) {
+            return $fmt(reset($this->tanggalSesi)).' s/d '.$fmt(end($this->tanggalSesi))
+                .' ('.count($this->tanggalSesi).' pertemuan)';
+        }
+
+        return 'Belum ada pertemuan';
     }
 }
