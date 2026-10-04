@@ -19,7 +19,23 @@ class JadwalController extends Controller
     public function index(Request $request)
     {
         $search = $request->query('search');
+        $reqTahunAjaran = $request->query('tahun_ajaran');
+        $reqSemester = $request->query('semester');
+        
+        $absensiService = app(\App\Services\AbsensiService::class);
+        $activePeriode = $absensiService->getActivePeriode();
+
+        // Jika tidak ada filter yang dipilih, gunakan active periode
+        $filterTahunAjaran = $reqTahunAjaran ?? $activePeriode['tahun_ajaran'];
+        $filterSemester = $reqSemester ?? $activePeriode['semester'];
+
         $jadwals = Jadwal::with(['kelas', 'mapel', 'guru.user'])
+            ->when($filterTahunAjaran && $filterTahunAjaran !== 'all', function ($q) use ($filterTahunAjaran) {
+                $q->where('tahun_ajaran', $filterTahunAjaran);
+            })
+            ->when($filterSemester && $filterTahunAjaran !== 'all', function ($q) use ($filterSemester) {
+                $q->where('semester', $filterSemester);
+            })
             ->when($search, function ($query) use ($search) {
                 $query->whereHas('kelas', function ($q) use ($search) {
                     $q->where('nama', 'like', "%{$search}%");
@@ -34,7 +50,9 @@ class JadwalController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.jadwal.index', compact('jadwals'));
+        $tahunAjarans = Jadwal::select('tahun_ajaran')->distinct()->orderBy('tahun_ajaran', 'desc')->pluck('tahun_ajaran');
+
+        return view('admin.jadwal.index', compact('jadwals', 'activePeriode', 'filterTahunAjaran', 'filterSemester', 'tahunAjarans'));
     }
 
     /**

@@ -44,12 +44,24 @@
                             @enderror
                         </div>
 
-                        <div class="mb-4">
-                            <label for="tahun_ajaran" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tahun Ajaran</label>
-                            <input type="text" name="tahun_ajaran" id="tahun_ajaran" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white" value="{{ old('tahun_ajaran', $kelas->tahun_ajaran) }}" required placeholder="2023/2024">
-                            @error('tahun_ajaran')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label for="tahun_ajaran" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tahun Ajaran</label>
+                                <input type="text" name="tahun_ajaran" id="tahun_ajaran" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white" value="{{ old('tahun_ajaran', $kelas->tahun_ajaran) }}" required placeholder="2023/2024">
+                                @error('tahun_ajaran')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="semester" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Semester</label>
+                                <select name="semester" id="semester" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white" required>
+                                    <option value="Ganjil" {{ old('semester', $kelas->semester) == 'Ganjil' ? 'selected' : '' }}>Ganjil</option>
+                                    <option value="Genap" {{ old('semester', $kelas->semester) == 'Genap' ? 'selected' : '' }}>Genap</option>
+                                </select>
+                                @error('semester')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-end mt-4">

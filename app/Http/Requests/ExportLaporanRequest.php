@@ -19,20 +19,33 @@ class ExportLaporanRequest extends FormRequest
         }
 
         // Pembatasan guru (AB-08): hanya boleh mengekspor kelas yang diampunya
-        if ($user->role === 'guru' && $this->filled('kelas_mapel')) {
+        if ($user->role === 'guru') {
             $guru = $user->guru;
             if (! $guru) {
                 return false;
             }
 
-            $parts = explode('-', $this->input('kelas_mapel'));
-            if (count($parts) === 2) {
-                return \App\Models\Jadwal::where('guru_id', $guru->id)
-                    ->where('kelas_id', $parts[0])
-                    ->where('mapel_id', $parts[1])
-                    ->exists();
+            if ($this->filled('kelas_mapel')) {
+                $parts = explode('-', $this->input('kelas_mapel'));
+                if (count($parts) === 2) {
+                    return \App\Models\Jadwal::where('guru_id', $guru->id)
+                        ->where('kelas_id', $parts[0])
+                        ->where('mapel_id', $parts[1])
+                        ->exists();
+                }
+                return false;
             }
-            return false;
+
+            if ($this->filled('kelas_id') || $this->filled('mapel_id')) {
+                $query = \App\Models\Jadwal::where('guru_id', $guru->id);
+                if ($this->filled('kelas_id')) {
+                    $query->where('kelas_id', $this->input('kelas_id'));
+                }
+                if ($this->filled('mapel_id')) {
+                    $query->where('mapel_id', $this->input('mapel_id'));
+                }
+                return $query->exists();
+            }
         }
 
         return true;
@@ -51,7 +64,8 @@ class ExportLaporanRequest extends FormRequest
             'kelas_mapel' => ['nullable', 'string'],
             'tanggal_awal' => ['nullable', 'date'],
             'tanggal_akhir' => ['nullable', 'date', 'after_or_equal:tanggal_awal'],
-            'bulan' => ['nullable', 'date_format:Y-m'],
+            'tahun_ajaran' => ['nullable', 'string', 'regex:/^\d{4}\/\d{4}$/'],
+            'semester' => ['nullable', 'string', 'in:Ganjil,Genap'],
             'hari' => ['nullable', 'array'],
             'hari.*' => ['in:senin,selasa,rabu,kamis,jumat,sabtu,minggu'],
             'mode' => ['nullable', 'in:data,template'],

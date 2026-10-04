@@ -23,14 +23,30 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                        <h3 class="text-lg font-bold">Daftar Jadwal</h3>
+                        <div class="flex flex-col">
+                            <h3 class="text-lg font-bold">Daftar Jadwal</h3>
+                            @if($activePeriode['tahun_ajaran'])
+                                <span class="text-sm text-green-600 dark:text-green-400">Periode Aktif: {{ $activePeriode['tahun_ajaran'] }} - {{ $activePeriode['semester'] }}</span>
+                            @endif
+                        </div>
                         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                            <form method="GET" action="{{ route('admin.jadwal.index') }}" class="flex gap-2">
-                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari jadwal..." class="w-full sm:w-64 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                            <form method="GET" action="{{ route('admin.jadwal.index') }}" class="flex flex-col sm:flex-row gap-2 w-full">
+                                <select name="tahun_ajaran" class="w-full sm:w-40 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                                    <option value="all">Semua T.A</option>
+                                    @foreach($tahunAjarans as $ta)
+                                        <option value="{{ $ta }}" {{ $filterTahunAjaran === $ta ? 'selected' : '' }}>{{ $ta }}</option>
+                                    @endforeach
+                                </select>
+                                <select name="semester" class="w-full sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                                    <option value="all">Semua</option>
+                                    <option value="Ganjil" {{ $filterSemester === 'Ganjil' ? 'selected' : '' }}>Ganjil</option>
+                                    <option value="Genap" {{ $filterSemester === 'Genap' ? 'selected' : '' }}>Genap</option>
+                                </select>
+                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari jadwal..." class="w-full sm:w-48 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
                                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition">
                                     Cari
                                 </button>
-                                @if(request('search'))
+                                @if(request()->hasAny(['search', 'tahun_ajaran', 'semester']))
                                     <a href="{{ route('admin.jadwal.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-3 rounded-md text-sm flex items-center justify-center transition">Reset</a>
                                 @endif
                             </form>
@@ -44,6 +60,8 @@
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 dark:text-gray-200">
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">T.A</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">Semester</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">Hari</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">Jam</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">Kelas</th>
@@ -55,6 +73,8 @@
                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                 @forelse ($jadwals as $jadwal)
                                     <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $jadwal->tahun_ajaran }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $jadwal->semester }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap capitalize font-medium text-gray-900 dark:text-white">{{ $jadwal->hari }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $jadwal->kelas->nama }}</td>
@@ -78,7 +98,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-6 py-12 text-center">
+                                        <td colspan="7" class="px-6 py-12 text-center">
                                             <div class="flex flex-col items-center justify-center">
                                                 <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 mb-3">
                                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

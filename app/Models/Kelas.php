@@ -14,7 +14,7 @@ class Kelas extends Model
 
     protected $table = 'kelas';
 
-    protected $fillable = ['jurusan_id', 'nama', 'tingkat', 'tahun_ajaran'];
+    protected $fillable = ['jurusan_id', 'nama', 'tingkat', 'tahun_ajaran', 'semester'];
 
     public function jurusan()
     {

@@ -18,6 +18,7 @@ class UpdateKelasRequest extends FormRequest
             'nama' => ['required', 'string', 'max:255'],
             'tingkat' => ['required', 'integer', 'min:1', 'max:13'],
             'tahun_ajaran' => ['required', 'string', 'max:9'],
+            'semester' => ['required', 'in:Ganjil,Genap'],
         ];
     }
 }

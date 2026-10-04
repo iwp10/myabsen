@@ -43,6 +43,7 @@ class JadwalTest extends TestCase
             'jam_mulai' => '07:00',
             'jam_selesai' => '09:00',
             'tahun_ajaran' => '2026/2027',
+            'semester' => 'Ganjil',
         ]);
 
         $response->assertRedirect(route('admin.jadwal.index'));
@@ -66,6 +67,8 @@ class JadwalTest extends TestCase
             'hari' => 'selasa',
             'jam_mulai' => '08:00',
             'jam_selesai' => '10:00',
+            'tahun_ajaran' => '2026/2027',
+            'semester' => 'Ganjil',
         ]);
 
         $response = $this->actingAs($this->admin)->post(route('admin.jadwal.store'), [
@@ -76,6 +79,7 @@ class JadwalTest extends TestCase
             'jam_mulai' => '09:00', // overlap
             'jam_selesai' => '11:00',
             'tahun_ajaran' => '2026/2027',
+            'semester' => 'Ganjil',
         ]);
 
         $response->assertSessionHasErrors(['guru_id']);
@@ -94,6 +98,8 @@ class JadwalTest extends TestCase
             'hari' => 'rabu',
             'jam_mulai' => '10:00',
             'jam_selesai' => '12:00',
+            'tahun_ajaran' => '2026/2027',
+            'semester' => 'Ganjil',
         ]);
 
         $response = $this->actingAs($this->admin)->post(route('admin.jadwal.store'), [
@@ -104,6 +110,7 @@ class JadwalTest extends TestCase
             'jam_mulai' => '09:00', // overlap
             'jam_selesai' => '10:30',
             'tahun_ajaran' => '2026/2027',
+            'semester' => 'Ganjil',
         ]);
 
         $response->assertSessionHasErrors(['kelas_id']);
@@ -115,6 +122,8 @@ class JadwalTest extends TestCase
             'hari' => 'kamis',
             'jam_mulai' => '07:00:00',
             'jam_selesai' => '09:00:00',
+            'tahun_ajaran' => '2026/2027',
+            'semester' => 'Ganjil',
         ]);
 
         $response = $this->actingAs($this->admin)->put(route('admin.jadwal.update', $jadwal), [
@@ -125,6 +134,7 @@ class JadwalTest extends TestCase
             'jam_mulai' => '08:00',
             'jam_selesai' => '10:00',
             'tahun_ajaran' => '2026/2027',
+            'semester' => 'Ganjil',
         ]);
 
         $response->assertRedirect(route('admin.jadwal.index'));

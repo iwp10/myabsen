@@ -34,10 +34,28 @@
                         </div>
                         
                         <div>
-                            <x-input-label for="bulan" :value="__('Bulan (Opsional)')" />
-                            <input id="bulan" name="bulan" type="month" value="{{ date('Y-m') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" />
-                            <p class="text-sm text-gray-500 mt-1">Kosongkan jika ingin mengunduh semua periode.</p>
+                            <x-input-label for="tahun_ajaran" :value="__('Tahun Ajaran (Opsional)')" />
+                            <select id="tahun_ajaran" name="tahun_ajaran" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                <option value="">-- Semua Tahun Ajaran --</option>
+                                @php
+                                    $currentYear = date('Y');
+                                    $startYear = 2024;
+                                @endphp
+                                @for($i = $startYear; $i <= $currentYear + 1; $i++)
+                                    <option value="{{ $i }}/{{ $i+1 }}">{{ $i }}/{{ $i+1 }}</option>
+                                @endfor
+                            </select>
                         </div>
+
+                        <div>
+                            <x-input-label for="semester" :value="__('Semester (Opsional)')" />
+                            <select id="semester" name="semester" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                <option value="">-- Semua Semester --</option>
+                                <option value="Ganjil">Ganjil</option>
+                                <option value="Genap">Genap</option>
+                            </select>
+                        </div>
+
 
                         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
                             <button type="submit" formaction="{{ route('admin.laporan.export') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded flex items-center justify-center transition">

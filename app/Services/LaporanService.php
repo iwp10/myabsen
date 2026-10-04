@@ -27,8 +27,17 @@ class LaporanService
         $filters = [
             'kelas_id' => $validatedFilters['kelas_id'] ?? null,
             'mapel_id' => $validatedFilters['mapel_id'] ?? null,
-            'bulan' => $validatedFilters['bulan'] ?? null,
+            'tahun_ajaran' => $validatedFilters['tahun_ajaran'] ?? null,
+            'semester' => $validatedFilters['semester'] ?? null,
         ];
+
+        if (!empty($validatedFilters['kelas_mapel'])) {
+            $parts = explode('-', $validatedFilters['kelas_mapel']);
+            if (count($parts) === 2) {
+                $filters['kelas_id'] = $parts[0];
+                $filters['mapel_id'] = $parts[1];
+            }
+        }
 
         // Jika guru, otomatis batasi data absensi hanya untuk jadwal guru tersebut (AB-08)
         if ($user->role === 'guru') {
@@ -46,7 +55,11 @@ class LaporanService
     {
         $prefix = $user->role === 'guru' ? 'rekap_absensi_guru' : 'rekap_absensi';
 
-        $periode = ! empty($filters['bulan']) ? $filters['bulan'] : date('Y-m');
+        $periode = date('Y-m-d');
+        if (!empty($filters['tahun_ajaran'])) {
+            $ta = str_replace('/', '-', $filters['tahun_ajaran']);
+            $periode = $ta . (!empty($filters['semester']) ? '_' . $filters['semester'] : '');
+        }
 
         return "{$prefix}_{$periode}.{$extension}";
     }
@@ -72,9 +85,13 @@ class LaporanService
 
         $data = $this->absensiService->getRekapLaporan($filters);
 
-        $periode = ! empty($filters['bulan'])
-            ? Carbon::createFromFormat('Y-m', $filters['bulan'])->translatedFormat('F Y')
-            : 'Semua Periode';
+        $periodeText = 'Semua Periode';
+        if (! empty($filters['tahun_ajaran'])) {
+            $periodeText = 'TA ' . $filters['tahun_ajaran'];
+            if (! empty($filters['semester'])) {
+                $periodeText .= ' Semester ' . $filters['semester'];
+            }
+        }
 
         // Ambil nama entitas sebagai variabel (tanpa query langsung di Blade PDF)
         $namaKelas = ! empty($filters['kelas_id']) ? Kelas::find($filters['kelas_id'])?->nama : null;
@@ -84,7 +101,7 @@ class LaporanService
         $pdf = Pdf::loadView('laporan.pdf', [
             'data' => $data,
             'filters' => $filters,
-            'periode' => $periode,
+            'periode' => $periodeText,
             'namaKelas' => $namaKelas,
             'namaMapel' => $namaMapel,
             'namaGuru' => $namaGuru,

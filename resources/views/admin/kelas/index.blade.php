@@ -16,12 +16,28 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                        <h3 class="text-lg font-bold">Daftar Kelas</h3>
+                        <div class="flex flex-col">
+                            <h3 class="text-lg font-bold">Daftar Kelas</h3>
+                            @if($activePeriode['tahun_ajaran'])
+                                <span class="text-sm text-green-600 dark:text-green-400">Periode Aktif: {{ $activePeriode['tahun_ajaran'] }} - {{ $activePeriode['semester'] }}</span>
+                            @endif
+                        </div>
                         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                            <form action="{{ route('admin.kelas.index') }}" method="GET" class="flex gap-2">
-                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, tingkat, jurusan..." class="w-full sm:w-64 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                            <form action="{{ route('admin.kelas.index') }}" method="GET" class="flex flex-col sm:flex-row gap-2 w-full">
+                                <select name="tahun_ajaran" class="w-full sm:w-40 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                                    <option value="all">Semua T.A</option>
+                                    @foreach($tahunAjarans as $ta)
+                                        <option value="{{ $ta }}" {{ $filterTahunAjaran === $ta ? 'selected' : '' }}>{{ $ta }}</option>
+                                    @endforeach
+                                </select>
+                                <select name="semester" class="w-full sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                                    <option value="all">Semua</option>
+                                    <option value="Ganjil" {{ $filterSemester === 'Ganjil' ? 'selected' : '' }}>Ganjil</option>
+                                    <option value="Genap" {{ $filterSemester === 'Genap' ? 'selected' : '' }}>Genap</option>
+                                </select>
+                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, tingkat, jurusan..." class="w-full sm:w-48 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
                                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition">Cari</button>
-                                @if(request('search'))
+                                @if(request()->hasAny(['search', 'tahun_ajaran', 'semester']))
                                     <a href="{{ route('admin.kelas.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-3 rounded-md text-sm flex items-center justify-center transition">Reset</a>
                                 @endif
                             </form>
@@ -39,6 +55,7 @@
                                     <th scope="col" class="px-6 py-3 whitespace-nowrap">Tingkat</th>
                                     <th scope="col" class="px-6 py-3 whitespace-nowrap">Jurusan</th>
                                     <th scope="col" class="px-6 py-3 whitespace-nowrap">Tahun Ajaran</th>
+                                    <th scope="col" class="px-6 py-3 whitespace-nowrap">Semester</th>
                                     <th scope="col" class="px-6 py-3 whitespace-nowrap">Aksi</th>
                                 </tr>
                             </thead>
@@ -49,6 +66,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $k->tingkat }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $k->jurusan->nama }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $k->tahun_ajaran }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">{{ $k->semester }}</td>
                                         <td class="px-6 py-4 flex space-x-2 whitespace-nowrap">
                                             <a href="{{ route('admin.kelas.edit', $k) }}" class="text-blue-600 dark:text-blue-400 hover:underline">Edit</a>
                                             <button type="button" 
@@ -67,7 +85,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="px-6 py-12 text-center">
+                                        <td colspan="6" class="px-6 py-12 text-center">
                                             <div class="flex flex-col items-center justify-center">
                                                 <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 mb-3">
                                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -66,10 +66,20 @@
                             </div>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700">Tahun Ajaran</label>
-                            <input type="text" name="tahun_ajaran" value="{{ old('tahun_ajaran', $jadwal->tahun_ajaran) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
-                            @error('tahun_ajaran') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Tahun Ajaran</label>
+                                <input type="text" name="tahun_ajaran" value="{{ old('tahun_ajaran', $jadwal->tahun_ajaran) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                                @error('tahun_ajaran') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Semester</label>
+                                <select name="semester" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                                    <option value="Ganjil" {{ old('semester', $jadwal->semester) == 'Ganjil' ? 'selected' : '' }}>Ganjil</option>
+                                    <option value="Genap" {{ old('semester', $jadwal->semester) == 'Genap' ? 'selected' : '' }}>Genap</option>
+                                </select>
+                                @error('semester') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-end mt-4">

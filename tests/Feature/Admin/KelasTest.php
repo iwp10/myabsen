@@ -52,6 +52,7 @@ class KelasTest extends TestCase
             'nama' => '10 RPL 1',
             'tingkat' => 10,
             'tahun_ajaran' => '2023/2024',
+            'semester' => 'Ganjil',
         ]);
 
         $response->assertRedirect(route('admin.kelas.index'));
@@ -60,6 +61,7 @@ class KelasTest extends TestCase
             'nama' => '10 RPL 1',
             'tingkat' => 10,
             'tahun_ajaran' => '2023/2024',
+            'semester' => 'Ganjil',
         ]);
     }
 
@@ -73,6 +75,7 @@ class KelasTest extends TestCase
             'nama' => 'Nama Baru',
             'tingkat' => 11,
             'tahun_ajaran' => '2024/2025',
+            'semester' => 'Genap',
         ]);
 
         $response->assertRedirect(route('admin.kelas.index'));
@@ -82,6 +85,7 @@ class KelasTest extends TestCase
             'nama' => 'Nama Baru',
             'tingkat' => 11,
             'tahun_ajaran' => '2024/2025',
+            'semester' => 'Genap',
         ]);
     }
 

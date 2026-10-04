@@ -181,23 +181,9 @@ class AbsensiController extends Controller
     /**
      * Mengunduh rekap absensi untuk guru dalam format Excel.
      */
-    public function export(Request $request)
+    public function export(ExportLaporanRequest $request)
     {
-        $guru = $request->user()->guru;
-        if (! $guru) {
-            abort(403);
-        }
-
-        $filters = $request->only([
-            'kelas_mapel', 'tanggal_awal', 'tanggal_akhir', 'bulan',
-        ]);
-
-        $filename = 'Rekap_Absensi_'.str_replace(' ', '_', $guru->user->name).'_'.date('Ymd').'.xlsx';
-
-        return Excel::download(
-            new LaporanAbsensiGuruExport($guru->id, $filters),
-            $filename
-        );
+        return $this->laporanService->exportExcel($request->user(), $request->validated());
     }
 
     /**

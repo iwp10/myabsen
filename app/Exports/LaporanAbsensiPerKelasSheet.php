@@ -132,12 +132,11 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithCustomStartCell, Wit
         if (! empty($this->filters['tanggal_akhir'])) {
             $sesiQuery->where('sesi_absensi.tanggal', '<=', $this->filters['tanggal_akhir']);
         }
-        if (! empty($this->filters['bulan'])) {
-            $parts = explode('-', $this->filters['bulan']);
-            if (count($parts) === 2) {
-                $sesiQuery->whereYear('sesi_absensi.tanggal', $parts[0])
-                    ->whereMonth('sesi_absensi.tanggal', $parts[1]);
-            }
+        if (! empty($this->filters['tahun_ajaran'])) {
+            $sesiQuery->where('jadwal.tahun_ajaran', $this->filters['tahun_ajaran']);
+        }
+        if (! empty($this->filters['semester'])) {
+            $sesiQuery->where('jadwal.semester', $this->filters['semester']);
         }
 
         $sesiData = $sesiQuery
@@ -377,12 +376,10 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithCustomStartCell, Wit
     {
         $fmt = fn ($t) => Carbon::parse($t)->locale('id')->isoFormat('D MMMM YYYY');
 
-        if (! empty($this->filters['bulan'])) {
-            try {
-                return Carbon::createFromFormat('Y-m', $this->filters['bulan'])->locale('id')->isoFormat('MMMM YYYY');
-            } catch (\Throwable) {
-                // abaikan, pakai rentang sesi
-            }
+        if (! empty($this->filters['tahun_ajaran'])) {
+            $ta = 'TA ' . $this->filters['tahun_ajaran'];
+            $sem = ! empty($this->filters['semester']) ? ' Semester ' . $this->filters['semester'] : '';
+            return $ta . $sem;
         }
         if (! empty($this->filters['tanggal_awal']) || ! empty($this->filters['tanggal_akhir'])) {
             $awal = ! empty($this->filters['tanggal_awal']) ? $fmt($this->filters['tanggal_awal']) : '...';

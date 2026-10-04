@@ -32,6 +32,7 @@ class StoreJadwalRequest extends FormRequest
             'jam_mulai' => 'required|date_format:H:i',
             'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
             'tahun_ajaran' => 'required|string|max:255',
+            'semester' => 'required|in:Ganjil,Genap',
         ];
     }
 
@@ -47,6 +48,8 @@ class StoreJadwalRequest extends FormRequest
 
             $overlapGuru = Jadwal::where('guru_id', $this->guru_id)
                 ->where('hari', $this->hari)
+                ->where('tahun_ajaran', $this->tahun_ajaran)
+                ->where('semester', $this->semester)
                 ->where(function ($q) {
                     $q->where('jam_mulai', '<', $this->jam_selesai)
                         ->where('jam_selesai', '>', $this->jam_mulai);
@@ -58,6 +61,8 @@ class StoreJadwalRequest extends FormRequest
 
             $overlapKelas = Jadwal::where('kelas_id', $this->kelas_id)
                 ->where('hari', $this->hari)
+                ->where('tahun_ajaran', $this->tahun_ajaran)
+                ->where('semester', $this->semester)
                 ->where(function ($q) {
                     $q->where('jam_mulai', '<', $this->jam_selesai)
                         ->where('jam_selesai', '>', $this->jam_mulai);
