@@ -19,20 +19,33 @@ class ExportLaporanRequest extends FormRequest
         }
 
         // Pembatasan guru (AB-08): hanya boleh mengekspor kelas yang diampunya
-        if ($user->role === 'guru' && $this->filled('kelas_mapel')) {
+        if ($user->role === 'guru') {
             $guru = $user->guru;
             if (! $guru) {
                 return false;
             }
 
-            $parts = explode('-', $this->input('kelas_mapel'));
-            if (count($parts) === 2) {
-                return \App\Models\Jadwal::where('guru_id', $guru->id)
-                    ->where('kelas_id', $parts[0])
-                    ->where('mapel_id', $parts[1])
+            if ($this->filled('kelas_id')) {
+                $hasJadwalKelas = Jadwal::where('guru_id', $guru->id)
+                    ->where('kelas_id', $this->input('kelas_id'))
                     ->exists();
+
+                if (! $hasJadwalKelas) {
+                    return false;
+                }
             }
-            return false;
+
+            if ($this->filled('kelas_mapel')) {
+                $parts = explode('-', $this->input('kelas_mapel'));
+                if (count($parts) === 2) {
+                    return Jadwal::where('guru_id', $guru->id)
+                        ->where('kelas_id', $parts[0])
+                        ->where('mapel_id', $parts[1])
+                        ->exists();
+                }
+
+                return false;
+            }
         }
 
         return true;
@@ -41,7 +54,7 @@ class ExportLaporanRequest extends FormRequest
     /**
      * Dapatkan aturan validasi yang berlaku untuk permintaan ini.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {

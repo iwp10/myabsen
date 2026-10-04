@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Guru;
 
-use App\Exports\LaporanAbsensiGuruExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ExportLaporanRequest;
 use App\Http\Requests\Guru\ShowAbsensiRequest;
@@ -18,7 +17,6 @@ use App\Services\LaporanService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Maatwebsite\Excel\Facades\Excel;
 
 class AbsensiController extends Controller
 {
@@ -181,23 +179,24 @@ class AbsensiController extends Controller
     /**
      * Mengunduh rekap absensi untuk guru dalam format Excel.
      */
-    public function export(Request $request)
+    public function export(ExportLaporanRequest $request)
     {
         $guru = $request->user()->guru;
         if (! $guru) {
             abort(403);
         }
 
-        $filters = $request->only([
-            'kelas_mapel', 'tanggal_awal', 'tanggal_akhir', 'bulan',
-        ]);
+        if ($request->filled('kelas_id')) {
+            $isDiampu = Jadwal::where('guru_id', $guru->id)
+                ->where('kelas_id', $request->input('kelas_id'))
+                ->exists();
 
-        $filename = 'Rekap_Absensi_'.str_replace(' ', '_', $guru->user->name).'_'.date('Ymd').'.xlsx';
+            if (! $isDiampu) {
+                abort(403, 'Anda tidak mengajar di kelas ini.');
+            }
+        }
 
-        return Excel::download(
-            new LaporanAbsensiGuruExport($guru->id, $filters),
-            $filename
-        );
+        return $this->laporanService->exportExcel($request->user(), $request->validated());
     }
 
     /**
@@ -205,6 +204,21 @@ class AbsensiController extends Controller
      */
     public function exportPdf(ExportLaporanRequest $request)
     {
+        $guru = $request->user()->guru;
+        if (! $guru) {
+            abort(403);
+        }
+
+        if ($request->filled('kelas_id')) {
+            $isDiampu = Jadwal::where('guru_id', $guru->id)
+                ->where('kelas_id', $request->input('kelas_id'))
+                ->exists();
+
+            if (! $isDiampu) {
+                abort(403, 'Anda tidak mengajar di kelas ini.');
+            }
+        }
+
         return $this->laporanService->exportPdf($request->user(), $request->validated());
     }
 }

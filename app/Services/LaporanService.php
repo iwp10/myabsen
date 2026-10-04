@@ -30,6 +30,14 @@ class LaporanService
             'bulan' => $validatedFilters['bulan'] ?? null,
         ];
 
+        if (! empty($validatedFilters['kelas_mapel'])) {
+            $parts = explode('-', $validatedFilters['kelas_mapel']);
+            if (count($parts) === 2) {
+                $filters['kelas_id'] = $filters['kelas_id'] ?? $parts[0];
+                $filters['mapel_id'] = $filters['mapel_id'] ?? $parts[1];
+            }
+        }
+
         // Jika guru, otomatis batasi data absensi hanya untuk jadwal guru tersebut (AB-08)
         if ($user->role === 'guru') {
             $guru = $user->guru;
