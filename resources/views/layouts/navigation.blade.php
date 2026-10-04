@@ -243,18 +243,23 @@
             <span>Profil</span>
         </x-sidebar-link>
 
-        <form method="POST" action="{{ route('logout') }}" class="w-full">
-            @csrf
-            <button type="submit"
-                    class="w-full text-left text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 group flex items-center px-3.5 py-2.5 text-sm font-medium rounded-md transition duration-150 ease-in-out">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400 dark:text-gray-400 group-hover:text-red-600 dark:group-hover:text-red-400 mr-3 flex-shrink-0 h-5 w-5 transition duration-150 ease-in-out">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
-                    <path d="M9 12h12l-3 -3" />
-                    <path d="M18 15l3 -3" />
-                </svg>
-                <span>Keluar</span>
-            </button>
-        </form>
+        <button type="button"
+                x-data=""
+                x-on:click.prevent="$dispatch('open-confirm-modal', {
+                    title: 'Konfirmasi Logout',
+                    message: 'Apakah Anda yakin ingin keluar dari akun?',
+                    action: '{{ route('logout') }}',
+                    method: 'POST',
+                    confirmText: 'Keluar'
+                })"
+                class="w-full text-left text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 group flex items-center px-3.5 py-2.5 text-sm font-medium rounded-md transition duration-150 ease-in-out">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400 dark:text-gray-400 group-hover:text-red-600 dark:group-hover:text-red-400 mr-3 flex-shrink-0 h-5 w-5 transition duration-150 ease-in-out">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
+                <path d="M9 12h12l-3 -3" />
+                <path d="M18 15l3 -3" />
+            </svg>
+            <span>Keluar</span>
+        </button>
     </div>
 </aside>

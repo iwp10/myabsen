@@ -47,15 +47,30 @@
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $guru->nip }}</td>
                                         <td class="px-6 py-4 flex items-center space-x-3 whitespace-nowrap">
                                             <a href="{{ route('admin.guru.edit', $guru) }}" class="text-blue-600 dark:text-blue-400 hover:underline">Edit</a>
-                                            <form action="{{ route('admin.guru.destroy', $guru) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus guru ini?');" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Hapus</button>
-                                            </form>
-                                            <form action="{{ route('admin.guru.reset-password', $guru) }}" method="POST" onsubmit="return confirm('Reset password guru ini ke \'password\'?');" class="inline">
-                                                @csrf
-                                                <button type="submit" class="text-yellow-600 dark:text-yellow-400 hover:underline">Reset Password</button>
-                                            </form>
+                                            <button type="button" 
+                                                x-data=""
+                                                x-on:click.prevent="$dispatch('open-confirm-modal', {
+                                                    title: 'Konfirmasi Hapus',
+                                                    message: 'Apakah Anda yakin ingin menghapus guru ini?\n\nData yang sudah dihapus mungkin tidak dapat dikembalikan.',
+                                                    action: '{{ route('admin.guru.destroy', $guru) }}',
+                                                    method: 'DELETE',
+                                                    confirmText: 'Hapus'
+                                                })"
+                                                class="text-red-600 dark:text-red-400 hover:underline">
+                                                Hapus
+                                            </button>
+                                            <button type="button" 
+                                                x-data=""
+                                                x-on:click.prevent="$dispatch('open-confirm-modal', {
+                                                    title: 'Konfirmasi Reset Password',
+                                                    message: 'Apakah Anda yakin ingin mereset password guru ini ke \'password\'?',
+                                                    action: '{{ route('admin.guru.reset-password', $guru) }}',
+                                                    method: 'POST',
+                                                    confirmText: 'Reset Password'
+                                                })"
+                                                class="text-yellow-600 dark:text-yellow-400 hover:underline">
+                                                Reset Password
+                                            </button>
                                         </td>
                                     </tr>
                                 @empty

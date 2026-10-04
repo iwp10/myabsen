@@ -53,11 +53,18 @@
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $jurusan->kode }}</td>
                                         <td class="px-6 py-4 flex space-x-2 whitespace-nowrap">
                                             <a href="{{ route('admin.jurusan.edit', $jurusan) }}" class="text-blue-600 dark:text-blue-400 hover:underline">Edit</a>
-                                            <form action="{{ route('admin.jurusan.destroy', $jurusan) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus jurusan ini?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Hapus</button>
-                                            </form>
+                                            <button type="button" 
+                                                x-data=""
+                                                x-on:click.prevent="$dispatch('open-confirm-modal', {
+                                                    title: 'Konfirmasi Hapus',
+                                                    message: 'Apakah Anda yakin ingin menghapus jurusan ini?\n\nData yang sudah dihapus mungkin tidak dapat dikembalikan.',
+                                                    action: '{{ route('admin.jurusan.destroy', $jurusan) }}',
+                                                    method: 'DELETE',
+                                                    confirmText: 'Hapus'
+                                                })"
+                                                class="text-red-600 dark:text-red-400 hover:underline">
+                                                Hapus
+                                            </button>
                                         </td>
                                     </tr>
                                 @empty

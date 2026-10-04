@@ -82,15 +82,30 @@
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $siswa->kelas->tingkat }} {{ $siswa->kelas->nama }} - {{ $siswa->kelas->jurusan->kode }}</td>
                                         <td class="px-6 py-4 flex items-center space-x-3 whitespace-nowrap">
                                             <a href="{{ route('admin.siswa.edit', $siswa) }}" class="text-blue-600 dark:text-blue-400 hover:underline">Edit</a>
-                                            <form action="{{ route('admin.siswa.destroy', $siswa) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus siswa ini?');" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Hapus</button>
-                                            </form>
-                                            <form action="{{ route('admin.siswa.reset-password', $siswa) }}" method="POST" onsubmit="return confirm('Reset password siswa ini ke \'password\'?');" class="inline">
-                                                @csrf
-                                                <button type="submit" class="text-yellow-600 dark:text-yellow-400 hover:underline">Reset Password</button>
-                                            </form>
+                                            <button type="button" 
+                                                x-data=""
+                                                x-on:click.prevent="$dispatch('open-confirm-modal', {
+                                                    title: 'Konfirmasi Hapus',
+                                                    message: 'Apakah Anda yakin ingin menghapus siswa ini?\n\nData yang sudah dihapus mungkin tidak dapat dikembalikan.',
+                                                    action: '{{ route('admin.siswa.destroy', $siswa) }}',
+                                                    method: 'DELETE',
+                                                    confirmText: 'Hapus'
+                                                })"
+                                                class="text-red-600 dark:text-red-400 hover:underline">
+                                                Hapus
+                                            </button>
+                                            <button type="button" 
+                                                x-data=""
+                                                x-on:click.prevent="$dispatch('open-confirm-modal', {
+                                                    title: 'Konfirmasi Reset Password',
+                                                    message: 'Apakah Anda yakin ingin mereset password siswa ini ke \'password\'?',
+                                                    action: '{{ route('admin.siswa.reset-password', $siswa) }}',
+                                                    method: 'POST',
+                                                    confirmText: 'Reset Password'
+                                                })"
+                                                class="text-yellow-600 dark:text-yellow-400 hover:underline">
+                                                Reset Password
+                                            </button>
                                         </td>
                                     </tr>
                                 @empty

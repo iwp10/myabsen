@@ -91,13 +91,17 @@
                                 </x-dropdown-link>
 
                                 <!-- Authentication -->
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <x-dropdown-link :href="route('logout')"
-                                            onclick="event.preventDefault(); this.closest('form').submit();">
-                                        {{ __('Log Out') }}
-                                    </x-dropdown-link>
-                                </form>
+                                <x-dropdown-link href="#"
+                                    x-data=""
+                                    x-on:click.prevent="$dispatch('open-confirm-modal', {
+                                        title: 'Konfirmasi Logout',
+                                        message: 'Apakah Anda yakin ingin keluar dari akun?',
+                                        action: '{{ route('logout') }}',
+                                        method: 'POST',
+                                        confirmText: 'Logout'
+                                    })">
+                                    {{ __('Log Out') }}
+                                </x-dropdown-link>
                             </x-slot>
                         </x-dropdown>
                     </div>
@@ -109,5 +113,8 @@
                 </main>
             </div>
         </div>
+        
+        <!-- Global Confirm Modal -->
+        <x-confirm-modal />
     </body>
 </html>

@@ -2,14 +2,15 @@
 
 namespace App\Exports;
 
-use App\Services\AbsensiService;
-use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
+use App\Models\Jadwal;
+use Maatwebsite\Excel\Concerns\Exportable;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Maatwebsite\Excel\Concerns\Export;
 
-class LaporanAbsensiExport implements FromCollection, WithHeadings, WithMapping
+class LaporanAbsensiExport implements WithMultipleSheets, Export
 {
+    use Exportable;
+
     protected array $filters;
 
     public function __construct(array $filters)
@@ -17,50 +18,42 @@ class LaporanAbsensiExport implements FromCollection, WithHeadings, WithMapping
         $this->filters = $filters;
     }
 
-    public function collection(): Collection
+    public function sheets(): array
     {
-        $absensiService = app(AbsensiService::class);
+        $sheets = [];
 
-        return collect($absensiService->getRekapLaporan($this->filters));
-    }
+        $jadwalQuery = Jadwal::with(['kelas', 'mapel'])
+            ->select('kelas_id', 'mapel_id', 'guru_id')
+            ->distinct();
 
-    public function headings(): array
-    {
-        return [
-            'NIS',
-            'Nama Siswa',
-            'Kelas',
-            'Mata Pelajaran',
-            'Hadir',
-            'Izin',
-            'Sakit',
-            'Alpa',
-            'Total Sesi',
-            'Persentase Kehadiran (%)',
-        ];
-    }
+        // Terapkan filter dari form Admin
+        if (!empty($this->filters['guru_id'])) {
+            $jadwalQuery->where('guru_id', $this->filters['guru_id']);
+        }
+        if (!empty($this->filters['kelas_id'])) {
+            $jadwalQuery->where('kelas_id', $this->filters['kelas_id']);
+        }
+        if (!empty($this->filters['mapel_id'])) {
+            $jadwalQuery->where('mapel_id', $this->filters['mapel_id']);
+        }
 
-    public function map($row): array
-    {
-        $absensiService = app(AbsensiService::class);
-        $persentase = $absensiService->hitungPersentaseKehadiran(
-            (int) $row->hadir,
-            (int) $row->izin,
-            (int) $row->sakit,
-            (int) $row->total_sesi
-        );
+        $kombinasi = $jadwalQuery->get();
 
-        return [
-            $row->nis,
-            $row->nama_siswa,
-            $row->nama_kelas,
-            $row->nama_mapel,
-            $row->hadir,
-            $row->izin,
-            $row->sakit,
-            $row->alpa,
-            $row->total_sesi,
-            $persentase,
-        ];
+        foreach ($kombinasi as $item) {
+            $sheets[] = new LaporanAbsensiPerKelasSheet(
+                $item->guru_id, 
+                $item->kelas_id, 
+                $item->mapel_id, 
+                $this->filters
+            );
+        }
+
+        // Jika tidak ada data, render 1 sheet kosong agar proses download tidak error
+        if (count($sheets) === 0) {
+            $guruId = $this->filters['guru_id'] ?? 0;
+            $sheets[] = new LaporanAbsensiPerKelasSheet($guruId, 0, 0, $this->filters);
+        }
+
+        return $sheets;
     }
 }

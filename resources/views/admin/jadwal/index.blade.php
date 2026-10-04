@@ -62,11 +62,18 @@
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $jadwal->guru->user->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <a href="{{ route('admin.jadwal.edit', $jadwal) }}" class="text-blue-600 dark:text-blue-400 hover:underline mr-3">Edit</a>
-                                            <form action="{{ route('admin.jadwal.destroy', $jadwal) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin ingin menghapus?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Hapus</button>
-                                            </form>
+                                            <button type="button" 
+                                                x-data=""
+                                                x-on:click.prevent="$dispatch('open-confirm-modal', {
+                                                    title: 'Konfirmasi Hapus',
+                                                    message: 'Apakah Anda yakin ingin menghapus jadwal ini?\n\nData yang sudah dihapus mungkin tidak dapat dikembalikan.',
+                                                    action: '{{ route('admin.jadwal.destroy', $jadwal) }}',
+                                                    method: 'DELETE',
+                                                    confirmText: 'Hapus'
+                                                })"
+                                                class="text-red-600 dark:text-red-400 hover:underline">
+                                                Hapus
+                                            </button>
                                         </td>
                                     </tr>
                                 @empty
