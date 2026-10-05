@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ImportSiswaRequest;
 use App\Http\Requests\StoreSiswaRequest;
 use App\Http\Requests\UpdateSiswaRequest;
 use App\Imports\SiswaImport;
@@ -120,13 +121,8 @@ class SiswaController extends Controller
             ->with('success', 'Password siswa berhasil direset ke "password".');
     }
 
-    public function import(Request $request)
+    public function import(ImportSiswaRequest $request)
     {
-        $request->validate([
-            'kelas_id' => 'required|exists:kelas,id',
-            'file' => 'required|mimes:xlsx,csv,xls',
-        ]);
-
         try {
             Excel::import(new SiswaImport($request->kelas_id), $request->file('file'));
 

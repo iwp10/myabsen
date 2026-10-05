@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Jadwal;
+use App\Support\KelasMapel;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -26,15 +27,16 @@ class ExportLaporanRequest extends FormRequest
             }
 
             if ($this->filled('kelas_mapel')) {
-                $parts = explode('-', $this->input('kelas_mapel'));
-                if (count($parts) === 2) {
+                $parsed = KelasMapel::parse($this->input('kelas_mapel'));
+                if ($parsed) {
                     return Jadwal::where('guru_id', $guru->id)
-                        ->where('kelas_id', $parts[0])
-                        ->where('mapel_id', $parts[1])
+                        ->where('kelas_id', $parsed['kelas_id'])
+                        ->where('mapel_id', $parsed['mapel_id'])
                         ->exists();
                 }
 
-                return false;
+                // Format tidak valid diloloskan ke aturan validasi (rules) agar menghasilkan error validasi
+                return true;
             }
 
             if ($this->filled('kelas_id') || $this->filled('mapel_id')) {
@@ -64,7 +66,7 @@ class ExportLaporanRequest extends FormRequest
             'jurusan_id' => ['nullable', 'integer', 'exists:jurusan,id'], // Untuk Admin
             'kelas_id' => ['nullable', 'integer', 'exists:kelas,id'], // Untuk Admin
             'mapel_id' => ['nullable', 'integer', 'exists:mapel,id'], // Untuk Admin
-            'kelas_mapel' => ['nullable', 'string'],
+            'kelas_mapel' => ['nullable', 'string', 'regex:/^[1-9]\d*-[1-9]\d*$/'],
             'bulan' => ['nullable', 'date_format:Y-m'],
             'tanggal_awal' => ['nullable', 'date'],
             'tanggal_akhir' => ['nullable', 'date', 'after_or_equal:tanggal_awal'],

@@ -55,4 +55,26 @@ class JadwalPolicy
 
         return Response::deny('Akses ditolak.');
     }
+
+    /**
+     * Menentukan apakah user (guru) dapat melihat riwayat absensi pada jadwal ini.
+     */
+    public function viewRiwayat(User $user, Jadwal $jadwal): Response
+    {
+        if ($user->role === 'guru') {
+            $guru = Guru::where('user_id', $user->id)->first();
+
+            if (! $guru) {
+                return Response::deny('Anda tidak terdaftar sebagai guru.');
+            }
+
+            if ($jadwal->guru_id !== $guru->id) {
+                return Response::deny('Anda tidak mengajar jadwal ini.');
+            }
+
+            return Response::allow();
+        }
+
+        return Response::deny('Akses ditolak.');
+    }
 }

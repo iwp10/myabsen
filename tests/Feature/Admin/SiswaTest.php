@@ -154,6 +154,74 @@ test('admin can import siswa from excel', function () {
     Excel::assertImported('siswa.xlsx');
 });
 
+test('import siswa: file bertipe salah ditolak', function () {
+    $file = UploadedFile::fake()->create('dokumen.pdf', 100, 'application/pdf');
+
+    $response = $this->actingAs($this->admin)->post(route('admin.siswa.import'), [
+        'kelas_id' => $this->kelas->id,
+        'file' => $file,
+    ]);
+
+    $response->assertSessionHasErrors('file');
+});
+
+test('import siswa: kelas_id tidak ada ditolak', function () {
+    $file = UploadedFile::fake()->create('siswa.xlsx', 100);
+
+    $response = $this->actingAs($this->admin)->post(route('admin.siswa.import'), [
+        'kelas_id' => 99999,
+        'file' => $file,
+    ]);
+
+    $response->assertSessionHasErrors('kelas_id');
+});
+
+test('import siswa: file valid berhasil membuat siswa dan akun seperti sebelumnya', function () {
+    $csvContent = "nis,nama\n20269999,Siswa Hasil Impor\n";
+    $file = UploadedFile::fake()->createWithContent('siswa.csv', $csvContent);
+
+    $response = $this->actingAs($this->admin)->post(route('admin.siswa.import'), [
+        'kelas_id' => $this->kelas->id,
+        'file' => $file,
+    ]);
+
+    $response->assertRedirect(route('admin.siswa.index'));
+    $response->assertSessionHas('success', 'Data siswa berhasil diimpor.');
+
+    $this->assertDatabaseHas('users', [
+        'name' => 'Siswa Hasil Impor',
+        'username' => '20269999',
+        'role' => 'siswa',
+    ]);
+
+    $user = User::where('username', '20269999')->first();
+    expect($user)->not->toBeNull();
+
+    $this->assertDatabaseHas('siswa', [
+        'user_id' => $user->id,
+        'nis' => '20269999',
+        'kelas_id' => $this->kelas->id,
+    ]);
+});
+
+test('import siswa: guru dan siswa tidak bisa mengakses import (403)', function () {
+    $guruUser = User::factory()->create(['role' => 'guru']);
+    $siswaUser = User::factory()->create(['role' => 'siswa']);
+    $file = UploadedFile::fake()->create('siswa.xlsx', 100);
+
+    // Guru mencoba akses import -> 403
+    $this->actingAs($guruUser)->post(route('admin.siswa.import'), [
+        'kelas_id' => $this->kelas->id,
+        'file' => $file,
+    ])->assertStatus(403);
+
+    // Siswa mencoba akses import -> 403
+    $this->actingAs($siswaUser)->post(route('admin.siswa.import'), [
+        'kelas_id' => $this->kelas->id,
+        'file' => $file,
+    ])->assertStatus(403);
+});
+
 test('admin can search siswa by nis or user name', function () {
     $user1 = User::factory()->create(['name' => 'Bambang Tri', 'role' => 'siswa', 'username' => 'NIS001']);
     Siswa::create(['user_id' => $user1->id, 'nis' => 'NIS001', 'kelas_id' => $this->kelas->id]);
