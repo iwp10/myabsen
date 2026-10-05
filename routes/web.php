@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ArsipController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\GuruController;
 use App\Http\Controllers\Admin\JadwalController;
@@ -51,6 +52,9 @@ Route::middleware('auth')->group(function () {
 
         Route::get('pengaturan-periode', [PengaturanPeriodeController::class, 'index'])->name('pengaturan-periode.index');
         Route::post('pengaturan-periode', [PengaturanPeriodeController::class, 'update'])->name('pengaturan-periode.update');
+
+        Route::get('arsip', [ArsipController::class, 'index'])->name('arsip.index');
+        Route::post('arsip/{jenis}/{id}/pulihkan', [ArsipController::class, 'pulihkan'])->name('arsip.pulihkan');
     });
 
     // Guru Routes

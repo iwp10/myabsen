@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Services\ArsipService;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateMapelRequest extends FormRequest
@@ -17,5 +18,17 @@ class UpdateMapelRequest extends FormRequest
             'nama' => ['required', 'string', 'max:255'],
             'kode' => ['required', 'string', 'max:255', 'unique:mapel,kode,'.$this->route('mapel')->id],
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            if ($validator->errors()->has('kode')) {
+                if ($pesan = app(ArsipService::class)->cekDuplikatTerhapus('mapel', (string) $this->kode)) {
+                    $validator->errors()->forget('kode');
+                    $validator->errors()->add('kode', $pesan);
+                }
+            }
+        });
     }
 }

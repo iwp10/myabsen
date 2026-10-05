@@ -29,9 +29,9 @@ Aplikasi ini memiliki tiga peran utama dengan batasan akses masing-masing, serta
 - **Master Data:** Mengelola data jurusan, kelas, mata pelajaran, guru, dan siswa dengan perlindungan riwayat data (soft delete).
 - **Manajemen Jadwal:** Mengatur jadwal pelajaran dengan validasi pencegahan jadwal bentrok.
 - **Import Data:** Memasukkan data siswa secara massal melalui file Excel.
-- **Pemantauan & Koreksi Historis:** Melihat seluruh rekap absensi sekolah dan hak istimewa untuk mengoreksi absensi historis kapan saja.
 - **Menu Koreksi Absensi:** Meninjau jadwal dan status sesi absensi pada tanggal lampau per kelas serta membuka form koreksi/susulan.
 - **Pengaturan Periode:** Mengelola tahun ajaran aktif dan semester aktif langsung dari antarmuka web dengan saran otomatis kalender dan modal konfirmasi pergantian.
+- **Data Terhapus (Arsip):** Meninjau data master yang telah di-soft-delete (Guru, Siswa, Kelas, Mapel) dalam 4 tab dan memulihkannya kembali secara aman dengan validasi dependensi dan pencegahan bentrok.
 - **Laporan & Ekspor:** Mengunduh rekap absensi sekolah dalam format Excel (multi-sheet per kelas-mapel) dan dokumen cetak PDF dengan batasan aman serta filter jurusan dan bulan.
 
 ### 👨‍🏫 Guru
@@ -55,7 +55,7 @@ Proyek ini dibangun menggunakan *stack* teknologi berikut (sesuai dengan aturan 
   - **Thin Controller:** Menerima request HTTP, mendelegasikan proses ke Service, dan mengembalikan response atau view.
   - **FormRequest:** Khusus memvalidasi integritas input pengguna di sisi server.
   - **Policy (`JadwalPolicy`):** Memusatkan otorisasi hak akses guru dan hak koreksi historis admin.
-  - **Service Pattern (`AbsensiService` & `LaporanService`):** Pusat seluruh *business logic*, transaksi absensi, kalkulasi persentase kehadiran, ekspor laporan, dan helper waktu server `Asia/Jakarta`.
+  - **Service Pattern (`AbsensiService`, `LaporanService`, & `ArsipService`):** Pusat seluruh *business logic*, transaksi absensi, kalkulasi persentase kehadiran, ekspor laporan, pemulihan data terhapus, dan helper waktu server `Asia/Jakarta`.
   - **Model:** Khusus menangani *relationships*, *query scopes*, dan *persistence concerns* (termasuk *soft deletes*).
   - **View:** Blade Templating dengan Tailwind CSS dan Alpine.js untuk layer presentasi.
 - **Database:** MySQL 8
