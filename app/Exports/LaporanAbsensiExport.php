@@ -57,7 +57,7 @@ class LaporanAbsensiExport implements Export, WithMultipleSheets
         $guruNamesByPair = [];
 
         if (! empty($guruId)) {
-            $guru = Guru::with('user')->find($guruId);
+            $guru = Guru::withTrashed()->with('user')->find($guruId);
             $defaultGuruNama = $guru && $guru->user ? $guru->user->name : '-';
         } else {
             $guruQuery = DB::table('jadwal')

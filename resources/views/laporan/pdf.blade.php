@@ -89,7 +89,12 @@
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td class="text-center">{{ $row->nis }}</td>
-                    <td>{{ $row->nama_siswa }}</td>
+                    <td>
+                        {{ $row->nama_siswa }}
+                        @if(!empty($row->is_nonaktif))
+                            <span style="font-size: 10px; color: #6b7280;">(nonaktif)</span>
+                        @endif
+                    </td>
                     <td class="text-center">{{ $row->nama_kelas }}</td>
                     <td>{{ $row->nama_mapel }}</td>
                     <td class="text-center">{{ $row->hadir }}</td>

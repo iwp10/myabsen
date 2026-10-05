@@ -87,7 +87,12 @@
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
                                         <td class="sticky left-0 z-10 bg-white dark:bg-gray-800 px-3 py-2 text-center text-gray-500 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700 w-8">{{ $no + 1 }}</td>
                                         <td class="sticky left-8 z-10 bg-white dark:bg-gray-800 px-3 py-2 text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700 font-mono text-xs w-32">{{ $siswa->nis }}</td>
-                                        <td class="sticky left-[10rem] z-10 bg-white dark:bg-gray-800 px-3 py-2 font-medium text-gray-800 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700 w-52">{{ $siswa->user->name }}</td>
+                                        <td class="sticky left-[10rem] z-10 bg-white dark:bg-gray-800 px-3 py-2 font-medium text-gray-800 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700 w-52">
+                                            <span>{{ $siswa->user->name }}</span>
+                                            @if($siswa->is_nonaktif)
+                                                <span class="text-xs text-gray-400 dark:text-gray-500 font-normal ml-1">(nonaktif)</span>
+                                            @endif
+                                        </td>
                                         @foreach($sesiList as $sesi)
                                             @php
                                                 $status = $detailMap[$sesi->id][$siswa->id] ?? null;

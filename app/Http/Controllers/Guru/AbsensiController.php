@@ -191,12 +191,8 @@ class AbsensiController extends Controller
             ->orderBy('tanggal', 'asc')
             ->get();
 
-        // Ambil daftar siswa di kelas ini
-        $siswaList = Siswa::with('user')
-            ->where('kelas_id', $kelas->id)
-            ->whereNull('deleted_at')
-            ->get()
-            ->sortBy('user.name');
+        // Ambil daftar siswa di kelas ini (aktif + nonaktif yang memiliki riwayat sesi)
+        $siswaList = $this->absensiService->getSiswaUntukLaporan($kelas->id, $sesiList->pluck('id'));
 
         return view('guru.riwayat_detail', [
             'jadwal' => $jadwal,

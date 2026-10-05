@@ -166,7 +166,7 @@ class LaporanService
         $namaJurusan = ! empty($filters['jurusan_id']) ? Jurusan::find($filters['jurusan_id'])?->nama : null;
         $namaKelas = ! empty($filters['kelas_id']) ? Kelas::find($filters['kelas_id'])?->nama : null;
         $namaMapel = ! empty($filters['mapel_id']) ? Mapel::find($filters['mapel_id'])?->nama : null;
-        $namaGuru = ! empty($filters['guru_id']) ? Guru::with('user')->find($filters['guru_id'])?->user?->name : null;
+        $namaGuru = ! empty($filters['guru_id']) ? Guru::withTrashed()->with('user')->find($filters['guru_id'])?->user?->name : null;
 
         $pdf = Pdf::loadView('laporan.pdf', [
             'data' => $data,

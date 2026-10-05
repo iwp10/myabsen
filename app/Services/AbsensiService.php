@@ -702,18 +702,32 @@ class AbsensiService
             'users.name as nama_siswa',
             'kelas.nama as nama_kelas',
             'mapel.nama as nama_mapel',
+            DB::raw('(CASE WHEN siswa.deleted_at IS NOT NULL THEN 1 ELSE 0 END) as is_nonaktif'),
             DB::raw('SUM(CASE WHEN detail_absensi.status = "hadir" THEN 1 ELSE 0 END) as hadir'),
             DB::raw('SUM(CASE WHEN detail_absensi.status = "izin" THEN 1 ELSE 0 END) as izin'),
             DB::raw('SUM(CASE WHEN detail_absensi.status = "sakit" THEN 1 ELSE 0 END) as sakit'),
             DB::raw('SUM(CASE WHEN detail_absensi.status = "alpa" THEN 1 ELSE 0 END) as alpa'),
             DB::raw('COUNT(detail_absensi.id) as total_sesi')
         )
-            ->groupBy('siswa.id', 'siswa.nis', 'users.name', 'kelas.nama', 'mapel.nama')
+            ->groupBy('siswa.id', 'siswa.nis', 'users.name', 'kelas.nama', 'mapel.nama', 'siswa.deleted_at')
             ->orderBy('kelas.nama')
             ->orderBy('mapel.nama')
             ->orderBy('users.name');
 
         return $query->get();
+    }
+
+    /**
+     * Mendapatkan daftar siswa untuk rekap/laporan absensi pada kelas dan cakupan sesi tertentu.
+     * Mengembalikan seluruh siswa aktif di kelas tersebut ditambah siswa yang sudah di-soft-delete
+     * yang memiliki riwayat absensi (detail_absensi) pada sesi-sesi cakupan tersebut.
+     * Diurutkan berdasarkan nama siswa (alfabetis).
+     *
+     * @return Collection<int, Siswa>
+     */
+    public function getSiswaUntukLaporan(int $kelasId, array|Collection $sesiIds = []): Collection
+    {
+        return Siswa::untukLaporan($kelasId, $sesiIds)->get();
     }
 
     /**
