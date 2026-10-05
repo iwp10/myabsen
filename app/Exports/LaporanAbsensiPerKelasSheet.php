@@ -62,26 +62,48 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithCustomStartCell, Wit
 
     protected ?string $customTitle = null;
 
+    protected ?string $pesanKosong = null;
+
     /** @var array<int, string> tanggal (Y-m-d) per pertemuan */
     protected array $tanggalSesi = [];
 
     protected int $jumlahSiswa = 0;
 
-    public function __construct($guruId, $kelasId, $mapelId, $filters, ?string $customTitle = null)
-    {
+    public function __construct(
+        $guruId,
+        $kelasId,
+        $mapelId,
+        $filters,
+        ?string $customTitle = null,
+        ?string $kelasNama = null,
+        ?string $mapelNama = null,
+        ?string $guruNama = null,
+        ?string $pesanKosong = null
+    ) {
         $this->guruId = $guruId;
         $this->kelasId = $kelasId;
         $this->mapelId = $mapelId;
         $this->filters = $filters;
         $this->customTitle = $customTitle;
+        $this->pesanKosong = $pesanKosong;
 
-        $kelas = Kelas::withTrashed()->find($kelasId);
-        $mapel = Mapel::withTrashed()->find($mapelId);
+        if ($kelasNama !== null) {
+            $this->kelasNama = $kelasNama;
+        } else {
+            $kelas = Kelas::withTrashed()->find($kelasId);
+            $this->kelasNama = $kelas ? $kelas->nama : '-';
+        }
 
-        $this->kelasNama = $kelas ? $kelas->nama : '-';
-        $this->mapelNama = $mapel ? $mapel->nama : '-';
+        if ($mapelNama !== null) {
+            $this->mapelNama = $mapelNama;
+        } else {
+            $mapel = Mapel::withTrashed()->find($mapelId);
+            $this->mapelNama = $mapel ? $mapel->nama : '-';
+        }
 
-        if (! empty($guruId)) {
+        if ($guruNama !== null) {
+            $this->guruNama = $guruNama;
+        } elseif (! empty($guruId)) {
             $guru = Guru::with('user')->find($guruId);
             $this->guruNama = $guru && $guru->user ? $guru->user->name : '-';
         } else {
@@ -128,7 +150,7 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithCustomStartCell, Wit
     public function array(): array
     {
         if ($this->kelasId == 0) {
-            return [['Belum ada jadwal mengajar.']];
+            return [[$this->pesanKosong ?? 'Belum ada jadwal mengajar.']];
         }
 
         // 1. Siswa di kelas ini
@@ -149,6 +171,14 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithCustomStartCell, Wit
 
         if (! empty($this->guruId)) {
             $sesiQuery->where('jadwal.guru_id', $this->guruId);
+        }
+
+        if (! empty($this->filters['bulan'])) {
+            $parts = explode('-', $this->filters['bulan']);
+            if (count($parts) === 2) {
+                $sesiQuery->whereYear('sesi_absensi.tanggal', $parts[0])
+                    ->whereMonth('sesi_absensi.tanggal', $parts[1]);
+            }
         }
 
         if (! empty($this->filters['tanggal_awal'])) {
@@ -401,6 +431,13 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithCustomStartCell, Wit
     {
         $fmt = fn ($t) => Carbon::parse($t)->locale('id')->isoFormat('D MMMM YYYY');
 
+        if (! empty($this->filters['bulan'])) {
+            $dt = Carbon::createFromFormat('Y-m', $this->filters['bulan']);
+            $textBulan = $dt ? $dt->locale('id')->isoFormat('MMMM YYYY') : $this->filters['bulan'];
+            $ta = ! empty($this->filters['tahun_ajaran']) ? ' TA '.$this->filters['tahun_ajaran'] : '';
+
+            return "Bulan {$textBulan}{$ta}";
+        }
         if (! empty($this->filters['tahun_ajaran'])) {
             $ta = 'TA '.$this->filters['tahun_ajaran'];
             $sem = ! empty($this->filters['semester']) ? ' Semester '.$this->filters['semester'] : '';

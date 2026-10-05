@@ -663,6 +663,9 @@ class AbsensiService
             ->join('kelas', 'jadwal.kelas_id', '=', 'kelas.id')
             ->join('mapel', 'jadwal.mapel_id', '=', 'mapel.id');
 
+        if (! empty($filters['jurusan_id'])) {
+            $query->where('kelas.jurusan_id', $filters['jurusan_id']);
+        }
         if (! empty($filters['kelas_id'])) {
             $query->where('jadwal.kelas_id', $filters['kelas_id']);
         }

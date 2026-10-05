@@ -102,6 +102,7 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] Fitur Akademik: Penambahan kolom `semester` (Ganjil/Genap) pada kelas dan jadwal beserta filter pada halaman index dan form request.
 - [x] Fitur Ekspor: Format ekspor Excel multi-sheet matriks per pertemuan (P1..Pn) per pasangan kelas-mapel untuk guru dan admin.
 - [x] Fitur Admin: Pengaturan Periode aktif (AB-11) melalui antarmuka web, migrasi tabel pengaturan (kunci-nilai), saran otomatis berbasis tanggal kalender, modal konfirmasi pergantian, banner pengingat dashboard admin, serta pemakaian seragam di seluruh dashboard guru, dashboard siswa, riwayat guru, rekapitulasi, dan ekspor laporan.
+- [x] Fitur Ekspor: Pembatasan jumlah sheet Excel admin ('batas_sheet_ekspor' => 50) dan batas baris PDF ('batas_baris_pdf' => 2000) di config/absensi.php dengan pesan error ramah, penambahan filter Jurusan pada laporan admin, penanganan kombinasi jurusan/kelas tidak cocok, dan eliminasi N+1 query pada pembentukan sheet ekspor.
 
 ### Tahap Improvement: Refactor Arsitektur
 - [x] Pemisahan Tanggung Jawab (Separation of Concerns): Controller tipis (*Thin Controller*), FormRequest khusus validasi input, Policy khusus otorisasi hak akses, Service sebagai pusat seluruh *business logic*, Model khusus relasi & persistensi data, dan View khusus layer presentasi.
@@ -131,11 +132,11 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-04 | 1,3,9 | feat: penambahan kolom dan konsep semester (Ganjil/Genap) pada tabel kelas dan jadwal via migrasi baru serta filter pada index dan request (oleh lat's play).
 2026-10-05 | 1,3,4,5,6,9 | feat: implementasi Pengaturan Periode aktif (AB-11) oleh admin via web dan database (tabel pengaturan), saran kalender otomatis, banner pengingat dashboard admin, penyelarasan default periode di dashboard guru, dashboard siswa, riwayat guru, rekap dan ekspor laporan, validasi tahun ajaran YYYY/YYYY (tahun kedua = pertama+1), serta 8 pengujian otomatis AB-11 lulus (PASS).
 2026-10-05 | 1,3,6,9 | fix: perbaikan filter periode terpadu master data admin (Kelas dan Jadwal default Semua Periode), standarisasi dark mode form admin (termasuk color-scheme:dark), pembentukan sheet ekspor admin multi-jurusan (TKJ, TBSM, dll) dengan sanitasi nama sheet <= 31 karakter, perbaikan kedipan modal pengaturan periode (type=button, intercept Enter, dan x-cloak global), serta 12 feature test AB-11 lulus (PASS).
+2026-10-05 | 6,9 | feat: pembatasan ekspor laporan admin (maks. 50 sheet Excel dan 2000 baris PDF via config/absensi.php), filter jurusan opsional, optimasi eliminasi N+1 pada LaporanAbsensiExport, dan 17 test LaporanTest lulus (PASS).
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:
 - [ ] **Pilihan Periode di Riwayat Guru dan Siswa:** Tambahkan dropdown pemilihan tahun ajaran dan semester pada halaman riwayat guru dan riwayat siswa agar pengguna dapat meninjau histori kehadiran periode terdahulu tanpa harus mengubah periode aktif.
-- [ ] **Pembatasan Ekspor Excel Admin Tanpa Filter:** Tambahkan validasi batas maksimum rentang/sheet atau filter wajib pada ekspor admin guna mencegah risiko *Out Of Memory* (OOM) dan *timeout* saat men-generate ratusan sheet secara sinkron.
 - [ ] **Policy dan Test untuk Riwayat Guru:** Terapkan pemeriksaan otorisasi melalui Policy pada rute `guru.riwayat.detail` dan lengkapi Feature Test untuk rute `guru.riwayat` serta `guru.riwayat.detail`.
 - [ ] **FormRequest untuk Import Siswa:** Pindahkan validasi manual `$request->validate()` di `SiswaController::import` ke kelas FormRequest tersendiri (`ImportSiswaRequest`).
 - [ ] **Sentralisasi Parser `kelas_mapel`:** Satukan logika pemecahan dan validasi string format `"{kelas_id}-{mapel_id}"` yang saat ini tersebar di 4 tempat ke dalam satu helper method terpusat.

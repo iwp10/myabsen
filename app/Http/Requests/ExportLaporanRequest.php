@@ -61,9 +61,11 @@ class ExportLaporanRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'jurusan_id' => ['nullable', 'integer', 'exists:jurusan,id'], // Untuk Admin
             'kelas_id' => ['nullable', 'integer', 'exists:kelas,id'], // Untuk Admin
             'mapel_id' => ['nullable', 'integer', 'exists:mapel,id'], // Untuk Admin
             'kelas_mapel' => ['nullable', 'string'],
+            'bulan' => ['nullable', 'date_format:Y-m'],
             'tanggal_awal' => ['nullable', 'date'],
             'tanggal_akhir' => ['nullable', 'date', 'after_or_equal:tanggal_awal'],
             'tahun_ajaran' => [

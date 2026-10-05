@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ExportLaporanRequest;
+use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Services\LaporanService;
@@ -19,12 +20,13 @@ class LaporanController extends Controller
 
     public function index(Request $request)
     {
+        $jurusan = Jurusan::orderBy('nama')->get();
         $kelas = Kelas::orderBy('nama')->get();
         $mapel = Mapel::orderBy('nama')->get();
         $activePeriode = $this->periodeService->getActivePeriode();
         $daftarTahunAjaran = $this->periodeService->getDaftarPilihanTahunAjaran();
 
-        return view('admin.laporan.index', compact('kelas', 'mapel', 'activePeriode', 'daftarTahunAjaran'));
+        return view('admin.laporan.index', compact('jurusan', 'kelas', 'mapel', 'activePeriode', 'daftarTahunAjaran'));
     }
 
     public function export(ExportLaporanRequest $request)
