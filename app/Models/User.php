@@ -56,4 +56,21 @@ class User extends Authenticatable
     {
         return $this->hasOne(Guru::class);
     }
+
+    /**
+     * Memeriksa apakah akun pengguna sudah tidak aktif karena profil Guru atau Siswa di-soft-delete.
+     * Akun yang profilnya tidak ada sama sekali (bukan trashed) tidak dianggap tidak aktif.
+     */
+    public function sudahTidakAktif(): bool
+    {
+        if ($this->role === 'guru') {
+            return Guru::onlyTrashed()->where('user_id', $this->id)->exists();
+        }
+
+        if ($this->role === 'siswa') {
+            return Siswa::onlyTrashed()->where('user_id', $this->id)->exists();
+        }
+
+        return false;
+    }
 }

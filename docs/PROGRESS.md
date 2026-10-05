@@ -42,6 +42,7 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] Middleware `role` dan redirect per role
 - [x] Layout dasar responsif dengan navbar per role
 - [x] Test akses per role
+- [x] Pemblokiran akses login dan pemutusan sesi berjalan untuk akun guru dan siswa yang profilnya di-soft-delete (AB-05, AB-10)
 
 ### Fase 3: Master data admin
 - [x] CRUD jurusan, kelas, mapel
@@ -142,6 +143,8 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-05 | 6,9 | feat: pembatasan ekspor laporan admin (maks. 50 sheet Excel dan 2000 baris PDF via config/absensi.php), filter jurusan opsional, optimasi eliminasi N+1 pada LaporanAbsensiExport, dan 17 test LaporanTest lulus (PASS).
 2026-10-05 | 3,4,8 | refactor: otorisasi riwayat detail guru via JadwalPolicy (AB-08), FormRequest ImportSiswaRequest untuk import siswa, sentralisasi parser dan validasi kelas_mapel ke App\Support\KelasMapel, serta penambahan 7 feature test riwayat guru dan 4 test import siswa (seluruh 155 test PASS).
 2026-10-05 | 6,7,9 | chore: pembersihan dead code LaporanAbsensiGuruExport, pencabutan @tailwindcss/vite, migrasi FK restrict sesi_absensi, pemindahan test koreksi admin, serta penghapusan ekspor PDF guru atas keputusan pemilik proyek (guru hanya Excel, admin tetap Excel dan PDF).
+2026-10-05 | 2,7,9 | fix: pemblokiran akses login dan pemutusan sesi berjalan untuk akun guru dan siswa yang profilnya telah di-soft-delete (AB-05 & AB-10) tanpa mengubah rate limiting, akun admin, maupun alur soft delete, disertai 5 feature test AB-05.
+
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:
