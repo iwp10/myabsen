@@ -214,12 +214,4 @@ class AbsensiController extends Controller
     {
         return $this->laporanService->exportExcel($request->user(), $request->validated());
     }
-
-    /**
-     * Mengunduh rekap absensi untuk guru dalam format PDF.
-     */
-    public function exportPdf(ExportLaporanRequest $request)
-    {
-        return $this->laporanService->exportPdf($request->user(), $request->validated());
-    }
 }

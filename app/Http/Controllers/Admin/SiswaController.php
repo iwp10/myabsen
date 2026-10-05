@@ -11,6 +11,7 @@ use App\Models\DetailAbsensi;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -104,11 +105,19 @@ class SiswaController extends Controller
                 ->with('success', 'Siswa di-soft-delete karena memiliki riwayat absensi.');
         }
 
-        // Hard delete user, this will cascade and hard delete the siswa as well
-        $siswa->user()->delete();
+        try {
+            DB::transaction(function () use ($siswa) {
+                $user = $siswa->user;
+                $siswa->forceDelete();
+                $user?->delete();
+            });
 
-        return redirect()->route('admin.siswa.index')
-            ->with('success', 'Siswa beserta akun berhasil dihapus.');
+            return redirect()->route('admin.siswa.index')
+                ->with('success', 'Siswa beserta akun berhasil dihapus.');
+        } catch (QueryException $e) {
+            return redirect()->route('admin.siswa.index')
+                ->with('error', 'Akun tidak dapat dihapus karena memiliki riwayat absensi.');
+        }
     }
 
     public function resetPassword(Siswa $siswa)

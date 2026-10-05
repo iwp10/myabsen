@@ -61,7 +61,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/riwayat', [AbsensiController::class, 'riwayat'])->name('riwayat');
         Route::get('/riwayat/{kelas}/{mapel}', [AbsensiController::class, 'riwayatDetail'])->name('riwayat.detail');
         Route::get('/laporan/export', [AbsensiController::class, 'export'])->name('laporan.export');
-        Route::get('/laporan/export-pdf', [AbsensiController::class, 'exportPdf'])->name('laporan.exportPdf');
     });
 
     // Guru & Admin Routes

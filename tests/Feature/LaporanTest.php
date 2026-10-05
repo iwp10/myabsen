@@ -10,6 +10,7 @@ use App\Models\Mapel;
 use App\Models\SesiAbsensi;
 use App\Models\Siswa;
 use App\Models\User;
+use App\Support\KelasMapel;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use PHPUnit\Framework\AssertionFailedError;
@@ -89,14 +90,6 @@ test('admin dapat mengunduh laporan pdf', function () {
     $response->assertHeader('content-type', 'application/pdf');
 });
 
-test('guru dapat mengunduh laporan pdf', function () {
-    $response = $this->actingAs($this->guruUser)
-        ->get(route('guru.laporan.exportPdf', ['tahun_ajaran' => '2026/2027', 'semester' => 'Ganjil']));
-
-    $response->assertStatus(200);
-    $response->assertHeader('content-type', 'application/pdf');
-});
-
 test('view pdf menampilkan periode dengan benar dan tidak berulang', function () {
     $view = $this->view('laporan.pdf', [
         'data' => collect(),
@@ -133,11 +126,6 @@ test('guru tidak bisa mengekspor kelas yang bukan diampunya', function () {
         ->get(route('guru.laporan.export', ['kelas_id' => $kelasLain->id]));
     $resExcel->assertStatus(403);
 
-    // Guru mencoba ekspor pdf untuk kelas yang bukan diampunya
-    $resPdf = $this->actingAs($this->guruUser)
-        ->get(route('guru.laporan.exportPdf', ['kelas_id' => $kelasLain->id]));
-    $resPdf->assertStatus(403);
-
     // Guru berhasil mengekspor kelas yang diampunya
     Excel::fake();
     $resOk = $this->actingAs($this->guruUser)
@@ -167,10 +155,28 @@ test('nama file hasil ekspor tetap sesuai format sebelum refactor', function () 
     $resAdminPdf = $this->actingAs($this->admin)
         ->get(route('admin.laporan.exportPdf', ['tahun_ajaran' => '2026/2027', 'semester' => 'Ganjil']));
     $resAdminPdf->assertHeader('content-disposition', 'attachment; filename=rekap_absensi_2026-2027_Ganjil.pdf');
+});
 
-    $resGuruPdf = $this->actingAs($this->guruUser)
-        ->get(route('guru.laporan.exportPdf', ['tahun_ajaran' => '2026/2027', 'semester' => 'Ganjil']));
-    $resGuruPdf->assertHeader('content-disposition', 'attachment; filename=rekap_absensi_guru_2026-2027_Ganjil.pdf');
+test('route guru.laporan.exportPdf sudah tidak ada dan halaman riwayat detail guru tidak memuat link PDF', function () {
+    // 1. URL lama ekspor PDF guru mengembalikan 404
+    $this->actingAs($this->guruUser)
+        ->get('/guru/laporan/export-pdf')
+        ->assertStatus(404);
+
+    // 2. Halaman riwayat detail guru tidak memuat tombol/link PDF dan tetap memuat tombol Export Excel
+    $responseDetail = $this->actingAs($this->guruUser)
+        ->get(route('guru.riwayat.detail', ['kelas' => $this->kelas->id, 'mapel' => $this->mapel->id]));
+    $responseDetail->assertStatus(200);
+    $responseDetail->assertDontSee('Export PDF');
+    $responseDetail->assertDontSee('/guru/laporan/export-pdf');
+    $responseDetail->assertSee('Export Excel');
+    $responseDetail->assertSee(route('guru.laporan.export', ['kelas_mapel' => KelasMapel::make($this->kelas->id, $this->mapel->id)]));
+
+    // 3. Ekspor PDF admin tetap bisa diunduh
+    $responseAdminPdf = $this->actingAs($this->admin)
+        ->get(route('admin.laporan.exportPdf', ['tahun_ajaran' => '2026/2027', 'semester' => 'Ganjil']));
+    $responseAdminPdf->assertStatus(200);
+    $responseAdminPdf->assertHeader('content-type', 'application/pdf');
 });
 
 test('excel hasil ekspor berisi persentase yang sama dengan rumus AB-07 (Hadir+Izin+Sakit)', function () {
