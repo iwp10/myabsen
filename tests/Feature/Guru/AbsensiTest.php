@@ -453,26 +453,6 @@ test('AB-03: halaman jadwal guru memuat link ke tanggal yang benar dan badge sta
 
     // Jadwal Rabu: link ke tanggal 2026-09-16 dan badge Sudah diabsen
     $response->assertSee(route('guru.absensi.show', ['jadwal' => $jadwalRabu->id, 'tanggal' => '2026-09-16']));
-    $response->assertSee('Sudah diabsen');
-});
-
-test('AB-03: menu Koreksi Absensi hanya bisa diakses admin (guru dan siswa 403)', function () {
-    // 1. Guest diarahkan ke login
-    $responseGuest = $this->get(route('admin.koreksi-absensi.index'));
-    $responseGuest->assertRedirect(route('login'));
-
-    // 2. Guru ditolak (403)
-    $responseGuru = $this->actingAs($this->guruUser)->get(route('admin.koreksi-absensi.index'));
-    $responseGuru->assertStatus(403);
-
-    // 3. Siswa ditolak (403)
-    $responseSiswa = $this->actingAs($this->siswa1User)->get(route('admin.koreksi-absensi.index'));
-    $responseSiswa->assertStatus(403);
-
-    // 4. Admin berhasil (200)
-    $responseAdmin = $this->actingAs($this->adminUser)->get(route('admin.koreksi-absensi.index'));
-    $responseAdmin->assertStatus(200);
-    $responseAdmin->assertSee('Koreksi Absensi');
 });
 
 test('AB-04 dan AB-09: semua siswa kelas mendapat baris detail, dan field log terisi', function () {

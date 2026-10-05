@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreGuruRequest;
 use App\Http\Requests\UpdateGuruRequest;
 use App\Models\Guru;
-use App\Models\SesiAbsensi;
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -83,12 +83,7 @@ class GuruController extends Controller
 
     public function destroy(Guru $guru)
     {
-        $hasHistory = SesiAbsensi::where('diabsen_oleh', $guru->user_id)
-            ->orWhere('diubah_oleh', $guru->user_id)
-            ->orWhereHas('jadwal', function ($q) use ($guru) {
-                $q->where('guru_id', $guru->id);
-            })
-            ->exists();
+        $hasHistory = $guru->jadwal()->whereHas('sesiAbsensi')->exists();
 
         if ($hasHistory) {
             $guru->delete();
@@ -97,11 +92,19 @@ class GuruController extends Controller
                 ->with('success', 'Guru di-soft-delete karena memiliki riwayat absensi.');
         }
 
-        // Hard delete user, this will cascade and hard delete the guru as well
-        $guru->user()->delete();
+        try {
+            DB::transaction(function () use ($guru) {
+                $user = $guru->user;
+                $guru->forceDelete();
+                $user?->delete();
+            });
 
-        return redirect()->route('admin.guru.index')
-            ->with('success', 'Guru beserta akun berhasil dihapus.');
+            return redirect()->route('admin.guru.index')
+                ->with('success', 'Guru beserta akun berhasil dihapus.');
+        } catch (QueryException $e) {
+            return redirect()->route('admin.guru.index')
+                ->with('error', 'Akun tidak dapat dihapus karena memiliki riwayat absensi.');
+        }
     }
 
     public function resetPassword(Guru $guru)

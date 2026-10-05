@@ -115,6 +115,10 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] Otorisasi Riwayat Guru via Policy: Memindahkan otorisasi detail riwayat guru (`guru.riwayat.detail`) dari `abort(403)` manual di controller ke `JadwalPolicy::viewRiwayat()` dan melengkapi pengujian Feature Test (AB-08).
 - [x] FormRequest untuk Import Siswa: Memindahkan validasi manual `$request->validate()` di `SiswaController::import` ke kelas FormRequest tersendiri (`ImportSiswaRequest`) dengan otorisasi khusus admin.
 - [x] Sentralisasi Parser `kelas_mapel`: Menyatukan logika pembuatan, pemecahan, dan validasi format `"{kelas_id}-{mapel_id}"` ke dalam class pembantu tunggal `App\Support\KelasMapel` serta aturan validasi `regex:/^[1-9]\d*-[1-9]\d*$/`.
+- [x] Pembersihan Dead Code `LaporanAbsensiGuruExport`: Menghapus class export `app/Exports/LaporanAbsensiGuruExport.php` yang tidak pernah diinstansiasi.
+- [x] Rapikan Dependensi Tailwind di `package.json`: Menghapus paket `@tailwindcss/vite` yang tidak terpakai agar konsisten dengan `tailwindcss: ^3.1.0` (ukuran bundle CSS `npm run build` tetap ~83 kB).
+- [x] Perlindungan FK `diabsen_oleh` dan `diubah_oleh`: Migrasi baru mengubah foreign key pada tabel `sesi_absensi` menjadi `restrictOnDelete` demi melindungi histori absensi, dilengkapi penanganan pesan ramah pada controller admin.
+- [x] Penghapusan Ekspor PDF Guru: Menghapus route `guru.laporan.exportPdf`, method controller, dan test terkait atas keputusan pemilik proyek (guru hanya mengekspor Excel; admin tetap Excel dan PDF).
 
 ## Catatan dan hambatan
 Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
@@ -137,14 +141,11 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-05 | 1,3,6,9 | fix: perbaikan filter periode terpadu master data admin (Kelas dan Jadwal default Semua Periode), standarisasi dark mode form admin (termasuk color-scheme:dark), pembentukan sheet ekspor admin multi-jurusan (TKJ, TBSM, dll) dengan sanitasi nama sheet <= 31 karakter, perbaikan kedipan modal pengaturan periode (type=button, intercept Enter, dan x-cloak global), serta 12 feature test AB-11 lulus (PASS).
 2026-10-05 | 6,9 | feat: pembatasan ekspor laporan admin (maks. 50 sheet Excel dan 2000 baris PDF via config/absensi.php), filter jurusan opsional, optimasi eliminasi N+1 pada LaporanAbsensiExport, dan 17 test LaporanTest lulus (PASS).
 2026-10-05 | 3,4,8 | refactor: otorisasi riwayat detail guru via JadwalPolicy (AB-08), FormRequest ImportSiswaRequest untuk import siswa, sentralisasi parser dan validasi kelas_mapel ke App\Support\KelasMapel, serta penambahan 7 feature test riwayat guru dan 4 test import siswa (seluruh 155 test PASS).
+2026-10-05 | 6,7,9 | chore: pembersihan dead code LaporanAbsensiGuruExport, pencabutan @tailwindcss/vite, migrasi FK restrict sesi_absensi, pemindahan test koreksi admin, serta penghapusan ekspor PDF guru atas keputusan pemilik proyek (guru hanya Excel, admin tetap Excel dan PDF).
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:
 - [ ] **Pilihan Periode di Riwayat Guru dan Siswa:** Tambahkan dropdown pemilihan tahun ajaran dan semester pada halaman riwayat guru dan riwayat siswa agar pengguna dapat meninjau histori kehadiran periode terdahulu tanpa harus mengubah periode aktif.
-- [ ] **Pembersihan Dead Code `LaporanAbsensiGuruExport`:** Hapus atau fungsikan kembali class `app/Exports/LaporanAbsensiGuruExport.php` yang saat ini tidak pernah diinstansiasi.
-- [ ] **Rapikan Dependensi Tailwind di `package.json`:** Bersihkan paket `@tailwindcss/vite` yang tidak terpakai agar konsisten dengan `tailwindcss: ^3.1.0`.
-- [ ] **Perlindungan FK `diabsen_oleh` dan `diubah_oleh`:** Buat migrasi baru untuk mengubah constraint dari `cascadeOnDelete` menjadi `restrictOnDelete` / `nullOnDelete` pada `sesi_absensi` demi mencegah hilangnya histori absensi saat user dihapus.
-- [ ] **Tombol Unduh PDF Guru di UI:** Sediakan tombol/link ekspor PDF pada antarmuka riwayat guru (`guru/riwayat_detail.blade.php`) untuk memanfaatkan rute `guru.laporan.exportPdf`.
 - [ ] **Audit Aturan Bisnis Lanjutan (dari `docs/AUDIT_MYABSEN.md`):**
   - Penyempurnaan pembagi persentase untuk siswa pindah kelas/siswa baru agar tidak bias (AB-07).
   - Tabel riwayat keanggotaan kelas per tahun ajaran (`anggota_kelas`) agar riwayat kelas siswa tidak tertimpa saat naik kelas.

@@ -15,7 +15,7 @@ Pembeda utama: absensi per mata pelajaran (bukan per hari), sehingga siswa yang 
 | Kelola jadwal | Ya | Tidak | Tidak |
 | Mengabsen | Ya (koreksi historis kapan saja pada tanggal lampau, bukan masa depan) | Ya (jadwal sendiri, tanggal dalam 7 hari terakhir yang cocok dengan hari jadwal; termasuk susulan) | Tidak |
 | Melihat rekap | Semua kelas | Kelas yang ia ajar | Milik sendiri |
-| Ekspor Excel/PDF | Ya | Ya | Tidak |
+| Ekspor Excel/PDF | Ya (Excel dan PDF) | Ya (Excel saja) | Tidak |
 
 ## 3. Fitur MVP
 
@@ -40,7 +40,7 @@ Pembeda utama: absensi per mata pelajaran (bukan per hari), sehingga siswa yang 
 - Halaman absensi: semua siswa kelas tampil dengan status default **Hadir**. Guru mengubah yang berbeda menjadi Izin, Sakit, atau Alpa, keterangan opsional, lalu menyimpan. Menampilkan dengan jelas tanggal sesi yang sedang dibuka.
 - Membuka kembali sesi yang sudah ada untuk diedit atau diisi susulan (dalam batas koreksi 7 hari terakhir yang cocok dengan hari jadwal).
 - Riwayat absensi dua tingkat (rute `guru.riwayat` dan `guru.riwayat.detail`): halaman utama menampilkan pilihan kartu kombinasi Kelas-Mapel yang diampu guru pada periode aktif, kemudian membuka halaman detail berupa tabel matriks kehadiran horizontal per pertemuan (P1..Pn) beserta daftar siswa dan tombol ekspor Excel.
-- Laporan dan ekspor: mengekspor rekap absensi kelas dalam format Excel multi-sheet per kelas-mapel (matriks per pertemuan P1..Pn) dan PDF, didukung parameter `kelas_mapel` dengan format `"{kelas_id}-{mapel_id}"`.
+- Laporan dan ekspor: mengekspor rekap absensi kelas dalam format Excel multi-sheet per kelas-mapel (matriks per pertemuan P1..Pn, tanpa PDF), didukung parameter `kelas_mapel` dengan format `"{kelas_id}-{mapel_id}"`.
 
 ### Siswa (read-only)
 - Dashboard: status hari ini per mapel sesuai jadwal (*Belum diabsen / Hadir / Izin / Sakit / Alpa*).
@@ -82,7 +82,7 @@ pengaturan(id, kunci string unique, nilai text null, timestamps)
 
 Index: `siswa(kelas_id)`, `jadwal(guru_id, hari)`, `jadwal(kelas_id, hari)`, `sesi_absensi(tanggal)`, `detail_absensi(siswa_id)`.
 
-Catatan: `diabsen_oleh` dan `diubah_oleh` merujuk ke `users.id`.
+Catatan: `diabsen_oleh` dan `diubah_oleh` merujuk ke `users.id` dengan aturan FK `restrictOnDelete` untuk menjaga integritas data riwayat absensi.
 
 ## 6. Kebutuhan non-fungsional
 - **Arsitektur Teknis:** Pemisahan tanggung jawab (*Separation of Concerns*) secara ketat antar layer:
@@ -123,3 +123,4 @@ Tidak dikerjakan sebelum MVP stabil dan diuji di sekolah:
 | 2026-10-04 | Penambahan kolom semester (Ganjil/Genap) pada kelas dan jadwal; penegasan AB-05 bahwa jadwal tidak menggunakan soft delete (proteksi penghapusan berbasis keberadaan riwayat sesi); penegasan AB-06 bentrok jadwal pada tahun ajaran dan semester yang sama; redesign riwayat guru menjadi dua tingkat (pemilihan kartu Kelas-Mapel lalu matriks horizontal P1..Pn); format ekspor Excel multi-sheet matriks per pertemuan; serta parameter gabungan kelas_mapel ("{kelas_id}-{mapel_id}") |
 | 2026-10-05 | Penetapan AB-11 bahwa periode aktif (tahun ajaran dan semester) dikelola oleh admin via antarmuka web dan disimpan di basis data (tabel pengaturan), bukan melalui file .env/config, untuk memudahkan operasional sekolah tanpa menyentuh server |
 | 2026-10-05 | Penegasan otorisasi riwayat detail guru melalui JadwalPolicy::viewRiwayat() sesuai AB-08, sentralisasi parser dan pembentuk format kelas_mapel ke class App\Support\KelasMapel, dan pemindahan validasi impor siswa ke FormRequest ImportSiswaRequest |
+| 2026-10-05 | Ekspor PDF guru dihapus atas keputusan pemilik proyek (guru hanya mengekspor Excel; admin tetap Excel dan PDF) serta foreign key diabsen_oleh dan diubah_oleh pada sesi_absensi diubah menjadi restrictOnDelete untuk menjamin integritas histori absensi |

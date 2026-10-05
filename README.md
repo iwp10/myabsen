@@ -32,12 +32,13 @@ Aplikasi ini memiliki tiga peran utama dengan batasan akses masing-masing, serta
 - **Pemantauan & Koreksi Historis:** Melihat seluruh rekap absensi sekolah dan hak istimewa untuk mengoreksi absensi historis kapan saja.
 - **Menu Koreksi Absensi:** Meninjau jadwal dan status sesi absensi pada tanggal lampau per kelas serta membuka form koreksi/susulan.
 - **Pengaturan Periode:** Mengelola tahun ajaran aktif dan semester aktif langsung dari antarmuka web dengan saran otomatis kalender dan modal konfirmasi pergantian.
+- **Laporan & Ekspor:** Mengunduh rekap absensi sekolah dalam format Excel (multi-sheet per kelas-mapel) dan dokumen cetak PDF dengan batasan aman serta filter jurusan dan bulan.
 
 ### 👨‍🏫 Guru
 - **Dashboard Cerdas:** Menampilkan jadwal mengajar pada hari tersebut serta ringkasan total mengajar.
 - **Absensi Cepat:** Sistem memberikan status default **Hadir** untuk seluruh kelas. Guru hanya mengubah status siswa yang *Izin*, *Sakit*, atau *Alpa*.
 - **Menu Jadwal & Koreksi Absensi:** Mengakses jadwal mengajar dan mengoreksi/mengisi susulan absensi dalam jendela **7 hari terakhir** (hari ini s.d. H-6 yang harinya cocok).
-- **Riwayat & Laporan:** Meninjau riwayat kehadiran per kelas & mapel dalam format matriks per pertemuan (P1..Pn), serta mengekspor rekap ke format Excel dan PDF.
+- **Riwayat & Laporan:** Meninjau riwayat kehadiran per kelas & mapel dalam format matriks per pertemuan (P1..Pn), serta mengekspor rekap kelas yang diampu ke format Excel.
 
 ### 🎓 Siswa (Read-Only)
 - **Monitoring Pribadi:** Melihat status kehadiran harian per mata pelajaran secara langsung.
