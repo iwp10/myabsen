@@ -3,15 +3,16 @@
 namespace App\Exports;
 
 use App\Models\Jadwal;
+use Maatwebsite\Excel\Concerns\Export;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
-use Maatwebsite\Excel\Concerns\Export;
 
-class LaporanAbsensiGuruExport implements WithMultipleSheets, Export
+class LaporanAbsensiGuruExport implements Export, WithMultipleSheets
 {
     use Exportable;
 
     protected $guruId;
+
     protected $filters;
 
     public function __construct($guruId, $filters)
@@ -29,7 +30,7 @@ class LaporanAbsensiGuruExport implements WithMultipleSheets, Export
             ->select('kelas_id', 'mapel_id')
             ->distinct();
 
-        if (!empty($this->filters['kelas_mapel'])) {
+        if (! empty($this->filters['kelas_mapel'])) {
             $parts = explode('-', $this->filters['kelas_mapel']);
             if (count($parts) === 2) {
                 $jadwalQuery->where('kelas_id', $parts[0])->where('mapel_id', $parts[1]);

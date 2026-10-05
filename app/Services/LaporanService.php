@@ -8,7 +8,6 @@ use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,14 +23,18 @@ class LaporanService
      */
     public function prepareFilters(User $user, array $validatedFilters): array
     {
+        $activePeriode = $this->absensiService->getActivePeriode();
+
         $filters = [
             'kelas_id' => $validatedFilters['kelas_id'] ?? null,
             'mapel_id' => $validatedFilters['mapel_id'] ?? null,
-            'tahun_ajaran' => $validatedFilters['tahun_ajaran'] ?? null,
-            'semester' => $validatedFilters['semester'] ?? null,
+            'tahun_ajaran' => ! empty($validatedFilters['tahun_ajaran']) ? $validatedFilters['tahun_ajaran'] : $activePeriode['tahun_ajaran'],
+            'semester' => ! empty($validatedFilters['semester']) ? $validatedFilters['semester'] : $activePeriode['semester'],
+            'tanggal_awal' => $validatedFilters['tanggal_awal'] ?? null,
+            'tanggal_akhir' => $validatedFilters['tanggal_akhir'] ?? null,
         ];
 
-        if (!empty($validatedFilters['kelas_mapel'])) {
+        if (! empty($validatedFilters['kelas_mapel'])) {
             $parts = explode('-', $validatedFilters['kelas_mapel']);
             if (count($parts) === 2) {
                 $filters['kelas_id'] = $parts[0];
@@ -51,14 +54,14 @@ class LaporanService
     /**
      * Membentuk nama file ekspor yang konsisten untuk Excel maupun PDF.
      */
-    public function generateFilename(User $user, array $filters, string $extension): string
+    public function generateFilename(User $user, array $validatedFilters, string $extension): string
     {
         $prefix = $user->role === 'guru' ? 'rekap_absensi_guru' : 'rekap_absensi';
 
         $periode = date('Y-m-d');
-        if (!empty($filters['tahun_ajaran'])) {
-            $ta = str_replace('/', '-', $filters['tahun_ajaran']);
-            $periode = $ta . (!empty($filters['semester']) ? '_' . $filters['semester'] : '');
+        if (! empty($validatedFilters['tahun_ajaran'])) {
+            $ta = str_replace('/', '-', $validatedFilters['tahun_ajaran']);
+            $periode = $ta.(! empty($validatedFilters['semester']) ? '_'.$validatedFilters['semester'] : '');
         }
 
         return "{$prefix}_{$periode}.{$extension}";
@@ -70,7 +73,7 @@ class LaporanService
     public function exportExcel(User $user, array $validatedFilters): BinaryFileResponse
     {
         $filters = $this->prepareFilters($user, $validatedFilters);
-        $filename = $this->generateFilename($user, $filters, 'xlsx');
+        $filename = $this->generateFilename($user, $validatedFilters, 'xlsx');
 
         return Excel::download(new LaporanAbsensiExport($filters), $filename);
     }
@@ -81,15 +84,15 @@ class LaporanService
     public function exportPdf(User $user, array $validatedFilters): Response
     {
         $filters = $this->prepareFilters($user, $validatedFilters);
-        $filename = $this->generateFilename($user, $filters, 'pdf');
+        $filename = $this->generateFilename($user, $validatedFilters, 'pdf');
 
         $data = $this->absensiService->getRekapLaporan($filters);
 
         $periodeText = 'Semua Periode';
         if (! empty($filters['tahun_ajaran'])) {
-            $periodeText = 'TA ' . $filters['tahun_ajaran'];
+            $periodeText = 'TA '.$filters['tahun_ajaran'];
             if (! empty($filters['semester'])) {
-                $periodeText .= ' Semester ' . $filters['semester'];
+                $periodeText .= ' Semester '.$filters['semester'];
             }
         }
 

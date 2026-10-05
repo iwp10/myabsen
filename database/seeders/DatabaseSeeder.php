@@ -12,6 +12,7 @@ use App\Models\Mapel;
 use App\Models\SesiAbsensi;
 use App\Models\Siswa;
 use App\Models\User;
+use App\Services\PeriodeService;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -27,6 +28,9 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => 'admin',
         ]);
+
+        // Isi periode aktif demo
+        app(PeriodeService::class)->setPeriodeAktif('2026/2027', 'Ganjil');
 
         $userGuru = User::create([
             'name' => 'Guru Satu',

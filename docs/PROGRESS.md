@@ -101,6 +101,7 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] UI/UX: Standarisasi seluruh ikon aplikasi menggunakan Tabler Icons (inline SVG) untuk tampilan yang lebih modern, konsisten, dan ringan.
 - [x] Fitur Akademik: Penambahan kolom `semester` (Ganjil/Genap) pada kelas dan jadwal beserta filter pada halaman index dan form request.
 - [x] Fitur Ekspor: Format ekspor Excel multi-sheet matriks per pertemuan (P1..Pn) per pasangan kelas-mapel untuk guru dan admin.
+- [x] Fitur Admin: Pengaturan Periode aktif (AB-11) melalui antarmuka web, migrasi tabel pengaturan (kunci-nilai), saran otomatis berbasis tanggal kalender, modal konfirmasi pergantian, banner pengingat dashboard admin, serta pemakaian seragam di seluruh dashboard guru, dashboard siswa, riwayat guru, rekapitulasi, dan ekspor laporan.
 
 ### Tahap Improvement: Refactor Arsitektur
 - [x] Pemisahan Tanggung Jawab (Separation of Concerns): Controller tipis (*Thin Controller*), FormRequest khusus validasi input, Policy khusus otorisasi hak akses, Service sebagai pusat seluruh *business logic*, Model khusus relasi & persistensi data, dan View khusus layer presentasi.
@@ -128,10 +129,12 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-04 | 4,9 | feat: finalisasi redesign riwayat guru dua tingkat (pemilihan kartu Kelas-Mapel lalu matriks pertemuan P1..Pn di guru.riwayat.detail) dan pembersihan stub export (oleh lat's play).
 2026-10-04 | 6,9 | feat: migrasi LaporanAbsensiExport admin ke format multi-sheet per kelas-mapel dan penambahan konfirmasi modal logout (oleh lat's play).
 2026-10-04 | 1,3,9 | feat: penambahan kolom dan konsep semester (Ganjil/Genap) pada tabel kelas dan jadwal via migrasi baru serta filter pada index dan request (oleh lat's play).
+2026-10-05 | 1,3,4,5,6,9 | feat: implementasi Pengaturan Periode aktif (AB-11) oleh admin via web dan database (tabel pengaturan), saran kalender otomatis, banner pengingat dashboard admin, penyelarasan default periode di dashboard guru, dashboard siswa, riwayat guru, rekap dan ekspor laporan, validasi tahun ajaran YYYY/YYYY (tahun kedua = pertama+1), serta 8 pengujian otomatis AB-11 lulus (PASS).
+2026-10-05 | 1,3,6,9 | fix: perbaikan filter periode terpadu master data admin (Kelas dan Jadwal default Semua Periode), standarisasi dark mode form admin (termasuk color-scheme:dark), pembentukan sheet ekspor admin multi-jurusan (TKJ, TBSM, dll) dengan sanitasi nama sheet <= 31 karakter, perbaikan kedipan modal pengaturan periode (type=button, intercept Enter, dan x-cloak global), serta 12 feature test AB-11 lulus (PASS).
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:
-- [ ] **Pengaturan Periode Aktif oleh Admin (`feat/pengaturan-periode-aktif`):** Implementasi tabel `pengaturan` (kunci-nilai: `tahun_ajaran_aktif` dan `semester_aktif`), menu UI admin untuk mengelola periode aktif, saran otomatis berbasis kalender (Juli-Desember = Ganjil, Januari-Juni = Genap), dan penyelarasan filter default di seluruh dashboard (guru & siswa), jadwal, serta service laporan.
+- [ ] **Pilihan Periode di Riwayat Guru dan Siswa:** Tambahkan dropdown pemilihan tahun ajaran dan semester pada halaman riwayat guru dan riwayat siswa agar pengguna dapat meninjau histori kehadiran periode terdahulu tanpa harus mengubah periode aktif.
 - [ ] **Pembatasan Ekspor Excel Admin Tanpa Filter:** Tambahkan validasi batas maksimum rentang/sheet atau filter wajib pada ekspor admin guna mencegah risiko *Out Of Memory* (OOM) dan *timeout* saat men-generate ratusan sheet secara sinkron.
 - [ ] **Policy dan Test untuk Riwayat Guru:** Terapkan pemeriksaan otorisasi melalui Policy pada rute `guru.riwayat.detail` dan lengkapi Feature Test untuk rute `guru.riwayat` serta `guru.riwayat.detail`.
 - [ ] **FormRequest untuk Import Siswa:** Pindahkan validasi manual `$request->validate()` di `SiswaController::import` ke kelas FormRequest tersendiri (`ImportSiswaRequest`).
@@ -140,7 +143,6 @@ Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutn
 - [ ] **Rapikan Dependensi Tailwind di `package.json`:** Bersihkan paket `@tailwindcss/vite` yang tidak terpakai agar konsisten dengan `tailwindcss: ^3.1.0`.
 - [ ] **Perlindungan FK `diabsen_oleh` dan `diubah_oleh`:** Buat migrasi baru untuk mengubah constraint dari `cascadeOnDelete` menjadi `restrictOnDelete` / `nullOnDelete` pada `sesi_absensi` demi mencegah hilangnya histori absensi saat user dihapus.
 - [ ] **Tombol Unduh PDF Guru di UI:** Sediakan tombol/link ekspor PDF pada antarmuka riwayat guru (`guru/riwayat_detail.blade.php`) untuk memanfaatkan rute `guru.laporan.exportPdf`.
-- [ ] **Koreksi Nilai Enum pada Validasi Request:** Hapus nilai `'minggu'` dari aturan validasi `ExportLaporanRequest` agar konsisten dengan enum hari di tabel `jadwal`.
 - [ ] **Audit Aturan Bisnis Lanjutan (dari `docs/AUDIT_MYABSEN.md`):**
   - Penyempurnaan pembagi persentase untuk siswa pindah kelas/siswa baru agar tidak bias (AB-07).
   - Tabel riwayat keanggotaan kelas per tahun ajaran (`anggota_kelas`) agar riwayat kelas siswa tidak tertimpa saat naik kelas.

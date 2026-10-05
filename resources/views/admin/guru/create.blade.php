@@ -23,7 +23,7 @@
                         <div class="mb-4">
                             <label for="nip" class="block text-sm font-medium text-gray-700 dark:text-gray-300">NIP / Username</label>
                             <input type="text" name="nip" id="nip" value="{{ old('nip') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
-                            <p class="text-xs text-gray-500 mt-1">NIP akan digunakan sebagai username untuk login. Password default adalah "password".</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">NIP akan digunakan sebagai username untuk login. Password default adalah "password".</p>
                             @error('nip')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror

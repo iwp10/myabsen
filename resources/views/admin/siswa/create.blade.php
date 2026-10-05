@@ -23,7 +23,7 @@
                         <div class="mb-4">
                             <label for="nis" class="block text-sm font-medium text-gray-700 dark:text-gray-300">NIS / Username</label>
                             <input type="text" name="nis" id="nis" value="{{ old('nis') }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
-                            <p class="text-xs text-gray-500 mt-1">NIS akan digunakan sebagai username untuk login. Password default adalah "password".</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">NIS akan digunakan sebagai username untuk login. Password default adalah "password".</p>
                             @error('nis')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
@@ -31,7 +31,7 @@
 
                         <div class="mb-4">
                             <label for="kelas_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Kelas</label>
-                            <select name="kelas_id" id="kelas_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
+                            <select name="kelas_id" id="kelas_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
                                 <option value="" disabled selected>-- Pilih Kelas --</option>
                                 @foreach($kelas as $k)
                                     <option value="{{ $k->id }}" {{ old('kelas_id') == $k->id ? 'selected' : '' }}>

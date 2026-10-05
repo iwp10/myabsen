@@ -15,24 +15,19 @@ use Illuminate\Support\Facades\DB;
 
 class AbsensiService
 {
+    protected PeriodeService $periodeService;
+
+    public function __construct(?PeriodeService $periodeService = null)
+    {
+        $this->periodeService = $periodeService ?? app(PeriodeService::class);
+    }
+
     /**
      * Mendapatkan periode akademik aktif (tahun ajaran dan semester).
      */
     public function getActivePeriode(): array
     {
-        $tahun_ajaran = config('absensi.tahun_ajaran_aktif');
-        $semester = config('absensi.semester_aktif');
-
-        if (!$tahun_ajaran || !$semester) {
-            $latestJadwal = Jadwal::latest('id')->first();
-            $tahun_ajaran = $tahun_ajaran ?: ($latestJadwal ? $latestJadwal->tahun_ajaran : null);
-            $semester = $semester ?: ($latestJadwal ? $latestJadwal->semester : 'Ganjil');
-        }
-
-        return [
-            'tahun_ajaran' => $tahun_ajaran,
-            'semester' => $semester
-        ];
+        return $this->periodeService->getActivePeriode();
     }
 
     /**
@@ -63,7 +58,7 @@ class AbsensiService
             ->where('hari', $hari)
             ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
                 $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
-                  ->where('semester', $activePeriode['semester']);
+                    ->where('semester', $activePeriode['semester']);
             })
             ->orderBy('jam_mulai')
             ->get()
@@ -168,10 +163,17 @@ class AbsensiService
      */
     public function getStatistikGuru(int $guruId): array
     {
+        $activePeriode = $this->getActivePeriode();
+        $query = Jadwal::where('guru_id', $guruId)
+            ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
+                $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
+                    ->where('semester', $activePeriode['semester']);
+            });
+
         return [
-            'total_kelas' => Jadwal::where('guru_id', $guruId)->distinct()->count('kelas_id'),
-            'total_mapel' => Jadwal::where('guru_id', $guruId)->distinct()->count('mapel_id'),
-            'total_jadwal' => Jadwal::where('guru_id', $guruId)->count(),
+            'total_kelas' => (clone $query)->distinct()->count('kelas_id'),
+            'total_mapel' => (clone $query)->distinct()->count('mapel_id'),
+            'total_jadwal' => (clone $query)->count(),
         ];
     }
 
@@ -186,6 +188,7 @@ class AbsensiService
         }
 
         $tanggalStr = $tanggal->toDateString();
+        $activePeriode = $this->getActivePeriode();
 
         $jadwals = Jadwal::with([
             'mapel',
@@ -199,6 +202,10 @@ class AbsensiService
         ])
             ->where('kelas_id', $siswa->kelas_id)
             ->where('hari', $hari)
+            ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
+                $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
+                    ->where('semester', $activePeriode['semester']);
+            })
             ->orderBy('jam_mulai')
             ->get();
 
@@ -265,30 +272,30 @@ class AbsensiService
                 $q->where('guru_id', $guru->id);
                 if ($activePeriode['tahun_ajaran']) {
                     $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
-                      ->where('semester', $activePeriode['semester']);
+                        ->where('semester', $activePeriode['semester']);
                 }
-                if (!empty($filters['kelas_mapel'])) {
+                if (! empty($filters['kelas_mapel'])) {
                     $parts = explode('-', $filters['kelas_mapel']);
                     if (count($parts) === 2) {
                         $q->where('kelas_id', $parts[0])->where('mapel_id', $parts[1]);
                     }
                 }
-                if (!empty($filters['hari']) && is_array($filters['hari'])) {
+                if (! empty($filters['hari']) && is_array($filters['hari'])) {
                     $q->whereIn('hari', $filters['hari']);
                 }
             });
 
-        if (!empty($filters['tanggal_awal'])) {
+        if (! empty($filters['tanggal_awal'])) {
             $query->where('tanggal', '>=', $filters['tanggal_awal']);
         }
-        if (!empty($filters['tanggal_akhir'])) {
+        if (! empty($filters['tanggal_akhir'])) {
             $query->where('tanggal', '<=', $filters['tanggal_akhir']);
         }
-        if (!empty($filters['bulan'])) {
+        if (! empty($filters['bulan'])) {
             $parts = explode('-', $filters['bulan']);
             if (count($parts) === 2) {
                 $query->whereYear('tanggal', $parts[0])
-                      ->whereMonth('tanggal', $parts[1]);
+                    ->whereMonth('tanggal', $parts[1]);
             }
         }
 
@@ -454,7 +461,7 @@ class AbsensiService
             ->where('guru_id', $guru->id)
             ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
                 $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
-                  ->where('semester', $activePeriode['semester']);
+                    ->where('semester', $activePeriode['semester']);
             })
             ->orderByRaw("CASE hari 
                 WHEN 'senin' THEN 1 
@@ -541,7 +548,7 @@ class AbsensiService
             ->where('guru_id', $guru->id)
             ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
                 $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
-                  ->where('semester', $activePeriode['semester']);
+                    ->where('semester', $activePeriode['semester']);
             })
             ->orderBy('jam_mulai')
             ->get();
@@ -625,7 +632,7 @@ class AbsensiService
             ->where('hari', $hari)
             ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
                 $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
-                  ->where('semester', $activePeriode['semester']);
+                    ->where('semester', $activePeriode['semester']);
             })
             ->orderBy('jam_mulai');
 
@@ -672,6 +679,17 @@ class AbsensiService
         }
         if (! empty($filters['guru_id'])) {
             $query->where('jadwal.guru_id', $filters['guru_id']);
+        }
+
+        $activePeriode = $this->getActivePeriode();
+        $tahunAjaran = $filters['tahun_ajaran'] ?? $activePeriode['tahun_ajaran'];
+        $semester = $filters['semester'] ?? $activePeriode['semester'];
+
+        if (! empty($tahunAjaran)) {
+            $query->where('jadwal.tahun_ajaran', $tahunAjaran);
+        }
+        if (! empty($semester)) {
+            $query->where('jadwal.semester', $semester);
         }
 
         $query->select(
