@@ -12,4 +12,16 @@ return [
     |
     */
     'batas_koreksi_hari' => 7,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Batas Ekspor Laporan
+    |--------------------------------------------------------------------------
+    |
+    | Batas jumlah sheet untuk ekspor Excel multi-sheet dan batas jumlah baris
+    | untuk ekspor PDF agar tidak membebani memori server (OOM) dan CPU.
+    |
+    */
+    'batas_sheet_ekspor' => 50,
+    'batas_baris_pdf' => 2000,
 ];

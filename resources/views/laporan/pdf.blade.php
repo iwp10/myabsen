@@ -43,6 +43,10 @@
     <div style="margin-bottom: 15px;">
         <strong>Periode:</strong> {{ $periode ?? 'Semua Periode' }}<br>
         
+        @if(!empty($namaJurusan))
+            <strong>Jurusan:</strong> {{ $namaJurusan }}<br>
+        @endif
+
         @if(!empty($namaKelas))
             <strong>Kelas:</strong> {{ $namaKelas }}<br>
         @endif
@@ -97,7 +101,13 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="11" class="text-center">Tidak ada data absensi yang sesuai filter.</td>
+                    <td colspan="11" class="text-center">
+                        @if(!empty($filters['kelas_id']) && !empty($filters['jurusan_id']))
+                            Kelas yang dipilih tidak sesuai dengan jurusan yang dipilih atau tidak ada data absensi.
+                        @else
+                            Tidak ada data absensi yang sesuai filter.
+                        @endif
+                    </td>
                 </tr>
             @endforelse
         </tbody>

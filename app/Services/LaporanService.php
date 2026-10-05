@@ -4,10 +4,13 @@ namespace App\Services;
 
 use App\Exports\LaporanAbsensiExport;
 use App\Models\Guru;
+use App\Models\Jadwal;
+use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\RedirectResponse;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,12 +29,14 @@ class LaporanService
         $activePeriode = $this->absensiService->getActivePeriode();
 
         $filters = [
+            'jurusan_id' => $validatedFilters['jurusan_id'] ?? null,
             'kelas_id' => $validatedFilters['kelas_id'] ?? null,
             'mapel_id' => $validatedFilters['mapel_id'] ?? null,
             'tahun_ajaran' => ! empty($validatedFilters['tahun_ajaran']) ? $validatedFilters['tahun_ajaran'] : $activePeriode['tahun_ajaran'],
             'semester' => ! empty($validatedFilters['semester']) ? $validatedFilters['semester'] : $activePeriode['semester'],
             'tanggal_awal' => $validatedFilters['tanggal_awal'] ?? null,
             'tanggal_akhir' => $validatedFilters['tanggal_akhir'] ?? null,
+            'bulan' => $validatedFilters['bulan'] ?? null,
         ];
 
         if (! empty($validatedFilters['kelas_mapel'])) {
@@ -49,6 +54,37 @@ class LaporanService
         }
 
         return array_filter($filters, fn ($val) => $val !== null);
+    }
+
+    /**
+     * Menghitung jumlah sheet (kombinasi kelas-mapel dengan jadwal) sesuai filter.
+     */
+    public function hitungJumlahSheet(array $filters): int
+    {
+        $jadwalQuery = Jadwal::query()
+            ->select('kelas_id', 'mapel_id')
+            ->distinct();
+
+        if (! empty($filters['jurusan_id'])) {
+            $jadwalQuery->whereHas('kelas', fn ($q) => $q->where('jurusan_id', $filters['jurusan_id']));
+        }
+        if (! empty($filters['guru_id'])) {
+            $jadwalQuery->where('guru_id', $filters['guru_id']);
+        }
+        if (! empty($filters['kelas_id'])) {
+            $jadwalQuery->where('kelas_id', $filters['kelas_id']);
+        }
+        if (! empty($filters['mapel_id'])) {
+            $jadwalQuery->where('mapel_id', $filters['mapel_id']);
+        }
+        if (! empty($filters['tahun_ajaran'])) {
+            $jadwalQuery->where('tahun_ajaran', $filters['tahun_ajaran']);
+        }
+        if (! empty($filters['semester'])) {
+            $jadwalQuery->where('semester', $filters['semester']);
+        }
+
+        return $jadwalQuery->get()->count();
     }
 
     /**
@@ -70,9 +106,24 @@ class LaporanService
     /**
      * Mengekspor laporan rekap absensi ke format Excel (.xlsx).
      */
-    public function exportExcel(User $user, array $validatedFilters): BinaryFileResponse
+    public function exportExcel(User $user, array $validatedFilters): BinaryFileResponse|RedirectResponse
     {
         $filters = $this->prepareFilters($user, $validatedFilters);
+
+        if ($user->role === 'admin') {
+            $batasSheet = (int) config('absensi.batas_sheet_ekspor', 50);
+            $jumlahSheet = $this->hitungJumlahSheet($filters);
+
+            if ($jumlahSheet > $batasSheet) {
+                $pesan = "Ekspor mencakup {$jumlahSheet} sheet, melebihi batas {$batasSheet}. Silakan pilih jurusan atau kelas tertentu.";
+
+                return redirect()->back(fallback: route('admin.laporan.index'))
+                    ->withInput()
+                    ->with('error', $pesan)
+                    ->withErrors(['sheet' => $pesan]);
+            }
+        }
+
         $filename = $this->generateFilename($user, $validatedFilters, 'xlsx');
 
         return Excel::download(new LaporanAbsensiExport($filters), $filename);
@@ -81,12 +132,26 @@ class LaporanService
     /**
      * Mengekspor laporan rekap absensi ke format PDF (.pdf).
      */
-    public function exportPdf(User $user, array $validatedFilters): Response
+    public function exportPdf(User $user, array $validatedFilters): Response|RedirectResponse
     {
         $filters = $this->prepareFilters($user, $validatedFilters);
-        $filename = $this->generateFilename($user, $validatedFilters, 'pdf');
-
         $data = $this->absensiService->getRekapLaporan($filters);
+
+        if ($user->role === 'admin') {
+            $batasBarisPdf = (int) config('absensi.batas_baris_pdf', 2000);
+            $totalBaris = $data->count();
+
+            if ($totalBaris > $batasBarisPdf) {
+                $pesan = "Ekspor mencakup {$totalBaris} baris, melebihi batas {$batasBarisPdf}. Silakan pilih jurusan atau kelas tertentu.";
+
+                return redirect()->back(fallback: route('admin.laporan.index'))
+                    ->withInput()
+                    ->with('error', $pesan)
+                    ->withErrors(['baris' => $pesan]);
+            }
+        }
+
+        $filename = $this->generateFilename($user, $validatedFilters, 'pdf');
 
         $periodeText = 'Semua Periode';
         if (! empty($filters['tahun_ajaran'])) {
@@ -97,6 +162,7 @@ class LaporanService
         }
 
         // Ambil nama entitas sebagai variabel (tanpa query langsung di Blade PDF)
+        $namaJurusan = ! empty($filters['jurusan_id']) ? Jurusan::find($filters['jurusan_id'])?->nama : null;
         $namaKelas = ! empty($filters['kelas_id']) ? Kelas::find($filters['kelas_id'])?->nama : null;
         $namaMapel = ! empty($filters['mapel_id']) ? Mapel::find($filters['mapel_id'])?->nama : null;
         $namaGuru = ! empty($filters['guru_id']) ? Guru::with('user')->find($filters['guru_id'])?->user?->name : null;
@@ -105,6 +171,7 @@ class LaporanService
             'data' => $data,
             'filters' => $filters,
             'periode' => $periodeText,
+            'namaJurusan' => $namaJurusan,
             'namaKelas' => $namaKelas,
             'namaMapel' => $namaMapel,
             'namaGuru' => $namaGuru,

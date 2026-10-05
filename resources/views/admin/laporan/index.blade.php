@@ -7,6 +7,22 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            @if (session('error'))
+                <div class="mb-4 bg-red-100 dark:bg-red-950/60 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded relative" role="alert">
+                    <span class="block sm:inline">{{ session('error') }}</span>
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="mb-4 bg-red-100 dark:bg-red-950/60 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded relative" role="alert">
+                    <ul class="list-disc list-inside text-sm">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-gray-200 dark:border-gray-700 gap-2">
@@ -29,11 +45,25 @@
                     <form action="{{ route('admin.laporan.export') }}" method="GET" class="space-y-4 max-w-lg">
                         
                         <div>
+                            <x-input-label for="jurusan_id" :value="__('Jurusan (Opsional)')" />
+                            <select id="jurusan_id" name="jurusan_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                <option value="">-- Semua Jurusan --</option>
+                                @foreach($jurusan as $j)
+                                    <option value="{{ $j->id }}" {{ (string) old('jurusan_id', request('jurusan_id')) === (string) $j->id ? 'selected' : '' }}>
+                                        {{ $j->nama }} ({{ $j->kode }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
                             <x-input-label for="kelas_id" :value="__('Kelas (Opsional)')" />
                             <select id="kelas_id" name="kelas_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                 <option value="">-- Semua Kelas --</option>
                                 @foreach($kelas as $k)
-                                    <option value="{{ $k->id }}">{{ $k->nama }}</option>
+                                    <option value="{{ $k->id }}" {{ (string) old('kelas_id', request('kelas_id')) === (string) $k->id ? 'selected' : '' }}>
+                                        {{ $k->nama }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -43,9 +73,16 @@
                             <select id="mapel_id" name="mapel_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                 <option value="">-- Semua Mata Pelajaran --</option>
                                 @foreach($mapel as $m)
-                                    <option value="{{ $m->id }}">{{ $m->nama }}</option>
+                                    <option value="{{ $m->id }}" {{ (string) old('mapel_id', request('mapel_id')) === (string) $m->id ? 'selected' : '' }}>
+                                        {{ $m->nama }}
+                                    </option>
                                 @endforeach
                             </select>
+                        </div>
+                        
+                        <div>
+                            <x-input-label for="bulan" :value="__('Bulan')" />
+                            <input type="month" id="bulan" name="bulan" value="{{ old('bulan', request('bulan')) }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                         </div>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -53,7 +90,7 @@
                                 <x-input-label for="tahun_ajaran" :value="__('Tahun Ajaran')" />
                                 <select id="tahun_ajaran" name="tahun_ajaran" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                     @foreach($daftarTahunAjaran as $ta)
-                                        <option value="{{ $ta }}" {{ ($activePeriode['tahun_ajaran'] ?? '') === $ta ? 'selected' : '' }}>
+                                        <option value="{{ $ta }}" {{ (string) old('tahun_ajaran', request('tahun_ajaran', $activePeriode['tahun_ajaran'] ?? '')) === (string) $ta ? 'selected' : '' }}>
                                             {{ $ta }} {{ ($activePeriode['tahun_ajaran'] ?? '') === $ta ? '(Aktif)' : '' }}
                                         </option>
                                     @endforeach
@@ -63,10 +100,10 @@
                             <div>
                                 <x-input-label for="semester" :value="__('Semester')" />
                                 <select id="semester" name="semester" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                                    <option value="Ganjil" {{ ($activePeriode['semester'] ?? '') === 'Ganjil' ? 'selected' : '' }}>
+                                    <option value="Ganjil" {{ (string) old('semester', request('semester', $activePeriode['semester'] ?? '')) === 'Ganjil' ? 'selected' : '' }}>
                                         Ganjil {{ ($activePeriode['semester'] ?? '') === 'Ganjil' ? '(Aktif)' : '' }}
                                     </option>
-                                    <option value="Genap" {{ ($activePeriode['semester'] ?? '') === 'Genap' ? 'selected' : '' }}>
+                                    <option value="Genap" {{ (string) old('semester', request('semester', $activePeriode['semester'] ?? '')) === 'Genap' ? 'selected' : '' }}>
                                         Genap {{ ($activePeriode['semester'] ?? '') === 'Genap' ? '(Aktif)' : '' }}
                                     </option>
                                 </select>

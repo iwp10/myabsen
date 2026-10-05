@@ -92,7 +92,7 @@ Catatan: `diabsen_oleh` dan `diubah_oleh` merujuk ke `users.id`.
   - **Service Pattern (`AbsensiService` & `LaporanService`):** Sebagai pusat seluruh logika bisnis (*business logic*), kalkulasi persentase kehadiran, agregasi rekapitulasi, dan eksekusi transaksi absensi serta ekspor laporan.
   - **Model:** Khusus menangani pemetaan relasi Eloquent (*relationships*), query scopes, dan kekhawatiran persistensi (*persistence concern*).
   - **View:** Khusus untuk layer presentasi UI menggunakan Blade Templating, Tailwind CSS, dan Alpine.js.
-- **Performa:** halaman absensi untuk kelas 40 siswa terbuka kurang dari 2 detik. Rekap memakai agregasi SQL, tanpa N+1.
+- **Performa:** halaman absensi untuk kelas 40 siswa terbuka kurang dari 2 detik. Rekap memakai agregasi SQL, tanpa N+1. Ekspor laporan admin dibatasi untuk mencegah *Out Of Memory* (OOM) dan pemborosan CPU: batas jumlah sheet Excel (`batas_sheet_ekspor`, default 50) dan batas baris PDF (`batas_baris_pdf`, default 2000) yang dapat disesuaikan pada file konfigurasi (`config/absensi.php`). Halaman laporan admin dilengkapi filter Jurusan untuk mempersempit cakupan data ekspor.
 - **Keamanan:** password di-hash, proteksi CSRF, otorisasi lewat Policy, rate limiting pada login, validasi di sisi server.
 - **Tampilan:** responsif, nyaman dipakai guru dari HP, layout sidebar, font Inter, ikon Tabler, serta toggle Mode Terang/Gelap menggunakan Alpine.js dan Tailwind (dengan Mode Terang sebagai setelan bawaan/default).
 - **Bahasa:** seluruh antarmuka Bahasa Indonesia.
