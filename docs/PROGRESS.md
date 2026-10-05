@@ -112,6 +112,9 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] Eliminasi Duplikasi Logika: Sentralisasi penentuan nama hari server berbasis `Asia/Jakarta` melalui method statis tunggal `AbsensiService::getHariServer()`.
 - [x] Standarisasi Timezone: Menyelaraskan seluruh pencatatan waktu dan instansiasi Carbon mutlak menggunakan `Asia/Jakarta`.
 - [x] Pencegahan N+1 Query & Eager Loading pada seluruh relasi domain siswa, guru, kelas, dan jadwal.
+- [x] Otorisasi Riwayat Guru via Policy: Memindahkan otorisasi detail riwayat guru (`guru.riwayat.detail`) dari `abort(403)` manual di controller ke `JadwalPolicy::viewRiwayat()` dan melengkapi pengujian Feature Test (AB-08).
+- [x] FormRequest untuk Import Siswa: Memindahkan validasi manual `$request->validate()` di `SiswaController::import` ke kelas FormRequest tersendiri (`ImportSiswaRequest`) dengan otorisasi khusus admin.
+- [x] Sentralisasi Parser `kelas_mapel`: Menyatukan logika pembuatan, pemecahan, dan validasi format `"{kelas_id}-{mapel_id}"` ke dalam class pembantu tunggal `App\Support\KelasMapel` serta aturan validasi `regex:/^[1-9]\d*-[1-9]\d*$/`.
 
 ## Catatan dan hambatan
 Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
@@ -133,13 +136,11 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-05 | 1,3,4,5,6,9 | feat: implementasi Pengaturan Periode aktif (AB-11) oleh admin via web dan database (tabel pengaturan), saran kalender otomatis, banner pengingat dashboard admin, penyelarasan default periode di dashboard guru, dashboard siswa, riwayat guru, rekap dan ekspor laporan, validasi tahun ajaran YYYY/YYYY (tahun kedua = pertama+1), serta 8 pengujian otomatis AB-11 lulus (PASS).
 2026-10-05 | 1,3,6,9 | fix: perbaikan filter periode terpadu master data admin (Kelas dan Jadwal default Semua Periode), standarisasi dark mode form admin (termasuk color-scheme:dark), pembentukan sheet ekspor admin multi-jurusan (TKJ, TBSM, dll) dengan sanitasi nama sheet <= 31 karakter, perbaikan kedipan modal pengaturan periode (type=button, intercept Enter, dan x-cloak global), serta 12 feature test AB-11 lulus (PASS).
 2026-10-05 | 6,9 | feat: pembatasan ekspor laporan admin (maks. 50 sheet Excel dan 2000 baris PDF via config/absensi.php), filter jurusan opsional, optimasi eliminasi N+1 pada LaporanAbsensiExport, dan 17 test LaporanTest lulus (PASS).
+2026-10-05 | 3,4,8 | refactor: otorisasi riwayat detail guru via JadwalPolicy (AB-08), FormRequest ImportSiswaRequest untuk import siswa, sentralisasi parser dan validasi kelas_mapel ke App\Support\KelasMapel, serta penambahan 7 feature test riwayat guru dan 4 test import siswa (seluruh 155 test PASS).
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:
 - [ ] **Pilihan Periode di Riwayat Guru dan Siswa:** Tambahkan dropdown pemilihan tahun ajaran dan semester pada halaman riwayat guru dan riwayat siswa agar pengguna dapat meninjau histori kehadiran periode terdahulu tanpa harus mengubah periode aktif.
-- [ ] **Policy dan Test untuk Riwayat Guru:** Terapkan pemeriksaan otorisasi melalui Policy pada rute `guru.riwayat.detail` dan lengkapi Feature Test untuk rute `guru.riwayat` serta `guru.riwayat.detail`.
-- [ ] **FormRequest untuk Import Siswa:** Pindahkan validasi manual `$request->validate()` di `SiswaController::import` ke kelas FormRequest tersendiri (`ImportSiswaRequest`).
-- [ ] **Sentralisasi Parser `kelas_mapel`:** Satukan logika pemecahan dan validasi string format `"{kelas_id}-{mapel_id}"` yang saat ini tersebar di 4 tempat ke dalam satu helper method terpusat.
 - [ ] **Pembersihan Dead Code `LaporanAbsensiGuruExport`:** Hapus atau fungsikan kembali class `app/Exports/LaporanAbsensiGuruExport.php` yang saat ini tidak pernah diinstansiasi.
 - [ ] **Rapikan Dependensi Tailwind di `package.json`:** Bersihkan paket `@tailwindcss/vite` yang tidak terpakai agar konsisten dengan `tailwindcss: ^3.1.0`.
 - [ ] **Perlindungan FK `diabsen_oleh` dan `diubah_oleh`:** Buat migrasi baru untuk mengubah constraint dari `cascadeOnDelete` menjadi `restrictOnDelete` / `nullOnDelete` pada `sesi_absensi` demi mencegah hilangnya histori absensi saat user dihapus.

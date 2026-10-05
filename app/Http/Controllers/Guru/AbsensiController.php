@@ -14,6 +14,7 @@ use App\Models\SesiAbsensi;
 use App\Models\Siswa;
 use App\Services\AbsensiService;
 use App\Services\LaporanService;
+use App\Support\KelasMapel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -131,7 +132,7 @@ class AbsensiController extends Controller
                     ->where('semester', $activePeriode['semester']);
             })
             ->get()
-            ->unique(fn ($j) => $j->kelas_id.'-'.$j->mapel_id)
+            ->unique(fn ($j) => KelasMapel::make($j->kelas_id, $j->mapel_id))
             ->values();
 
         return view('guru.riwayat', [
@@ -145,23 +146,35 @@ class AbsensiController extends Controller
      */
     public function riwayatDetail(Request $request, Kelas $kelas, Mapel $mapel)
     {
-        $guru = Guru::where('user_id', $request->user()->id)->first();
-        if (! $guru) {
-            abort(403);
-        }
-
         $activePeriode = $this->absensiService->getActivePeriode();
+        $guru = $request->user()->guru;
 
-        // Pastikan guru memang mengajar kelas & mapel ini pada periode aktif
+        // Cari jadwal milik guru yang login pada kelas-mapel & periode aktif
         $jadwal = Jadwal::with(['kelas', 'mapel'])
-            ->where('guru_id', $guru->id)
+            ->where('guru_id', $guru?->id)
             ->where('kelas_id', $kelas->id)
             ->where('mapel_id', $mapel->id)
             ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
                 $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
                     ->where('semester', $activePeriode['semester']);
             })
-            ->firstOrFail();
+            ->first();
+
+        // Jika tidak ada jadwal miliknya, cari jadwal kelas-mapel lain (atau 404 jika sama sekali tidak ada)
+        // agar JadwalPolicy memeriksa dan menolak dengan 403 Forbidden
+        if (! $jadwal) {
+            $jadwalLain = Jadwal::where('kelas_id', $kelas->id)
+                ->where('mapel_id', $mapel->id)
+                ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
+                    $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
+                        ->where('semester', $activePeriode['semester']);
+                })
+                ->firstOrFail();
+
+            Gate::authorize('viewRiwayat', $jadwalLain);
+        }
+
+        Gate::authorize('viewRiwayat', $jadwal);
 
         $jadwalIds = Jadwal::where('guru_id', $guru->id)
             ->where('kelas_id', $kelas->id)

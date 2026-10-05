@@ -9,6 +9,7 @@ use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\User;
+use App\Support\KelasMapel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Maatwebsite\Excel\Facades\Excel;
@@ -40,10 +41,10 @@ class LaporanService
         ];
 
         if (! empty($validatedFilters['kelas_mapel'])) {
-            $parts = explode('-', $validatedFilters['kelas_mapel']);
-            if (count($parts) === 2) {
-                $filters['kelas_id'] = $parts[0];
-                $filters['mapel_id'] = $parts[1];
+            $parsed = KelasMapel::parse($validatedFilters['kelas_mapel']);
+            if ($parsed) {
+                $filters['kelas_id'] = $parsed['kelas_id'];
+                $filters['mapel_id'] = $parsed['mapel_id'];
             }
         }
 

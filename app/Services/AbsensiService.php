@@ -9,6 +9,7 @@ use App\Models\Jadwal;
 use App\Models\SesiAbsensi;
 use App\Models\Siswa;
 use App\Models\User;
+use App\Support\KelasMapel;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -275,9 +276,9 @@ class AbsensiService
                         ->where('semester', $activePeriode['semester']);
                 }
                 if (! empty($filters['kelas_mapel'])) {
-                    $parts = explode('-', $filters['kelas_mapel']);
-                    if (count($parts) === 2) {
-                        $q->where('kelas_id', $parts[0])->where('mapel_id', $parts[1]);
+                    $parsed = KelasMapel::parse($filters['kelas_mapel']);
+                    if ($parsed) {
+                        $q->where('kelas_id', $parsed['kelas_id'])->where('mapel_id', $parsed['mapel_id']);
                     }
                 }
                 if (! empty($filters['hari']) && is_array($filters['hari'])) {
