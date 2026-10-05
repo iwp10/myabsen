@@ -30,7 +30,7 @@
                         
                         <div>
                             <x-input-label for="kelas_id" :value="__('Kelas (Opsional)')" />
-                            <select id="kelas_id" name="kelas_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                            <select id="kelas_id" name="kelas_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                 <option value="">-- Semua Kelas --</option>
                                 @foreach($kelas as $k)
                                     <option value="{{ $k->id }}">{{ $k->nama }}</option>
@@ -40,7 +40,7 @@
                         
                         <div>
                             <x-input-label for="mapel_id" :value="__('Mata Pelajaran (Opsional)')" />
-                            <select id="mapel_id" name="mapel_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                            <select id="mapel_id" name="mapel_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                 <option value="">-- Semua Mata Pelajaran --</option>
                                 @foreach($mapel as $m)
                                     <option value="{{ $m->id }}">{{ $m->nama }}</option>
@@ -51,7 +51,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <x-input-label for="tahun_ajaran" :value="__('Tahun Ajaran')" />
-                                <select id="tahun_ajaran" name="tahun_ajaran" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                <select id="tahun_ajaran" name="tahun_ajaran" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                     @foreach($daftarTahunAjaran as $ta)
                                         <option value="{{ $ta }}" {{ ($activePeriode['tahun_ajaran'] ?? '') === $ta ? 'selected' : '' }}>
                                             {{ $ta }} {{ ($activePeriode['tahun_ajaran'] ?? '') === $ta ? '(Aktif)' : '' }}
@@ -62,7 +62,7 @@
 
                             <div>
                                 <x-input-label for="semester" :value="__('Semester')" />
-                                <select id="semester" name="semester" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                <select id="semester" name="semester" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                     <option value="Ganjil" {{ ($activePeriode['semester'] ?? '') === 'Ganjil' ? 'selected' : '' }}>
                                         Ganjil {{ ($activePeriode['semester'] ?? '') === 'Ganjil' ? '(Aktif)' : '' }}
                                     </option>

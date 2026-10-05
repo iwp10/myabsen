@@ -130,6 +130,7 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-04 | 6,9 | feat: migrasi LaporanAbsensiExport admin ke format multi-sheet per kelas-mapel dan penambahan konfirmasi modal logout (oleh lat's play).
 2026-10-04 | 1,3,9 | feat: penambahan kolom dan konsep semester (Ganjil/Genap) pada tabel kelas dan jadwal via migrasi baru serta filter pada index dan request (oleh lat's play).
 2026-10-05 | 1,3,4,5,6,9 | feat: implementasi Pengaturan Periode aktif (AB-11) oleh admin via web dan database (tabel pengaturan), saran kalender otomatis, banner pengingat dashboard admin, penyelarasan default periode di dashboard guru, dashboard siswa, riwayat guru, rekap dan ekspor laporan, validasi tahun ajaran YYYY/YYYY (tahun kedua = pertama+1), serta 8 pengujian otomatis AB-11 lulus (PASS).
+2026-10-05 | 1,3,6,9 | fix: perbaikan filter periode terpadu master data admin (Kelas dan Jadwal default Semua Periode), standarisasi dark mode form admin (termasuk color-scheme:dark), pembentukan sheet ekspor admin multi-jurusan (TKJ, TBSM, dll) dengan sanitasi nama sheet <= 31 karakter, perbaikan kedipan modal pengaturan periode (type=button, intercept Enter, dan x-cloak global), serta 12 feature test AB-11 lulus (PASS).
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:

@@ -24,20 +24,17 @@
                         </div>
                         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                             <form action="{{ route('admin.kelas.index') }}" method="GET" class="flex flex-col sm:flex-row gap-2 w-full">
-                                <select name="tahun_ajaran" class="w-full sm:w-40 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
-                                    <option value="all">Semua T.A</option>
-                                    @foreach($tahunAjarans as $ta)
-                                        <option value="{{ $ta }}" {{ $filterTahunAjaran === $ta ? 'selected' : '' }}>{{ $ta }}</option>
+                                <select name="periode" class="w-full sm:w-56 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                                    <option value="">Semua periode</option>
+                                    @foreach($daftarPeriode as $item)
+                                        <option value="{{ $item['value'] }}" {{ $filterPeriode === $item['value'] ? 'selected' : '' }}>
+                                            {{ $item['label'] }}
+                                        </option>
                                     @endforeach
-                                </select>
-                                <select name="semester" class="w-full sm:w-32 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
-                                    <option value="all">Semua</option>
-                                    <option value="Ganjil" {{ $filterSemester === 'Ganjil' ? 'selected' : '' }}>Ganjil</option>
-                                    <option value="Genap" {{ $filterSemester === 'Genap' ? 'selected' : '' }}>Genap</option>
                                 </select>
                                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, tingkat, jurusan..." class="w-full sm:w-48 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
                                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition">Cari</button>
-                                @if(request()->hasAny(['search', 'tahun_ajaran', 'semester']))
+                                @if(request()->hasAny(['search', 'periode', 'tahun_ajaran', 'semester']) && (request('search') || request('periode') || request('tahun_ajaran') || request('semester')))
                                     <a href="{{ route('admin.kelas.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-3 rounded-md text-sm flex items-center justify-center transition">Reset</a>
                                 @endif
                             </form>

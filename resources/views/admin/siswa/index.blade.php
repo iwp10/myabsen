@@ -43,7 +43,7 @@
                             @csrf
                             <div class="w-full sm:w-auto">
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kelas</label>
-                                <select name="kelas_id" required class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm">
+                                <select name="kelas_id" required class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 rounded-md shadow-sm">
                                     <option value="">Pilih Kelas</option>
                                     @foreach($kelas as $k)
                                         <option value="{{ $k->id }}">{{ $k->nama }}</option>

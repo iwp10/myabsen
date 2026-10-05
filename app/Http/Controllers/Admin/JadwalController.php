@@ -9,7 +9,7 @@ use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\Mapel;
-use App\Services\AbsensiService;
+use App\Services\PeriodeService;
 use Illuminate\Http\Request;
 
 class JadwalController extends Controller
@@ -20,21 +20,42 @@ class JadwalController extends Controller
     public function index(Request $request)
     {
         $search = $request->query('search');
+        $periodeService = app(PeriodeService::class);
+        $activePeriode = $periodeService->getActivePeriode();
+        $daftarPeriode = $periodeService->getDaftarKombinasiPeriode();
+
+        $reqPeriode = $request->query('periode');
         $reqTahunAjaran = $request->query('tahun_ajaran');
         $reqSemester = $request->query('semester');
 
-        $absensiService = app(AbsensiService::class);
-        $activePeriode = $absensiService->getActivePeriode();
+        $filterTahunAjaran = null;
+        $filterSemester = null;
+        $filterPeriode = '';
 
-        // Jika tidak ada filter yang dipilih, gunakan active periode
-        $filterTahunAjaran = $reqTahunAjaran ?? $activePeriode['tahun_ajaran'];
-        $filterSemester = $reqSemester ?? $activePeriode['semester'];
+        if (! empty($reqPeriode) && $reqPeriode !== 'all') {
+            $filterPeriode = $reqPeriode;
+            if (str_contains($reqPeriode, '|')) {
+                [$filterTahunAjaran, $filterSemester] = explode('|', $reqPeriode, 2);
+            } elseif (str_contains($reqPeriode, ' - ')) {
+                [$filterTahunAjaran, $filterSemester] = explode(' - ', $reqPeriode, 2);
+            }
+        } elseif (! empty($reqTahunAjaran) || ! empty($reqSemester)) {
+            if (! empty($reqTahunAjaran) && $reqTahunAjaran !== 'all') {
+                $filterTahunAjaran = $reqTahunAjaran;
+            }
+            if (! empty($reqSemester) && $reqSemester !== 'all') {
+                $filterSemester = $reqSemester;
+            }
+            if ($filterTahunAjaran && $filterSemester) {
+                $filterPeriode = $filterTahunAjaran.'|'.$filterSemester;
+            }
+        }
 
         $jadwals = Jadwal::with(['kelas', 'mapel', 'guru.user'])
-            ->when($filterTahunAjaran && $filterTahunAjaran !== 'all', function ($q) use ($filterTahunAjaran) {
+            ->when($filterTahunAjaran, function ($q) use ($filterTahunAjaran) {
                 $q->where('tahun_ajaran', $filterTahunAjaran);
             })
-            ->when($filterSemester && $filterTahunAjaran !== 'all', function ($q) use ($filterSemester) {
+            ->when($filterSemester, function ($q) use ($filterSemester) {
                 $q->where('semester', $filterSemester);
             })
             ->when($search, function ($query) use ($search) {
@@ -51,9 +72,14 @@ class JadwalController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $tahunAjarans = Jadwal::select('tahun_ajaran')->distinct()->orderBy('tahun_ajaran', 'desc')->pluck('tahun_ajaran');
-
-        return view('admin.jadwal.index', compact('jadwals', 'activePeriode', 'filterTahunAjaran', 'filterSemester', 'tahunAjarans'));
+        return view('admin.jadwal.index', compact(
+            'jadwals',
+            'activePeriode',
+            'daftarPeriode',
+            'filterPeriode',
+            'filterTahunAjaran',
+            'filterSemester'
+        ));
     }
 
     /**
@@ -64,8 +90,11 @@ class JadwalController extends Controller
         $kelas = Kelas::orderBy('tingkat')->orderBy('nama')->get();
         $mapel = Mapel::orderBy('nama')->get();
         $guru = Guru::with('user')->get()->sortBy('user.name');
+        $periodeService = app(PeriodeService::class);
+        $activePeriode = $periodeService->getActivePeriode();
+        $daftarTahunAjaran = $periodeService->getDaftarPilihanTahunAjaran();
 
-        return view('admin.jadwal.create', compact('kelas', 'mapel', 'guru'));
+        return view('admin.jadwal.create', compact('kelas', 'mapel', 'guru', 'activePeriode', 'daftarTahunAjaran'));
     }
 
     /**
@@ -86,8 +115,11 @@ class JadwalController extends Controller
         $kelas = Kelas::orderBy('tingkat')->orderBy('nama')->get();
         $mapel = Mapel::orderBy('nama')->get();
         $guru = Guru::with('user')->get()->sortBy('user.name');
+        $periodeService = app(PeriodeService::class);
+        $activePeriode = $periodeService->getActivePeriode();
+        $daftarTahunAjaran = $periodeService->getDaftarPilihanTahunAjaran();
 
-        return view('admin.jadwal.edit', compact('jadwal', 'kelas', 'mapel', 'guru'));
+        return view('admin.jadwal.edit', compact('jadwal', 'kelas', 'mapel', 'guru', 'activePeriode', 'daftarTahunAjaran'));
     }
 
     /**

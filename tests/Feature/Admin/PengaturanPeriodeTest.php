@@ -4,6 +4,7 @@ use App\Exports\LaporanAbsensiExport;
 use App\Models\DetailAbsensi;
 use App\Models\Guru;
 use App\Models\Jadwal;
+use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\Pengaturan;
@@ -391,4 +392,164 @@ test('AB-11: dashboard siswa tidak lagi mencampur jadwal lintas periode', functi
     $resGenap = $this->actingAs($siswaUser)->get(route('siswa.dashboard'));
     $resGenap->assertSee('Mapel Genap');
     $resGenap->assertDontSee('Mapel Ganjil');
+});
+
+test('AB-11: kelas dan jadwal Genap 2025/2026 tampil di daftar admin pada Semua periode dan filter periode itu, tidak tampil pada filter Ganjil 2026/2027', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    app(PeriodeService::class)->setPeriodeAktif('2026/2027', 'Ganjil');
+
+    $jurusan = Jurusan::factory()->create();
+    $guru = Guru::factory()->create();
+    $mapel = Mapel::factory()->create();
+
+    $kelasGenap = Kelas::factory()->create([
+        'nama' => 'TBSM 2 kelas 12',
+        'jurusan_id' => $jurusan->id,
+        'tahun_ajaran' => '2025/2026',
+        'semester' => 'Genap',
+    ]);
+
+    $kelasGanjil = Kelas::factory()->create([
+        'nama' => 'TKJ 1 kelas 12',
+        'jurusan_id' => $jurusan->id,
+        'tahun_ajaran' => '2026/2027',
+        'semester' => 'Ganjil',
+    ]);
+
+    $jadwalGenap = Jadwal::factory()->create([
+        'kelas_id' => $kelasGenap->id,
+        'guru_id' => $guru->id,
+        'mapel_id' => $mapel->id,
+        'tahun_ajaran' => '2025/2026',
+        'semester' => 'Genap',
+    ]);
+
+    $jadwalGanjil = Jadwal::factory()->create([
+        'kelas_id' => $kelasGanjil->id,
+        'guru_id' => $guru->id,
+        'mapel_id' => $mapel->id,
+        'tahun_ajaran' => '2026/2027',
+        'semester' => 'Ganjil',
+    ]);
+
+    // A. Daftar Kelas
+    // 1. Tanpa filter (bawaan: Semua periode) -> keduanya tampil
+    $resKelasAll = $this->actingAs($admin)->get(route('admin.kelas.index'));
+    $resKelasAll->assertStatus(200);
+    $resKelasAll->assertSee('TBSM 2 kelas 12');
+    $resKelasAll->assertSee('TKJ 1 kelas 12');
+
+    // 2. Filter periode 2025/2026 Genap -> hanya kelasGenap yang tampil
+    $resKelasGenap = $this->actingAs($admin)->get(route('admin.kelas.index', ['periode' => '2025/2026|Genap']));
+    $resKelasGenap->assertStatus(200);
+    $resKelasGenap->assertSee('TBSM 2 kelas 12');
+    $resKelasGenap->assertDontSee('TKJ 1 kelas 12');
+
+    // 3. Filter periode 2026/2027 Ganjil -> kelasGenap tidak tampil
+    $resKelasGanjil = $this->actingAs($admin)->get(route('admin.kelas.index', ['periode' => '2026/2027|Ganjil']));
+    $resKelasGanjil->assertStatus(200);
+    $resKelasGanjil->assertDontSee('TBSM 2 kelas 12');
+    $resKelasGanjil->assertSee('TKJ 1 kelas 12');
+
+    // B. Daftar Jadwal
+    // 1. Tanpa filter (bawaan: Semua periode) -> keduanya tampil
+    $resJadwalAll = $this->actingAs($admin)->get(route('admin.jadwal.index'));
+    $resJadwalAll->assertStatus(200);
+    $resJadwalAll->assertSee($kelasGenap->nama);
+    $resJadwalAll->assertSee($kelasGanjil->nama);
+
+    // 2. Filter periode 2025/2026 Genap -> hanya jadwalGenap tampil
+    $resJadwalGenap = $this->actingAs($admin)->get(route('admin.jadwal.index', ['periode' => '2025/2026|Genap']));
+    $resJadwalGenap->assertStatus(200);
+    $resJadwalGenap->assertSee($kelasGenap->nama);
+    $resJadwalGenap->assertDontSee($kelasGanjil->nama);
+
+    // 3. Filter periode 2026/2027 Ganjil -> jadwalGenap tidak tampil
+    $resJadwalGanjil = $this->actingAs($admin)->get(route('admin.jadwal.index', ['periode' => '2026/2027|Ganjil']));
+    $resJadwalGanjil->assertStatus(200);
+    $resJadwalGanjil->assertDontSee($kelasGenap->nama);
+    $resJadwalGanjil->assertSee($kelasGanjil->nama);
+});
+
+test('AB-11: ekspor Semua kelas memuat sheet dari lebih dari satu jurusan dan periode lain tidak ikut tercampur', function () {
+    $jurusanTkj = Jurusan::factory()->create(['nama' => 'Teknik Komputer dan Jaringan', 'kode' => 'TKJ']);
+    $jurusanTbsm = Jurusan::factory()->create(['nama' => 'Teknik dan Bisnis Sepeda Motor', 'kode' => 'TBSM']);
+
+    $kelasTkj = Kelas::factory()->create(['nama' => 'XII TKJ 1', 'jurusan_id' => $jurusanTkj->id, 'tahun_ajaran' => '2026/2027', 'semester' => 'Ganjil']);
+    $kelasTbsm = Kelas::factory()->create(['nama' => 'XII TBSM 1', 'jurusan_id' => $jurusanTbsm->id, 'tahun_ajaran' => '2026/2027', 'semester' => 'Ganjil']);
+    $kelasPeriodeLain = Kelas::factory()->create(['nama' => 'X RPL 1', 'tahun_ajaran' => '2025/2026', 'semester' => 'Genap']);
+
+    $guru = Guru::factory()->create();
+    $mapel = Mapel::factory()->create(['nama' => 'Matematika']);
+
+    // Jadwal untuk TKJ di 2026/2027 Ganjil
+    Jadwal::factory()->create([
+        'kelas_id' => $kelasTkj->id,
+        'guru_id' => $guru->id,
+        'mapel_id' => $mapel->id,
+        'tahun_ajaran' => '2026/2027',
+        'semester' => 'Ganjil',
+    ]);
+
+    // Jadwal untuk TBSM di 2026/2027 Ganjil
+    Jadwal::factory()->create([
+        'kelas_id' => $kelasTbsm->id,
+        'guru_id' => $guru->id,
+        'mapel_id' => $mapel->id,
+        'tahun_ajaran' => '2026/2027',
+        'semester' => 'Ganjil',
+    ]);
+
+    // Jadwal untuk kelasPeriodeLain di 2025/2026 Genap
+    Jadwal::factory()->create([
+        'kelas_id' => $kelasPeriodeLain->id,
+        'guru_id' => $guru->id,
+        'mapel_id' => $mapel->id,
+        'tahun_ajaran' => '2025/2026',
+        'semester' => 'Genap',
+    ]);
+
+    $export = new LaporanAbsensiExport([
+        'tahun_ajaran' => '2026/2027',
+        'semester' => 'Ganjil',
+    ]);
+
+    $sheets = $export->sheets();
+    expect($sheets)->toHaveCount(2);
+
+    $titles = array_map(fn ($s) => $s->title(), $sheets);
+    // Memuat sheet TKJ dan TBSM
+    expect(collect($titles)->contains(fn ($t) => str_contains($t, 'XII TKJ 1')))->toBeTrue();
+    expect(collect($titles)->contains(fn ($t) => str_contains($t, 'XII TBSM 1')))->toBeTrue();
+    // Periode lain tidak ikut tercampur
+    expect(collect($titles)->contains(fn ($t) => str_contains($t, 'X RPL 1')))->toBeFalse();
+});
+
+test('halaman form jadwal memuat class dark: pada input dan select', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $jadwal = Jadwal::factory()->create();
+
+    // Halaman create jadwal
+    $resCreate = $this->actingAs($admin)->get(route('admin.jadwal.create'));
+    $resCreate->assertStatus(200);
+    $resCreate->assertSee('dark:bg-gray-800');
+    $resCreate->assertSee('dark:[color-scheme:dark]');
+    $resCreate->assertSee('dark:text-gray-300');
+
+    // Halaman edit jadwal
+    $resEdit = $this->actingAs($admin)->get(route('admin.jadwal.edit', $jadwal));
+    $resEdit->assertStatus(200);
+    $resEdit->assertSee('dark:bg-gray-800');
+    $resEdit->assertSee('dark:[color-scheme:dark]');
+    $resEdit->assertSee('dark:text-gray-300');
+});
+
+test('AB-11: halaman Pengaturan Periode memuat modal dengan x-cloak dan tombol pembuka modal bertipe button', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+
+    $response = $this->actingAs($admin)->get(route('admin.pengaturan-periode.index'));
+    $response->assertStatus(200);
+    $response->assertSee('x-cloak', false);
+    $response->assertSee('type="button"', false);
+    $response->assertSee('@submit.prevent="showConfirmModal = true"', false);
 });

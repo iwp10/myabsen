@@ -60,25 +60,43 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithCustomStartCell, Wit
 
     protected $guruNama = '';
 
+    protected ?string $customTitle = null;
+
     /** @var array<int, string> tanggal (Y-m-d) per pertemuan */
     protected array $tanggalSesi = [];
 
     protected int $jumlahSiswa = 0;
 
-    public function __construct($guruId, $kelasId, $mapelId, $filters)
+    public function __construct($guruId, $kelasId, $mapelId, $filters, ?string $customTitle = null)
     {
         $this->guruId = $guruId;
         $this->kelasId = $kelasId;
         $this->mapelId = $mapelId;
         $this->filters = $filters;
+        $this->customTitle = $customTitle;
 
         $kelas = Kelas::withTrashed()->find($kelasId);
         $mapel = Mapel::withTrashed()->find($mapelId);
-        $guru = Guru::with('user')->find($guruId);
 
         $this->kelasNama = $kelas ? $kelas->nama : '-';
         $this->mapelNama = $mapel ? $mapel->nama : '-';
-        $this->guruNama = $guru && $guru->user ? $guru->user->name : '-';
+
+        if (! empty($guruId)) {
+            $guru = Guru::with('user')->find($guruId);
+            $this->guruNama = $guru && $guru->user ? $guru->user->name : '-';
+        } else {
+            $guruNames = DB::table('jadwal')
+                ->join('guru', 'jadwal.guru_id', '=', 'guru.id')
+                ->join('users', 'guru.user_id', '=', 'users.id')
+                ->where('jadwal.kelas_id', $kelasId)
+                ->where('jadwal.mapel_id', $mapelId)
+                ->when(! empty($filters['tahun_ajaran']), fn ($q) => $q->where('jadwal.tahun_ajaran', $filters['tahun_ajaran']))
+                ->when(! empty($filters['semester']), fn ($q) => $q->where('jadwal.semester', $filters['semester']))
+                ->distinct()
+                ->pluck('users.name')
+                ->all();
+            $this->guruNama = ! empty($guruNames) ? implode(', ', $guruNames) : '-';
+        }
     }
 
     public function startCell(): string
@@ -88,6 +106,10 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithCustomStartCell, Wit
 
     public function title(): string
     {
+        if ($this->customTitle !== null) {
+            return $this->customTitle;
+        }
+
         if ($this->kelasId == 0) {
             return 'Data Kosong';
         }
@@ -122,9 +144,12 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithCustomStartCell, Wit
         // 2. Sesi (pertemuan) yang benar-benar ada
         $sesiQuery = DB::table('sesi_absensi')
             ->join('jadwal', 'sesi_absensi.jadwal_id', '=', 'jadwal.id')
-            ->where('jadwal.guru_id', $this->guruId)
             ->where('jadwal.kelas_id', $this->kelasId)
             ->where('jadwal.mapel_id', $this->mapelId);
+
+        if (! empty($this->guruId)) {
+            $sesiQuery->where('jadwal.guru_id', $this->guruId);
+        }
 
         if (! empty($this->filters['tanggal_awal'])) {
             $sesiQuery->where('sesi_absensi.tanggal', '>=', $this->filters['tanggal_awal']);

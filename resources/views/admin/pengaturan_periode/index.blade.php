@@ -115,7 +115,12 @@
                 </div>
 
                 <!-- Form Ubah Periode -->
-                <form id="form-update-periode" action="{{ route('admin.pengaturan-periode.update') }}" method="POST" class="mt-6 space-y-6">
+                <form id="form-update-periode"
+                      action="{{ route('admin.pengaturan-periode.update') }}"
+                      method="POST"
+                      @submit.prevent="showConfirmModal = true"
+                      @keydown.enter.prevent="showConfirmModal = true"
+                      class="mt-6 space-y-6">
                     @csrf
 
                     <!-- (c) Dua Dropdown: Tahun Ajaran dan Semester -->
@@ -127,8 +132,9 @@
                                 <select id="tahun_ajaran"
                                         name="tahun_ajaran"
                                         x-model="tahunAjaran"
+                                        @keydown.enter.prevent="showConfirmModal = true"
                                         required
-                                        class="block w-full rounded-xl border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-500 shadow-xs text-sm py-2.5">
+                                        class="block w-full rounded-xl border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark] focus:border-blue-500 dark:focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-500 shadow-xs text-sm py-2.5">
                                     @foreach($daftarTahunAjaran as $ta)
                                         <option value="{{ $ta }}">{{ $ta }}</option>
                                     @endforeach
@@ -146,8 +152,9 @@
                                 <select id="semester"
                                         name="semester"
                                         x-model="semester"
+                                        @keydown.enter.prevent="showConfirmModal = true"
                                         required
-                                        class="block w-full rounded-xl border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-500 shadow-xs text-sm py-2.5">
+                                        class="block w-full rounded-xl border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark] focus:border-blue-500 dark:focus:border-blue-500 focus:ring-blue-500 dark:focus:ring-blue-500 shadow-xs text-sm py-2.5">
                                     <option value="Ganjil">Semester Ganjil</option>
                                     <option value="Genap">Semester Genap</option>
                                 </select>
