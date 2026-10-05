@@ -104,7 +104,7 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithCustomStartCell, Wit
         if ($guruNama !== null) {
             $this->guruNama = $guruNama;
         } elseif (! empty($guruId)) {
-            $guru = Guru::with('user')->find($guruId);
+            $guru = Guru::withTrashed()->with('user')->find($guruId);
             $this->guruNama = $guru && $guru->user ? $guru->user->name : '-';
         } else {
             $guruNames = DB::table('jadwal')
@@ -153,17 +153,9 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithCustomStartCell, Wit
             return [[$this->pesanKosong ?? 'Belum ada jadwal mengajar.']];
         }
 
-        // 1. Siswa di kelas ini
-        $siswaList = DB::table('siswa')
-            ->join('users', 'siswa.user_id', '=', 'users.id')
-            ->where('siswa.kelas_id', $this->kelasId)
-            ->whereNull('siswa.deleted_at')
-            ->select('siswa.id', 'siswa.nis', 'users.name as nama_siswa')
-            ->orderBy('users.name')
-            ->get();
-        $this->jumlahSiswa = $siswaList->count();
+        $absensiService = app(AbsensiService::class);
 
-        // 2. Sesi (pertemuan) yang benar-benar ada
+        // 1. Sesi (pertemuan) yang benar-benar ada
         $sesiQuery = DB::table('sesi_absensi')
             ->join('jadwal', 'sesi_absensi.jadwal_id', '=', 'jadwal.id')
             ->where('jadwal.kelas_id', $this->kelasId)
@@ -205,6 +197,10 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithCustomStartCell, Wit
             ->all();
         $jumlahSesi = count($sesiIds);
 
+        // 2. Siswa di kelas ini (aktif + nonaktif yang memiliki riwayat sesi)
+        $siswaList = $absensiService->getSiswaUntukLaporan($this->kelasId, $sesiIds);
+        $this->jumlahSiswa = $siswaList->count();
+
         // 3. Detail absensi: [siswa_id][sesi_id] => kode
         $kodeStatus = ['hadir' => 'H', 'izin' => 'I', 'sakit' => 'S', 'alpa' => 'A'];
         $detailMap = [];
@@ -217,8 +213,6 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithCustomStartCell, Wit
                     $detailMap[$d->siswa_id][$d->sesi_absensi_id] = $kodeStatus[$d->status] ?? '';
                 });
         }
-
-        $absensiService = app(AbsensiService::class);
 
         // 4. Bangun baris
         $rows = [];
@@ -250,7 +244,7 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithCustomStartCell, Wit
         $rekap = array_fill_keys(['H', 'I', 'S', 'A'], array_fill(0, $jumlahSesi, 0));
 
         foreach ($siswaList as $no => $siswa) {
-            $row = [$no + 1, ' '.$siswa->nis, $siswa->nama_siswa]; // spasi: paksa NIS sebagai teks
+            $row = [$no + 1, ' '.$siswa->nis, $siswa->nama_laporan]; // spasi: paksa NIS sebagai teks
             $hitung = ['H' => 0, 'I' => 0, 'S' => 0, 'A' => 0];
 
             foreach ($sesiIds as $idx => $sesiId) {
