@@ -31,6 +31,7 @@ Pembeda utama: absensi per mata pelajaran (bukan per hari), sehingga siswa yang 
 - CRUD jadwal (kelas + mapel + guru + hari + jam) dengan pencegahan bentrok.
 - Melihat semua rekap dan melakukan koreksi historis absensi (mengubah data absensi pada tanggal di masa lampau kapan saja).
 - Menu Koreksi Absensi: memilih tanggal (tidak boleh masa depan) dan kelas untuk melihat jadwal beserta status sesi (sudah/belum diabsen), lalu membuka form absensi untuk koreksi/susulan.
+- Pengaturan Periode (rencana / belum diimplementasikan): mengatur tahun ajaran aktif dan semester aktif yang disimpan di database (tabel `pengaturan`), dengan saran otomatis berbasis tanggal kalender (Juli-Desember = Ganjil, Januari-Juni = Genap) dan konfirmasi sebelum pergantian periode.
 
 ### Guru
 - Dashboard: ringkasan statistik (kelas, mapel, jadwal), daftar jadwal mengajar hari ini, dan tombol "Jadwal & Koreksi Absensi" yang selalu terlihat.
@@ -38,7 +39,8 @@ Pembeda utama: absensi per mata pelajaran (bukan per hari), sehingga siswa yang 
 - Menu dan halaman "Jadwal & Koreksi Absensi" di sidebar guru (tepat di bawah "Jadwal Mengajar"): menampilkan daftar 7 hari terakhir (hari ini sampai H-6) urut dari yang terbaru dengan hari + tanggal, daftar jadwal milik guru tersebut pada tiap tanggal, badge status ("Sudah diabsen" / "Belum diabsen", label "Hari ini"), tanggal tanpa jadwal tampil ringkas ("Tidak ada jadwal"), dan link langsung ke form absensi untuk koreksi/susulan.
 - Halaman absensi: semua siswa kelas tampil dengan status default **Hadir**. Guru mengubah yang berbeda menjadi Izin, Sakit, atau Alpa, keterangan opsional, lalu menyimpan. Menampilkan dengan jelas tanggal sesi yang sedang dibuka.
 - Membuka kembali sesi yang sudah ada untuk diedit atau diisi susulan (dalam batas koreksi 7 hari terakhir yang cocok dengan hari jadwal).
-- Riwayat sesi dan rekap per kelas, mapel, dan periode, dengan ekspor Excel dan PDF.
+- Riwayat absensi dua tingkat: halaman utama menampilkan pilihan kartu kombinasi Kelas-Mapel yang diampu guru, kemudian membuka halaman detail berupa tabel matriks kehadiran horizontal per pertemuan (P1..Pn) beserta persentase kehadiran siswa.
+- Laporan dan ekspor: mengekspor rekap absensi kelas dalam format Excel multi-sheet per kelas-mapel (matriks per pertemuan P1..Pn) dan PDF, didukung parameter `kelas_mapel` dengan format `"{kelas_id}-{mapel_id}"`.
 
 ### Siswa (read-only)
 - Dashboard: status hari ini per mapel sesuai jadwal (*Belum diabsen / Hadir / Izin / Sakit / Alpa*).
@@ -52,28 +54,30 @@ Setiap aturan di bawah harus punya test.
 - **AB-02** "Belum diabsen" berarti belum ada baris `detail_absensi`. Tidak pernah disimpan sebagai alpa.
 - **AB-03** Guru hanya mengabsen jadwal miliknya, pada tanggal yang jatuh di hari jadwal tersebut dan dalam 7 hari terakhir (hari ini dan 6 hari sebelumnya, Asia/Jakarta); jadwal yang belum diabsen boleh diisi susulan dalam batas itu; admin boleh koreksi tanggal apa pun; tanggal masa depan ditolak untuk semua role. MVP tidak membatasi jam, hanya hari.
 - **AB-04** Saat sesi disimpan, semua siswa kelas mendapat satu baris `detail_absensi` (default hadir kecuali diubah), dalam satu transaksi database.
-- **AB-05** Mekanisme Master Data & Integritas Histori: Seluruh penghapusan master data (Siswa, Guru, Kelas, Mapel, Jadwal) yang sudah memiliki riwayat absensi tidak dihapus permanen melainkan menggunakan mekanisme `SoftDeletes` (atau diproteksi dari hard-delete) untuk menjamin histori absensi masa lalu tetap utuh dan valid.
-- **AB-06** Satu guru tidak boleh punya dua jadwal yang jamnya beririsan di hari yang sama. Berlaku juga untuk satu kelas.
+- **AB-05** Mekanisme Master Data & Integritas Histori: Penghapusan master data Siswa, Guru, Kelas, dan Mapel yang sudah memiliki riwayat absensi tidak dihapus permanen melainkan menggunakan mekanisme `SoftDeletes`. Khusus tabel `Jadwal` TIDAK menggunakan soft delete: jadwal tidak dapat dihapus jika sudah memiliki sesi absensi (`sesi_absensi`), dan hanya dihapus permanen jika belum pernah memiliki sesi absensi.
+- **AB-06** Satu guru tidak boleh punya dua jadwal yang jamnya beririsan di hari yang sama pada tahun ajaran dan semester yang sama. Berlaku juga untuk satu kelas.
 - **AB-07** Kalkulasi Persentase Kehadiran: Persentase = ((Hadir + Izin + Sakit) / Total Sesi Diabsen) * 100. Status Hadir, Izin, dan Sakit dihitung sebagai hadir. Alpa tidak dihitung. Pembagi adalah jumlah sesi yang sudah diabsen untuk siswa itu (sesi yang belum diabsen tidak dihitung).
 - **AB-08** Siswa hanya bisa melihat data miliknya. Guru hanya bisa melihat kelas yang ia ajar (berdasarkan jadwal).
 - **AB-09** Setiap sesi mencatat siapa yang mengabsen (`diabsen_oleh`) dan siapa yang terakhir mengubah (`diubah_oleh`).
 - **AB-10** Akun hanya dibuat admin, tidak ada registrasi publik. Login resmi fleksibel memakai `username` ATAU `NIP` (guru) ATAU `NIS` (siswa).
-- **AB-11** Standar Waktu: Seluruh sistem, operasi tanggal, pencatatan sesi, dan jam absensi menggunakan standar zona waktu `Asia/Jakarta`.
+- **AB-11** Periode Aktif (belum diimplementasikan, rencana `feat/pengaturan-periode-aktif`): Periode akademik aktif (tahun ajaran dan semester) diatur oleh admin melalui menu "Pengaturan Periode" dan disimpan di database (bukan file config/.env). Dashboard guru, dashboard siswa, jadwal pelajaran, serta rekapitulasi/ekspor menggunakan periode aktif sebagai filter default; periode lainnya hanya dapat diakses melalui filter eksplisit. Sistem menyediakan saran otomatis berbasis tanggal kalender (Juli-Desember = Ganjil, Januari-Juni = Genap) dan meminta konfirmasi pengguna sebelum periode aktif diperbarui.
+- **AB-12** Standar Waktu: Seluruh sistem, operasi tanggal, pencatatan sesi, dan jam absensi menggunakan standar zona waktu `Asia/Jakarta`.
 
 ## 5. Skema database
 
 ```
-users(id, name, username unique, email null, password, role enum[admin,guru,siswa])
-jurusan(id, nama, kode)
-kelas(id, jurusan_id, nama, tingkat, tahun_ajaran, deleted_at null)
-guru(id, user_id, nip null, deleted_at null)
-siswa(id, user_id, kelas_id, nis unique, deleted_at null)
-mapel(id, nama, kode, deleted_at null)
-jadwal(id, kelas_id, mapel_id, guru_id, hari enum[senin..sabtu], jam_mulai, jam_selesai, tahun_ajaran, deleted_at null)
+users(id, name, username unique, email null, password, role enum[admin,guru,siswa], timestamps)
+jurusan(id, nama, kode, timestamps)
+kelas(id, jurusan_id, nama, tingkat, tahun_ajaran, semester enum[Ganjil,Genap] default Ganjil, timestamps, deleted_at null)
+guru(id, user_id, nip null, timestamps, deleted_at null)
+siswa(id, user_id, kelas_id, nis unique, timestamps, deleted_at null)
+mapel(id, nama, kode, timestamps, deleted_at null)
+jadwal(id, kelas_id, mapel_id, guru_id, hari enum[senin..sabtu], jam_mulai, jam_selesai, tahun_ajaran, semester enum[Ganjil,Genap] default Ganjil, timestamps)
 sesi_absensi(id, jadwal_id, tanggal, diabsen_oleh, diubah_oleh null, catatan null, timestamps)
   UNIQUE(jadwal_id, tanggal)
 detail_absensi(id, sesi_absensi_id, siswa_id, status enum[hadir,izin,sakit,alpa], keterangan null, timestamps)
   UNIQUE(sesi_absensi_id, siswa_id)
+pengaturan(id, kunci string unique, nilai text null, timestamps) [rencana: tahun_ajaran_aktif, semester_aktif]
 ```
 
 Index: `siswa(kelas_id)`, `jadwal(guru_id, hari)`, `jadwal(kelas_id, hari)`, `sesi_absensi(tanggal)`, `detail_absensi(siswa_id)`.
@@ -85,7 +89,7 @@ Catatan: `diabsen_oleh` dan `diubah_oleh` merujuk ke `users.id`.
   - **Controller:** Berperan tipis (*Thin Controller*) yang bertugas menerima request HTTP, memanggil Service yang sesuai, dan mengembalikan response JSON atau view Blade.
   - **FormRequest:** Khusus untuk validasi input data dari pengguna di sisi server dan menghubungkan pemeriksaan otorisasi awal.
   - **Policy:** Khusus untuk memusatkan otorisasi hak akses (*authorization rules*), termasuk batasan jadwal mengajar guru dan hak koreksi historis admin.
-  - **Service Pattern (`AbsensiService`):** Sebagai pusat seluruh logika bisnis (*business logic*), kalkulasi persentase kehadiran, agregasi rekapitulasi, dan eksekusi transaksi absensi.
+  - **Service Pattern (`AbsensiService` & `LaporanService`):** Sebagai pusat seluruh logika bisnis (*business logic*), kalkulasi persentase kehadiran, agregasi rekapitulasi, dan eksekusi transaksi absensi serta ekspor laporan.
   - **Model:** Khusus menangani pemetaan relasi Eloquent (*relationships*), query scopes, dan kekhawatiran persistensi (*persistence concern*).
   - **View:** Khusus untuk layer presentasi UI menggunakan Blade Templating, Tailwind CSS, dan Alpine.js.
 - **Performa:** halaman absensi untuk kelas 40 siswa terbuka kurang dari 2 detik. Rekap memakai agregasi SQL, tanpa N+1.
@@ -116,3 +120,5 @@ Tidak dikerjakan sebelum MVP stabil dan diuji di sekolah:
 | 2026-10-02 | Perubahan AB-07 (status Hadir, Izin, dan Sakit dihitung hadir, Alpa tidak dihitung; pembagi = jumlah sesi yang sudah diabsen untuk siswa), login resmi fleksibel memakai username ATAU NIP (guru) ATAU NIS (siswa), serta penambahan fitur MVP (halaman jadwal mingguan guru, dashboard admin statistik + pintasan, dashboard guru statistik + jadwal hari ini, layout sidebar, font Inter, ikon Tabler) |
 | 2026-10-03 | Perubahan AB-03: Guru diizinkan mengabsen, mengisi susulan, dan mengoreksi absensi jadwal miliknya pada tanggal dalam 7 hari terakhir (hari ini dan 6 hari sebelumnya, Asia/Jakarta) yang harinya cocok dengan jadwal; admin boleh koreksi tanggal lampau apa pun; tanggal masa depan ditolak untuk semua role; penambahan halaman jadwal mingguan guru interaktif dan menu Koreksi Absensi admin |
 | 2026-10-03 | Penambahan menu sidebar guru "Jadwal & Koreksi Absensi" tepat di bawah "Jadwal Mengajar", menampilkan daftar 7 hari terakhir (hari ini sampai H-6) secara terurut dari terbaru untuk pengisian susulan dan koreksi absensi jadwal guru |
+| 2026-10-04 | Penambahan kolom semester (Ganjil/Genap) pada kelas dan jadwal; penegasan AB-05 bahwa jadwal tidak menggunakan soft delete (proteksi penghapusan berbasis keberadaan riwayat sesi); penegasan AB-06 bentrok jadwal pada tahun ajaran dan semester yang sama; redesign riwayat guru menjadi dua tingkat (pemilihan kartu Kelas-Mapel lalu matriks horizontal P1..Pn); format ekspor Excel multi-sheet matriks per pertemuan; serta parameter gabungan kelas_mapel ("{kelas_id}-{mapel_id}") |
+| 2026-10-05 | Penetapan AB-11 bahwa periode aktif (tahun ajaran dan semester) dikelola oleh admin via antarmuka web dan disimpan di basis data (tabel pengaturan), bukan melalui file .env/config, untuk memudahkan operasional sekolah tanpa menyentuh server |

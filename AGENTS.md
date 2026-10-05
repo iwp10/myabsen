@@ -47,9 +47,11 @@ Baca keduanya sebelum mengerjakan tugas apa pun. Jika kode bertentangan dengan P
 - Jika ada yang ambigu atau bertentangan dengan PRD, tanya dulu, jangan berasumsi.
 
 ## Git dan tim
-- Jangan commit langsung ke `main`. Kerja di branch `fitur/...` atau `perbaikan/...`.
-- Format commit: `feat:`, `fix:`, `docs:`, `test:`, `chore:` diikuti deskripsi singkat.
+- Jangan commit langsung ke `main`. Kerja di branch `fitur/...`, `perbaikan/...`, `refactor/...`, `test/...`, `chore/...`, atau `docs/...`.
+- Format commit: `feat:`, `fix:`, `refactor:`, `test:`, `chore:`, `docs:` diikuti deskripsi singkat.
+- Setiap migrasi baru wajib disebut di PR ("jalankan php artisan migrate").
 - Jangan ubah `AGENTS.md` dan `docs/PRD.md` kecuali diminta secara eksplisit.
 - Sebelum membuat migration, pastikan branch sudah up to date dengan `main`.
 - Di `docs/PROGRESS.md`, edit hanya baris fase yang sedang dikerjakan.
 - Jangan pernah commit file `.env`.
+
