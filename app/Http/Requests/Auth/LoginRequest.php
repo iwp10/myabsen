@@ -48,24 +48,41 @@ class LoginRequest extends FormRequest
         $password = $this->input('password');
         $remember = $this->boolean('remember');
 
+        $authenticated = false;
+
         // Cek username
         if (Auth::attempt(['username' => $input, 'password' => $password], $remember)) {
-            RateLimiter::clear($this->throttleKey());
-
-            return;
+            $authenticated = true;
+        } elseif ($guru = Guru::withTrashed()->where('nip', $input)->first()) {
+            // Cek nip dari tabel guru (termasuk trashed)
+            if (Auth::attempt(['id' => $guru->user_id, 'password' => $password], $remember)) {
+                $authenticated = true;
+            }
+        } elseif ($siswa = Siswa::withTrashed()->where('nis', $input)->first()) {
+            // Cek nis dari tabel siswa (termasuk trashed)
+            if (Auth::attempt(['id' => $siswa->user_id, 'password' => $password], $remember)) {
+                $authenticated = true;
+            }
         }
 
-        // Cek nip dari tabel guru
-        $guru = Guru::where('nip', $input)->first();
-        if ($guru && Auth::attempt(['id' => $guru->user_id, 'password' => $password], $remember)) {
-            RateLimiter::clear($this->throttleKey());
+        if ($authenticated) {
+            $user = Auth::user();
 
-            return;
-        }
+            if ($user && $user->sudahTidakAktif()) {
+                Auth::guard('web')->logout();
 
-        // Cek nis dari tabel siswa
-        $siswa = Siswa::where('nis', $input)->first();
-        if ($siswa && Auth::attempt(['id' => $siswa->user_id, 'password' => $password], $remember)) {
+                if ($this->hasSession()) {
+                    $this->session()->invalidate();
+                    $this->session()->regenerateToken();
+                }
+
+                RateLimiter::hit($this->throttleKey());
+
+                throw ValidationException::withMessages([
+                    'username' => 'Akun ini sudah tidak aktif. Silakan hubungi admin sekolah.',
+                ]);
+            }
+
             RateLimiter::clear($this->throttleKey());
 
             return;
