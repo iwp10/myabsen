@@ -31,7 +31,7 @@ Pembeda utama: absensi per mata pelajaran (bukan per hari), sehingga siswa yang 
 - CRUD jadwal (kelas + mapel + guru + hari + jam) dengan pencegahan bentrok.
 - Melihat semua rekap dan melakukan koreksi historis absensi (mengubah data absensi pada tanggal di masa lampau kapan saja).
 - Menu Koreksi Absensi: memilih tanggal (tidak boleh masa depan) dan kelas untuk melihat jadwal beserta status sesi (sudah/belum diabsen), lalu membuka form absensi untuk koreksi/susulan.
-- Pengaturan Periode (rencana / belum diimplementasikan): mengatur tahun ajaran aktif dan semester aktif yang disimpan di database (tabel `pengaturan`), dengan saran otomatis berbasis tanggal kalender (Juli-Desember = Ganjil, Januari-Juni = Genap) dan konfirmasi sebelum pergantian periode.
+- Pengaturan Periode: mengatur tahun ajaran aktif dan semester aktif yang disimpan di database (tabel `pengaturan`), dengan saran otomatis berbasis tanggal kalender (Juli-Desember = Ganjil, Januari-Juni = Genap) dan konfirmasi sebelum pergantian periode.
 
 ### Guru
 - Dashboard: ringkasan statistik (kelas, mapel, jadwal), daftar jadwal mengajar hari ini, dan tombol "Jadwal & Koreksi Absensi" yang selalu terlihat.
@@ -60,7 +60,7 @@ Setiap aturan di bawah harus punya test.
 - **AB-08** Siswa hanya bisa melihat data miliknya. Guru hanya bisa melihat kelas yang ia ajar (berdasarkan jadwal).
 - **AB-09** Setiap sesi mencatat siapa yang mengabsen (`diabsen_oleh`) dan siapa yang terakhir mengubah (`diubah_oleh`).
 - **AB-10** Akun hanya dibuat admin, tidak ada registrasi publik. Login resmi fleksibel memakai `username` ATAU `NIP` (guru) ATAU `NIS` (siswa).
-- **AB-11** Periode Aktif (belum diimplementasikan, rencana `feat/pengaturan-periode-aktif`): Periode akademik aktif (tahun ajaran dan semester) diatur oleh admin melalui menu "Pengaturan Periode" dan disimpan di database (bukan file config/.env). Dashboard guru, dashboard siswa, jadwal pelajaran, serta rekapitulasi/ekspor menggunakan periode aktif sebagai filter default; periode lainnya hanya dapat diakses melalui filter eksplisit. Sistem menyediakan saran otomatis berbasis tanggal kalender (Juli-Desember = Ganjil, Januari-Juni = Genap) dan meminta konfirmasi pengguna sebelum periode aktif diperbarui.
+- **AB-11** Periode Aktif: Periode akademik aktif (tahun ajaran dan semester) diatur oleh admin melalui menu "Pengaturan Periode" dan disimpan di database (tabel `pengaturan`, bukan file config/.env). Dashboard guru, dashboard siswa, jadwal pelajaran, serta rekapitulasi/ekspor menggunakan periode aktif sebagai filter default; periode lainnya hanya dapat diakses melalui filter eksplisit. Sistem menyediakan saran otomatis berbasis tanggal kalender (Juli-Desember = Ganjil, Januari-Juni = Genap) dan meminta konfirmasi pengguna sebelum periode aktif diperbarui.
 - **AB-12** Standar Waktu: Seluruh sistem, operasi tanggal, pencatatan sesi, dan jam absensi menggunakan standar zona waktu `Asia/Jakarta`.
 
 ## 5. Skema database
@@ -77,7 +77,7 @@ sesi_absensi(id, jadwal_id, tanggal, diabsen_oleh, diubah_oleh null, catatan nul
   UNIQUE(jadwal_id, tanggal)
 detail_absensi(id, sesi_absensi_id, siswa_id, status enum[hadir,izin,sakit,alpa], keterangan null, timestamps)
   UNIQUE(sesi_absensi_id, siswa_id)
-pengaturan(id, kunci string unique, nilai text null, timestamps) [rencana: tahun_ajaran_aktif, semester_aktif]
+pengaturan(id, kunci string unique, nilai text null, timestamps)
 ```
 
 Index: `siswa(kelas_id)`, `jadwal(guru_id, hari)`, `jadwal(kelas_id, hari)`, `sesi_absensi(tanggal)`, `detail_absensi(siswa_id)`.

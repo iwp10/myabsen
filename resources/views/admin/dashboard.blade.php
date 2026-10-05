@@ -38,9 +38,49 @@
                         <span class="text-sm font-semibold text-white">
                             {{ \Illuminate\Support\Carbon::now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
                         </span>
+                        <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/20 text-white border border-white/30">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" />
+                                <path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" />
+                            </svg>
+                            <span>Periode aktif: {{ $activePeriode['semester'] }} {{ $activePeriode['tahun_ajaran'] }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Pengingat Pergantian Periode (Jika berbeda dengan saran sistem) -->
+            @if ($isBerbedaDenganSaran)
+                <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M12 9v4" />
+                                <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.875h16.214a1.914 1.914 0 0 0 1.636 -2.875l-8.106 -13.534a1.914 1.914 0 0 0 -3.274 0z" />
+                                <path d="M12 16h.01" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-amber-900 dark:text-amber-200">
+                                Pengingat Periode Akademik
+                            </h4>
+                            <p class="text-xs text-amber-800 dark:text-amber-300 mt-0.5">
+                                Sepertinya sudah masuk semester {{ $saranPeriode['semester'] }} ({{ $saranPeriode['tahun_ajaran'] }}). Ganti periode?
+                            </p>
+                        </div>
+                    </div>
+                    <a href="{{ route('admin.pengaturan-periode.index') }}"
+                       class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-xl shadow-xs transition flex-shrink-0">
+                        <span>Ganti periode</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M9 6l6 6l-6 6" />
+                        </svg>
+                    </a>
+                </div>
+            @endif
 
             <!-- Kartu Statistik Master Data (Grid 4 Kolom) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

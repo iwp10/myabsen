@@ -9,6 +9,7 @@ use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\Mapel;
+use App\Services\AbsensiService;
 use Illuminate\Http\Request;
 
 class JadwalController extends Controller
@@ -21,8 +22,8 @@ class JadwalController extends Controller
         $search = $request->query('search');
         $reqTahunAjaran = $request->query('tahun_ajaran');
         $reqSemester = $request->query('semester');
-        
-        $absensiService = app(\App\Services\AbsensiService::class);
+
+        $absensiService = app(AbsensiService::class);
         $activePeriode = $absensiService->getActivePeriode();
 
         // Jika tidak ada filter yang dipilih, gunakan active periode

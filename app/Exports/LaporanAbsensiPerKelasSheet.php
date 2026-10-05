@@ -377,9 +377,10 @@ class LaporanAbsensiPerKelasSheet implements FromArray, WithCustomStartCell, Wit
         $fmt = fn ($t) => Carbon::parse($t)->locale('id')->isoFormat('D MMMM YYYY');
 
         if (! empty($this->filters['tahun_ajaran'])) {
-            $ta = 'TA ' . $this->filters['tahun_ajaran'];
-            $sem = ! empty($this->filters['semester']) ? ' Semester ' . $this->filters['semester'] : '';
-            return $ta . $sem;
+            $ta = 'TA '.$this->filters['tahun_ajaran'];
+            $sem = ! empty($this->filters['semester']) ? ' Semester '.$this->filters['semester'] : '';
+
+            return $ta.$sem;
         }
         if (! empty($this->filters['tanggal_awal']) || ! empty($this->filters['tanggal_akhir'])) {
             $awal = ! empty($this->filters['tanggal_awal']) ? $fmt($this->filters['tanggal_awal']) : '...';

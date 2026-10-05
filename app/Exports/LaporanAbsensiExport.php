@@ -3,11 +3,11 @@
 namespace App\Exports;
 
 use App\Models\Jadwal;
+use Maatwebsite\Excel\Concerns\Export;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
-use Maatwebsite\Excel\Concerns\Export;
 
-class LaporanAbsensiExport implements WithMultipleSheets, Export
+class LaporanAbsensiExport implements Export, WithMultipleSheets
 {
     use Exportable;
 
@@ -27,23 +27,29 @@ class LaporanAbsensiExport implements WithMultipleSheets, Export
             ->distinct();
 
         // Terapkan filter dari form Admin
-        if (!empty($this->filters['guru_id'])) {
+        if (! empty($this->filters['guru_id'])) {
             $jadwalQuery->where('guru_id', $this->filters['guru_id']);
         }
-        if (!empty($this->filters['kelas_id'])) {
+        if (! empty($this->filters['kelas_id'])) {
             $jadwalQuery->where('kelas_id', $this->filters['kelas_id']);
         }
-        if (!empty($this->filters['mapel_id'])) {
+        if (! empty($this->filters['mapel_id'])) {
             $jadwalQuery->where('mapel_id', $this->filters['mapel_id']);
+        }
+        if (! empty($this->filters['tahun_ajaran'])) {
+            $jadwalQuery->where('tahun_ajaran', $this->filters['tahun_ajaran']);
+        }
+        if (! empty($this->filters['semester'])) {
+            $jadwalQuery->where('semester', $this->filters['semester']);
         }
 
         $kombinasi = $jadwalQuery->get();
 
         foreach ($kombinasi as $item) {
             $sheets[] = new LaporanAbsensiPerKelasSheet(
-                $item->guru_id, 
-                $item->kelas_id, 
-                $item->mapel_id, 
+                $item->guru_id,
+                $item->kelas_id,
+                $item->mapel_id,
                 $this->filters
             );
         }

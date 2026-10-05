@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Guru;
 
-use App\Exports\LaporanAbsensiGuruExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ExportLaporanRequest;
 use App\Http\Requests\Guru\ShowAbsensiRequest;
@@ -122,15 +121,22 @@ class AbsensiController extends Controller
             return view('guru.riwayat', ['jadwalList' => collect()]);
         }
 
-        // Ambil semua jadwal milik guru, unik per kelas+mapel
+        $activePeriode = $this->absensiService->getActivePeriode();
+
+        // Ambil semua jadwal milik guru pada periode aktif, unik per kelas+mapel
         $jadwalList = Jadwal::with(['kelas', 'mapel'])
             ->where('guru_id', $guru->id)
+            ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
+                $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
+                    ->where('semester', $activePeriode['semester']);
+            })
             ->get()
             ->unique(fn ($j) => $j->kelas_id.'-'.$j->mapel_id)
             ->values();
 
         return view('guru.riwayat', [
             'jadwalList' => $jadwalList,
+            'activePeriode' => $activePeriode,
         ]);
     }
 
@@ -144,19 +150,29 @@ class AbsensiController extends Controller
             abort(403);
         }
 
-        // Pastikan guru memang mengajar kelas & mapel ini
+        $activePeriode = $this->absensiService->getActivePeriode();
+
+        // Pastikan guru memang mengajar kelas & mapel ini pada periode aktif
         $jadwal = Jadwal::with(['kelas', 'mapel'])
             ->where('guru_id', $guru->id)
             ->where('kelas_id', $kelas->id)
             ->where('mapel_id', $mapel->id)
+            ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
+                $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
+                    ->where('semester', $activePeriode['semester']);
+            })
             ->firstOrFail();
 
         $jadwalIds = Jadwal::where('guru_id', $guru->id)
             ->where('kelas_id', $kelas->id)
             ->where('mapel_id', $mapel->id)
+            ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
+                $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
+                    ->where('semester', $activePeriode['semester']);
+            })
             ->pluck('id');
 
-        // Tampilkan semua pertemuan (tanpa filter periode)
+        // Tampilkan pertemuan pada periode aktif
         $sesiList = SesiAbsensi::with('detailAbsensi')
             ->whereIn('jadwal_id', $jadwalIds)
             ->orderBy('tanggal', 'asc')

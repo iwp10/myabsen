@@ -31,7 +31,7 @@ Aplikasi ini memiliki tiga peran utama dengan batasan akses masing-masing, serta
 - **Import Data:** Memasukkan data siswa secara massal melalui file Excel.
 - **Pemantauan & Koreksi Historis:** Melihat seluruh rekap absensi sekolah dan hak istimewa untuk mengoreksi absensi historis kapan saja.
 - **Menu Koreksi Absensi:** Meninjau jadwal dan status sesi absensi pada tanggal lampau per kelas serta membuka form koreksi/susulan.
-- **Pengaturan Periode (Segera Hadir):** Mengelola tahun ajaran aktif dan semester aktif langsung dari web.
+- **Pengaturan Periode:** Mengelola tahun ajaran aktif dan semester aktif langsung dari antarmuka web dengan saran otomatis kalender dan modal konfirmasi pergantian.
 
 ### 👨‍🏫 Guru
 - **Dashboard Cerdas:** Menampilkan jadwal mengajar pada hari tersebut serta ringkasan total mengajar.

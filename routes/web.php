@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\KoreksiAbsensiController;
 use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\MapelController;
+use App\Http\Controllers\Admin\PengaturanPeriodeController;
 use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\Guru\AbsensiController;
 use App\Http\Controllers\Guru\JadwalController as GuruJadwalController;
@@ -47,6 +48,9 @@ Route::middleware('auth')->group(function () {
         Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
         Route::get('laporan/export', [LaporanController::class, 'export'])->name('laporan.export');
         Route::get('laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
+
+        Route::get('pengaturan-periode', [PengaturanPeriodeController::class, 'index'])->name('pengaturan-periode.index');
+        Route::post('pengaturan-periode', [PengaturanPeriodeController::class, 'update'])->name('pengaturan-periode.update');
     });
 
     // Guru Routes

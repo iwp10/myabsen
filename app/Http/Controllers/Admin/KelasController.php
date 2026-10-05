@@ -7,6 +7,7 @@ use App\Http\Requests\StoreKelasRequest;
 use App\Http\Requests\UpdateKelasRequest;
 use App\Models\Jurusan;
 use App\Models\Kelas;
+use App\Services\AbsensiService;
 use Illuminate\Http\Request;
 
 class KelasController extends Controller
@@ -16,8 +17,8 @@ class KelasController extends Controller
         $search = $request->search;
         $reqTahunAjaran = $request->query('tahun_ajaran');
         $reqSemester = $request->query('semester');
-        
-        $absensiService = app(\App\Services\AbsensiService::class);
+
+        $absensiService = app(AbsensiService::class);
         $activePeriode = $absensiService->getActivePeriode();
 
         // Jika tidak ada filter yang dipilih, gunakan active periode
