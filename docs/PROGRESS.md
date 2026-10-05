@@ -8,7 +8,7 @@ Cara pakai:
 
 ## Ringkasan
 
-Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Mandiri 02 Balaraja, form login kustom responsif dengan rate-limiting Alpine.js, ekspor data (Excel/PDF), hardening N+1, lokalisasi Bahasa Indonesia, serta perombakan UX yang transparan untuk Dashboard Siswa dan Guru. Antarmuka sekarang menggunakan font Inter untuk kenyamanan visual semua kalangan umur, serta penambahan visibilitas jadwal penuh untuk guru.
+MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan Siswa: otentikasi fleksibel (Username/NIP/NIS), dashboard responsif berbasis font Inter dan Tabler Icons, presensi cepat default Hadir, manajemen sesi dengan jendela koreksi 7 hari, riwayat guru dua tingkat, ekspor Excel multi-sheet matriks pertemuan (P1..Pn), ekspor PDF resmi, serta perlindungan integritas histori absensi dengan 123 automated test lulus (PASS).
 
 | Fase | Isi | Penanggung jawab | Branch | Status |
 |---|---|---|---|---|
@@ -54,8 +54,7 @@ Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Man
 - [x] Dashboard jadwal hari ini
 - [x] Halaman absensi dengan default Hadir
 - [x] Simpan dalam satu transaksi (AB-04)
-- [x] Sesi unik (AB-01) dan koreksi/susulan absensi dalam batas 7 hari terakhir untuk guru / kapan saja untuk admin (AB-03), halaman jadwal mingguan interaktif, dan menu Koreksi Absensi admin
-- [x] Menu dan halaman "Jadwal & Koreksi Absensi" di sidebar guru (7 hari terakhir dari hari ini s.d. H-6, status sesi sudah/belum diabsen, link form koreksi/susulan)
+- [x] Sesi unik (AB-01) dan koreksi/susulan absensi dalam batas 7 hari terakhir untuk guru / kapan saja untuk admin (AB-03)
 - [x] Koreksi oleh admin, pencatatan `diabsen_oleh` dan `diubah_oleh` (AB-09)
 - [x] Test untuk AB-01 sampai AB-04
 
@@ -94,12 +93,14 @@ Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Man
 - [x] UI/UX: Perbaikan Dashboard Siswa (kontras warna, persentase kehadiran positif Izin & Sakit, serta breakdown transparan).
 - [x] UI/UX: Perombakan Dashboard Guru (banner sapaan solid blue, kartu statistik total kelas/mapel/jadwal, dan tombol navigasi pintar saat jadwal kosong).
 - [x] UI/UX: Mengganti font utama sistem menjadi Inter untuk meningkatkan aksesibilitas dan kenyamanan membaca.
-- [x] Fitur Guru: Menambahkan menu dan halaman khusus agar guru dapat melihat seluruh jadwal mengajar mereka dalam seminggu.
-- [x] UI/UX & Fitur Guru: Halaman jadwal mingguan interaktif (kartu jadwal memuat tanggal dalam 7 hari terakhir, status absensi, dan link langsung ke form absensi/koreksi/susulan) serta tombol 'Jadwal & Koreksi Absensi' yang selalu terlihat di dashboard.
+- [x] Fitur Guru: Halaman jadwal mingguan interaktif (kartu jadwal memuat tanggal dalam 7 hari terakhir, status absensi, dan link langsung ke form absensi/koreksi/susulan).
+- [x] Fitur Guru: Menu sidebar "Jadwal & Koreksi Absensi" tepat di bawah "Jadwal Mengajar", halaman daftar 7 hari terakhir (hari ini sampai H-6) urut dari terbaru dengan status sesi, label Hari ini, dan empty state ringkas.
+- [x] Fitur Guru: Redesign riwayat absensi guru dua tingkat (halaman pemilihan kartu Kelas-Mapel dan halaman detail tabel matriks pertemuan P1..Pn).
 - [x] Fitur Admin: Menu Koreksi Absensi di sidebar dan pintasan dashboard untuk mencari jadwal berdasarkan tanggal lampau dan kelas serta melakukan koreksi/susulan absensi.
 - [x] UI/UX: Merombak Dashboard Admin dengan banner sapaan, statistik master data (Siswa, Guru, Kelas, Mapel), dan pintasan aksi cepat.
 - [x] UI/UX: Standarisasi seluruh ikon aplikasi menggunakan Tabler Icons (inline SVG) untuk tampilan yang lebih modern, konsisten, dan ringan.
-- [x] Fitur Guru: Menu sidebar "Jadwal & Koreksi Absensi" tepat di bawah "Jadwal Mengajar", halaman daftar 7 hari terakhir (hari ini sampai H-6) urut dari terbaru dengan status sesi, label Hari ini, empty state ringkas, integrasi tombol dashboard, dan penyambungan pemilih tanggal ke halaman koreksi.
+- [x] Fitur Akademik: Penambahan kolom `semester` (Ganjil/Genap) pada kelas dan jadwal beserta filter pada halaman index dan form request.
+- [x] Fitur Ekspor: Format ekspor Excel multi-sheet matriks per pertemuan (P1..Pn) per pasangan kelas-mapel untuk guru dan admin.
 
 ### Tahap Improvement: Refactor Arsitektur
 - [x] Pemisahan Tanggung Jawab (Separation of Concerns): Controller tipis (*Thin Controller*), FormRequest khusus validasi input, Policy khusus otorisasi hak akses, Service sebagai pusat seluruh *business logic*, Model khusus relasi & persistensi data, dan View khusus layer presentasi.
@@ -113,13 +114,39 @@ Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Man
 ## Catatan dan hambatan
 Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-09-21 | 3,6,7,8 | Fase 3, 6, 7, 8 ditunda untuk fokus MVP/BETA (Fase 1, 2, 4, 5). Master data digenerate via Seeder.
-2026-09-27 | 3,5,6,7,9 | Aplikasi MyAbsen telah berhasil mengimplementasikan: Layout Sidebar khas SMK Mandiri 02 Balaraja, form login kustom responsif dengan rate-limiting Alpine.js, ekspor data (Excel/PDF), hardening N+1, lokalisasi Bahasa Indonesia, serta perombakan UX yang transparan untuk Dashboard Siswa dan Guru. Antarmuka sekarang menggunakan font Inter untuk kenyamanan visual semua kalangan umur, serta penambahan visibilitas jadwal penuh untuk guru.
+2026-09-27 | 3,5,6,7,9 | Implementasi layout Sidebar SMK Mandiri 02 Balaraja, form login rate-limiting Alpine.js, ekspor data awal, hardening N+1, lokalisasi Bahasa Indonesia, font Inter, dan perombakan dashboard siswa dan guru.
 2026-09-29 | 2 | Fase 2 (Refactor Dokumen & Test ke Keputusan Bisnis Aktual) telah selesai dilakukan berdasarkan hasil temuan Audit. PRD dan Test diselaraskan dengan aturan bisnis aktual: AB-03 (hak koreksi historis admin), AB-05 (perlindungan soft delete histori master data), AB-07 (kalkulasi persentase kehadiran: Hadir, Izin, dan Sakit dihitung positif; Alpa sebagai pengurang), dan standar timezone Asia/Jakarta. Seluruh 100 pengujian otomatis lulus (PASS).
 2026-09-29 | 3 | Tahap Improvement (Refactor Arsitektur) selesai: Pemisahan tegas tanggung jawab Controller-Service-Policy-FormRequest, eliminasi duplikasi hari/tanggal, standarisasi mutlak Asia/Jakarta, dan pembersihan Fat Controllers. Seluruh 100 test lulus (PASS).
 2026-10-02 | 3,6,7 | Catatan 2026-09-21 yang menunda Fase 3, 6, 7 sudah tidak berlaku (dikerjakan kemudian, lihat catatan 2026-09-27).
 2026-10-02 | 2,3,4,5,7 | Perlu audit: test untuk AB-05, 06, 07, 09, 10 dan rate limiting login sisi server belum terverifikasi.
-2026-10-03 | 4,9 | Fitur AB-03 dan kemudahan koreksi absensi selesai: Guru diizinkan mengabsen, mengisi susulan, dan mengoreksi jadwal miliknya dalam batas 7 hari terakhir (hari ini dan 6 hari sebelumnya) yang harinya cocok; tombol 'Jadwal & Koreksi Absensi' selalu tampil di dashboard guru; halaman jadwal mingguan guru interaktif dengan kartu status dan link langsung; menu 'Koreksi Absensi' ditambahkan di sidebar admin; 8 skenario test AB-03 terverifikasi lulus (PASS).
-2026-10-03 | 4,9 | Menu sidebar guru "Jadwal & Koreksi Absensi" ditambahkan tepat di bawah "Jadwal Mengajar": Halaman daftar 7 hari terakhir (hari ini s.d. H-6) urut dari terbaru, status sesi sudah/belum diabsen, label Hari ini, empty state ringkas per tanggal tanpa jadwal, tombol dashboard terhubung, dan pemilih tanggal terintegrasi.
-2026-10-03 | 6 | Refactor ekspor laporan: Logika ekspor dipusatkan di LaporanService, FormRequest ExportLaporanRequest untuk validasi filter dan penegakan AB-08 guru, view PDF digabungkan ke laporan.pdf tanpa query Eloquent di blade, file duplikat admin/laporan/pdf.blade.php dihapus, dan 11 test LaporanTest lulus.
+2026-10-03 | 7 | chore: rapikan batas versi PHP dan maatwebsite/excel di composer.json (PR #10 oleh iwp10).
+2026-10-03 | 2 | test: tambah test login NIP/NIS dan soft delete guru (PR #11 oleh iwp10).
+2026-10-03 | 4,9 | feat: koreksi absensi 7 hari untuk guru, halaman jadwal interaktif, dan menu koreksi absensi admin (PR #12 oleh iwp10).
+2026-10-03 | 4,9 | feat: menu sidebar guru "Jadwal & Koreksi Absensi" (7 hari terakhir dari hari ini s.d. H-6) urut terbaru (PR #13 oleh iwp10).
+2026-10-03 | 6 | refactor: satukan logika ekspor laporan ke LaporanService, FormRequest ExportLaporanRequest, dan konsolidasi view PDF (PR #14 oleh iwp10).
+2026-10-03 | 6,9 | feat: inisiasi format ekspor Excel multi-sheet matriks per pertemuan (LaporanAbsensiPerKelasSheet) dan draf redesign riwayat guru (oleh lat's play).
+2026-10-04 | 4,9 | feat: finalisasi redesign riwayat guru dua tingkat (pemilihan kartu Kelas-Mapel lalu matriks pertemuan P1..Pn di guru.riwayat.detail) dan pembersihan stub export (oleh lat's play).
+2026-10-04 | 6,9 | feat: migrasi LaporanAbsensiExport admin ke format multi-sheet per kelas-mapel dan penambahan konfirmasi modal logout (oleh lat's play).
+2026-10-04 | 1,3,9 | feat: penambahan kolom dan konsep semester (Ganjil/Genap) pada tabel kelas dan jadwal via migrasi baru serta filter pada index dan request (oleh lat's play).
+
+## Backlog teknis (belum dikerjakan)
+Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:
+- [ ] **Pengaturan Periode Aktif oleh Admin (`feat/pengaturan-periode-aktif`):** Implementasi tabel `pengaturan` (kunci-nilai: `tahun_ajaran_aktif` dan `semester_aktif`), menu UI admin untuk mengelola periode aktif, saran otomatis berbasis kalender (Juli-Desember = Ganjil, Januari-Juni = Genap), dan penyelarasan filter default di seluruh dashboard (guru & siswa), jadwal, serta service laporan.
+- [ ] **Pembatasan Ekspor Excel Admin Tanpa Filter:** Tambahkan validasi batas maksimum rentang/sheet atau filter wajib pada ekspor admin guna mencegah risiko *Out Of Memory* (OOM) dan *timeout* saat men-generate ratusan sheet secara sinkron.
+- [ ] **Policy dan Test untuk Riwayat Guru:** Terapkan pemeriksaan otorisasi melalui Policy pada rute `guru.riwayat.detail` dan lengkapi Feature Test untuk rute `guru.riwayat` serta `guru.riwayat.detail`.
+- [ ] **FormRequest untuk Import Siswa:** Pindahkan validasi manual `$request->validate()` di `SiswaController::import` ke kelas FormRequest tersendiri (`ImportSiswaRequest`).
+- [ ] **Sentralisasi Parser `kelas_mapel`:** Satukan logika pemecahan dan validasi string format `"{kelas_id}-{mapel_id}"` yang saat ini tersebar di 4 tempat ke dalam satu helper method terpusat.
+- [ ] **Pembersihan Dead Code `LaporanAbsensiGuruExport`:** Hapus atau fungsikan kembali class `app/Exports/LaporanAbsensiGuruExport.php` yang saat ini tidak pernah diinstansiasi.
+- [ ] **Rapikan Dependensi Tailwind di `package.json`:** Bersihkan paket `@tailwindcss/vite` yang tidak terpakai agar konsisten dengan `tailwindcss: ^3.1.0`.
+- [ ] **Perlindungan FK `diabsen_oleh` dan `diubah_oleh`:** Buat migrasi baru untuk mengubah constraint dari `cascadeOnDelete` menjadi `restrictOnDelete` / `nullOnDelete` pada `sesi_absensi` demi mencegah hilangnya histori absensi saat user dihapus.
+- [ ] **Tombol Unduh PDF Guru di UI:** Sediakan tombol/link ekspor PDF pada antarmuka riwayat guru (`guru/riwayat_detail.blade.php`) untuk memanfaatkan rute `guru.laporan.exportPdf`.
+- [ ] **Koreksi Nilai Enum pada Validasi Request:** Hapus nilai `'minggu'` dari aturan validasi `ExportLaporanRequest` agar konsisten dengan enum hari di tabel `jadwal`.
+- [ ] **Audit Aturan Bisnis Lanjutan (dari `docs/AUDIT_MYABSEN.md`):**
+  - Penyempurnaan pembagi persentase untuk siswa pindah kelas/siswa baru agar tidak bias (AB-07).
+  - Tabel riwayat keanggotaan kelas per tahun ajaran (`anggota_kelas`) agar riwayat kelas siswa tidak tertimpa saat naik kelas.
+  - Audit log koreksi absensi (pencatatan nilai sebelum dan sesudah koreksi beserta alasan).
+  - Antrean ekspor latar belakang (`ShouldQueue`) untuk laporan berskala besar.
+  - Penggantian password default `'password'` dengan kredensial berbasis tanggal lahir/acak saat rilis produksi (Fase 8).
+
 
 
