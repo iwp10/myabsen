@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Services\ArsipService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -35,5 +36,17 @@ class UpdateSiswaRequest extends FormRequest
             'kelas_id.required' => 'Kelas wajib dipilih.',
             'kelas_id.exists' => 'Kelas tidak valid.',
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            if ($validator->errors()->has('nis')) {
+                if ($pesan = app(ArsipService::class)->cekDuplikatTerhapus('siswa', (string) $this->nis)) {
+                    $validator->errors()->forget('nis');
+                    $validator->errors()->add('nis', $pesan);
+                }
+            }
+        });
     }
 }

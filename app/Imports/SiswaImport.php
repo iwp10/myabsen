@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Models\Siswa;
 use App\Models\User;
+use App\Services\ArsipService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
@@ -42,5 +43,20 @@ class SiswaImport implements SkipsEmptyRows, ToModel, WithHeadingRow, WithValida
             'nis' => 'required|unique:siswa,nis|unique:users,username',
             'nama' => 'required|string|max:255',
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $data = $validator->getData();
+            foreach ($data as $index => $row) {
+                if (isset($row['nis']) && $validator->errors()->has("{$index}.nis")) {
+                    if ($pesan = app(ArsipService::class)->cekDuplikatTerhapus('siswa', (string) $row['nis'])) {
+                        $validator->errors()->forget("{$index}.nis");
+                        $validator->errors()->add("{$index}.nis", $pesan);
+                    }
+                }
+            }
+        });
     }
 }
