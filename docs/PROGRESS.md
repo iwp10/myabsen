@@ -146,11 +146,12 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-05 | 2,7,9 | fix: pemblokiran akses login dan pemutusan sesi berjalan untuk akun guru dan siswa yang profilnya telah di-soft-delete (AB-05 & AB-10) tanpa mengubah rate limiting, akun admin, maupun alur soft delete, disertai 5 feature test AB-05.
 2026-10-05 | 4,6,7,9 | fix: standardisasi tampilan siswa terhapus (soft-delete) pada seluruh laporan (riwayat guru, Excel, PDF) dengan tanda "(nonaktif)" jika memiliki riwayat absensi pada cakupan filter, header guru terhapus di Excel tetap tampil nama, dan 7 automated feature test AB-05 lulus (PASS).
 2026-10-05 | 3,7,9 | feat: implementasi menu admin "Data Terhapus" (Arsip) untuk memulihkan master data yang di-soft-delete (Guru, Siswa, Kelas, Mapel) dengan validasi dependensi dan pencegahan bentrok, pesan validasi edukatif saat input NIP/NIS/kode duplikat dengan data terhapus, serta 9 feature test AB-05 lulus (PASS).
+2026-10-06 | 1,3,9 | fix: validasi periode jadwal wajib sama dengan kelasnya pada Store & Update (AB-06), perlindungan route /profile dan /password dengan middleware role:admin,guru,siswa (AB-05), serta penambahan feature test AB-06 dan AB-05 (189 test PASS).
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:
 - [ ] hapus permanen dari menu Data Terhapus (belum dibuat sengaja)
-- [ ] /profile dan /password belum dilindungi middleware role (pengguna nonaktif masih bisa membukanya sampai membuka halaman role)
+- [ ] validasi saat mengubah periode kelas yang sudah punya jadwal
 - [ ] **Pilihan Periode di Riwayat Guru dan Siswa:** Tambahkan dropdown pemilihan tahun ajaran dan semester pada halaman riwayat guru dan riwayat siswa agar pengguna dapat meninjau histori kehadiran periode terdahulu tanpa harus mengubah periode aktif.
 - [ ] **Audit Aturan Bisnis Lanjutan (dari `docs/AUDIT_MYABSEN.md`):**
   - Penyempurnaan pembagi persentase untuk siswa pindah kelas/siswa baru agar tidak bias (AB-07).
