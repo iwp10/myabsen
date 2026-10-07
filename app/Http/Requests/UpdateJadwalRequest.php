@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\ValidatesPeriodeJadwal;
 use App\Models\Jadwal;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -9,6 +10,8 @@ use Illuminate\Validation\Validator;
 
 class UpdateJadwalRequest extends FormRequest
 {
+    use ValidatesPeriodeJadwal;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -42,39 +45,39 @@ class UpdateJadwalRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
-            if (! $this->jam_mulai || ! $this->jam_selesai || ! $this->hari) {
-                return;
+            if ($this->jam_mulai && $this->jam_selesai && $this->hari) {
+                $jadwalId = $this->jadwal->id ?? $this->route('jadwal')->id;
+
+                $overlapGuru = Jadwal::where('guru_id', $this->guru_id)
+                    ->where('hari', $this->hari)
+                    ->where('tahun_ajaran', $this->tahun_ajaran)
+                    ->where('semester', $this->semester)
+                    ->where('id', '!=', $jadwalId)
+                    ->where(function ($q) {
+                        $q->where('jam_mulai', '<', $this->jam_selesai)
+                            ->where('jam_selesai', '>', $this->jam_mulai);
+                    });
+
+                if ($overlapGuru->exists()) {
+                    $validator->errors()->add('guru_id', 'Guru sudah memiliki jadwal di hari dan jam yang beririsan.');
+                }
+
+                $overlapKelas = Jadwal::where('kelas_id', $this->kelas_id)
+                    ->where('hari', $this->hari)
+                    ->where('tahun_ajaran', $this->tahun_ajaran)
+                    ->where('semester', $this->semester)
+                    ->where('id', '!=', $jadwalId)
+                    ->where(function ($q) {
+                        $q->where('jam_mulai', '<', $this->jam_selesai)
+                            ->where('jam_selesai', '>', $this->jam_mulai);
+                    });
+
+                if ($overlapKelas->exists()) {
+                    $validator->errors()->add('kelas_id', 'Kelas sudah memiliki jadwal di hari dan jam yang beririsan.');
+                }
             }
 
-            $jadwalId = $this->jadwal->id ?? $this->route('jadwal')->id;
-
-            $overlapGuru = Jadwal::where('guru_id', $this->guru_id)
-                ->where('hari', $this->hari)
-                ->where('tahun_ajaran', $this->tahun_ajaran)
-                ->where('semester', $this->semester)
-                ->where('id', '!=', $jadwalId)
-                ->where(function ($q) {
-                    $q->where('jam_mulai', '<', $this->jam_selesai)
-                        ->where('jam_selesai', '>', $this->jam_mulai);
-                });
-
-            if ($overlapGuru->exists()) {
-                $validator->errors()->add('guru_id', 'Guru sudah memiliki jadwal di hari dan jam yang beririsan.');
-            }
-
-            $overlapKelas = Jadwal::where('kelas_id', $this->kelas_id)
-                ->where('hari', $this->hari)
-                ->where('tahun_ajaran', $this->tahun_ajaran)
-                ->where('semester', $this->semester)
-                ->where('id', '!=', $jadwalId)
-                ->where(function ($q) {
-                    $q->where('jam_mulai', '<', $this->jam_selesai)
-                        ->where('jam_selesai', '>', $this->jam_mulai);
-                });
-
-            if ($overlapKelas->exists()) {
-                $validator->errors()->add('kelas_id', 'Kelas sudah memiliki jadwal di hari dan jam yang beririsan.');
-            }
+            $this->validatePeriodeSamaDenganKelas($validator);
         });
     }
 }

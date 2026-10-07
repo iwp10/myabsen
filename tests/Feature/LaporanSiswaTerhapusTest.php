@@ -12,6 +12,11 @@ use App\Models\SesiAbsensi;
 use App\Models\Siswa;
 use App\Models\User;
 use App\Services\AbsensiService;
+use Carbon\Carbon;
+
+afterEach(function () {
+    Carbon::setTestNow();
+});
 
 beforeEach(function () {
     Pengaturan::updateOrCreate(['kunci' => 'tahun_ajaran_aktif'], ['nilai' => '2026/2027']);
@@ -303,6 +308,8 @@ test('AB-05: 5. Header Excel menampilkan nama guru yang sudah terhapus (bukan -)
 });
 
 test('AB-05: 6. Siswa aktif tidak berubah di ketiga jalur, dan form absensi untuk sesi baru tetap menyembunyikan siswa terhapus', function () {
+    Carbon::setTestNow('2026-08-10 08:00:00'); // Senin
+
     $userAktif = User::factory()->create(['name' => 'Siswa Selalu Aktif', 'role' => 'siswa']);
     $siswaAktif = Siswa::create(['user_id' => $userAktif->id, 'nis' => '4001', 'kelas_id' => $this->kelas->id]);
 

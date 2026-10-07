@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\MapelController;
 use App\Http\Controllers\Admin\PengaturanPeriodeController;
 use App\Http\Controllers\Admin\SiswaController;
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Guru\AbsensiController;
 use App\Http\Controllers\Guru\JadwalController as GuruJadwalController;
 use App\Http\Controllers\ProfileController;
@@ -21,8 +22,13 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+require __DIR__.'/auth.php';
+
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::middleware('role:admin,guru,siswa')->group(function () {
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/password', [PasswordController::class, 'update'])->name('password.update');
+    });
 
     // Admin Routes
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
@@ -79,5 +85,3 @@ Route::middleware('auth')->group(function () {
         Route::get('/riwayat', [DashboardController::class, 'riwayat'])->name('riwayat');
     });
 });
-
-require __DIR__.'/auth.php';
