@@ -20,7 +20,7 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 | 5 | Tampilan siswa | Agent | fitur/fase-5-tampilan-siswa | selesai |
 | 6 | Rekap dan ekspor | Agent | fitur/fase-6-rekap-ekspor | selesai |
 | 7 | Hardening | Agent | fitur/fase-7-hardening | selesai |
-| 8 | Siap produksi dan deploy | | | ditunda |
+| 8 | Siap produksi dan deploy | Agent | feat/siap-produksi-akun | dikerjakan |
 | 9 | Tambahan | Agent | main | selesai |
 
 ## Checklist per fase
@@ -81,7 +81,8 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] README (cara install dan akun demo)
 
 ### Fase 8: Siap produksi
-- [ ] AdminSeeder khusus produksi (tanpa data demo)
+- [x] AdminSeeder khusus produksi (tanpa data demo)
+- [x] Password awal aman terkonfigurasi dan wajib ganti password saat login pertama (AB-10)
 - [ ] Checklist `.env` produksi
 - [ ] `docs/DEPLOY.md`
 - [ ] Uji dengan `APP_DEBUG=false` dan `php artisan optimize`
@@ -147,6 +148,7 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-05 | 4,6,7,9 | fix: standardisasi tampilan siswa terhapus (soft-delete) pada seluruh laporan (riwayat guru, Excel, PDF) dengan tanda "(nonaktif)" jika memiliki riwayat absensi pada cakupan filter, header guru terhapus di Excel tetap tampil nama, dan 7 automated feature test AB-05 lulus (PASS).
 2026-10-05 | 3,7,9 | feat: implementasi menu admin "Data Terhapus" (Arsip) untuk memulihkan master data yang di-soft-delete (Guru, Siswa, Kelas, Mapel) dengan validasi dependensi dan pencegahan bentrok, pesan validasi edukatif saat input NIP/NIS/kode duplikat dengan data terhapus, serta 9 feature test AB-05 lulus (PASS).
 2026-10-06 | 1,3,9 | fix: validasi periode jadwal wajib sama dengan kelasnya pada Store & Update (AB-06), perlindungan route /profile dan /password dengan middleware role:admin,guru,siswa (AB-05), serta penambahan feature test AB-06 dan AB-05 (189 test PASS).
+2026-10-06 | 8 | feat: implementasi akun siap produksi: isolasi DemoSeeder untuk non-produksi, AdminSeeder idempotent di produksi, sentralisasi password awal aman (config/absensi.php), migrasi flag must_change_password pada users, middleware EnsurePasswordChanged untuk kewajiban ganti password profil saat login pertama, validasi penolakan password baru yang lemah/sama dengan awal (AB-10), serta 6 feature test AB-10 lulus (195 test PASS).
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:
@@ -158,7 +160,6 @@ Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutn
   - Tabel riwayat keanggotaan kelas per tahun ajaran (`anggota_kelas`) agar riwayat kelas siswa tidak tertimpa saat naik kelas.
   - Audit log koreksi absensi (pencatatan nilai sebelum dan sesudah koreksi beserta alasan).
   - Antrean ekspor latar belakang (`ShouldQueue`) untuk laporan berskala besar.
-  - Penggantian password default `'password'` dengan kredensial berbasis tanggal lahir/acak saat rilis produksi (Fase 8).
 
 
 

@@ -98,7 +98,7 @@
                                                 x-data=""
                                                 x-on:click.prevent="$dispatch('open-confirm-modal', {
                                                     title: 'Konfirmasi Reset Password',
-                                                    message: 'Apakah Anda yakin ingin mereset password siswa ini ke \'password\'?',
+                                                    message: 'Apakah Anda yakin ingin mereset password siswa ini ke password awal?',
                                                     action: '{{ route('admin.siswa.reset-password', $siswa) }}',
                                                     method: 'POST',
                                                     confirmText: 'Reset Password'

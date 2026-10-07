@@ -21,3 +21,7 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+/database/*.sql
+/storage/*.sql
+/storage/app/*.sql
+/storage/app/dumps/

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,10 +16,16 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'role' => RoleMiddleware::class,
+            'password.changed' => EnsurePasswordChanged::class,
         ]);
 
         $middleware->redirectUsersTo(function (Request $request) {
-            $role = $request->user()?->role;
+            $user = $request->user();
+            if ($user?->must_change_password) {
+                return route('profile.edit');
+            }
+
+            $role = $user?->role;
             if ($role === 'admin') {
                 return route('admin.dashboard');
             }
