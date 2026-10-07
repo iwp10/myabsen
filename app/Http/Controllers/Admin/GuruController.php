@@ -7,10 +7,12 @@ use App\Http\Requests\StoreGuruRequest;
 use App\Http\Requests\UpdateGuruRequest;
 use App\Models\Guru;
 use App\Models\User;
+use App\Services\PasswordAwalService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use RuntimeException;
 
 class GuruController extends Controller
 {
@@ -39,22 +41,29 @@ class GuruController extends Controller
 
     public function store(StoreGuruRequest $request)
     {
-        DB::transaction(function () use ($request) {
-            $user = User::create([
-                'name' => $request->name,
-                'username' => $request->nip,
-                'password' => Hash::make('password'),
-                'role' => 'guru',
-            ]);
+        try {
+            $passwordAwal = PasswordAwalService::get();
 
-            Guru::create([
-                'user_id' => $user->id,
-                'nip' => $request->nip,
-            ]);
-        });
+            DB::transaction(function () use ($request, $passwordAwal) {
+                $user = User::create([
+                    'name' => $request->name,
+                    'username' => $request->nip,
+                    'password' => Hash::make($passwordAwal),
+                    'role' => 'guru',
+                    'must_change_password' => true,
+                ]);
 
-        return redirect()->route('admin.guru.index')
-            ->with('success', 'Guru berhasil ditambahkan.');
+                Guru::create([
+                    'user_id' => $user->id,
+                    'nip' => $request->nip,
+                ]);
+            });
+
+            return redirect()->route('admin.guru.index')
+                ->with('success', 'Guru berhasil ditambahkan.');
+        } catch (RuntimeException $e) {
+            return back()->withInput()->with('error', 'Password awal belum diatur dengan aman. Hubungi pengelola sistem.');
+        }
     }
 
     public function edit(Guru $guru)
@@ -109,11 +118,18 @@ class GuruController extends Controller
 
     public function resetPassword(Guru $guru)
     {
-        $guru->user->update([
-            'password' => Hash::make('password'),
-        ]);
+        try {
+            $passwordAwal = PasswordAwalService::get();
 
-        return redirect()->route('admin.guru.index')
-            ->with('success', 'Password guru berhasil direset ke "password".');
+            $guru->user->update([
+                'password' => Hash::make($passwordAwal),
+                'must_change_password' => true,
+            ]);
+
+            return redirect()->route('admin.guru.index')
+                ->with('success', 'Password guru berhasil direset ke password awal.');
+        } catch (RuntimeException $e) {
+            return back()->with('error', 'Password awal belum diatur dengan aman. Hubungi pengelola sistem.');
+        }
     }
 }

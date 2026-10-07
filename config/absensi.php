@@ -24,4 +24,29 @@ return [
     */
     'batas_sheet_ekspor' => 50,
     'batas_baris_pdf' => 2000,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Password Awal Pengguna Baru & Reset
+    |--------------------------------------------------------------------------
+    |
+    | Menentukan password default untuk pembuatan akun baru guru/siswa
+    | serta proses reset password oleh admin.
+    |
+    */
+    'password_awal' => env('ABSENSI_PASSWORD_AWAL', 'password'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Kredensial Administrator Awal (AdminSeeder)
+    |--------------------------------------------------------------------------
+    |
+    | Digunakan oleh AdminSeeder untuk menginisialisasi akun admin awal.
+    |
+    */
+    'admin' => [
+        'name' => env('ADMIN_NAME', 'Administrator'),
+        'username' => env('ADMIN_USERNAME', 'admin'),
+        'password' => env('ADMIN_PASSWORD'),
+    ],
 ];

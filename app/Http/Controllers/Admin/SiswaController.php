@@ -11,12 +11,14 @@ use App\Models\DetailAbsensi;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\User;
+use App\Services\PasswordAwalService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
+use RuntimeException;
 
 class SiswaController extends Controller
 {
@@ -49,23 +51,30 @@ class SiswaController extends Controller
 
     public function store(StoreSiswaRequest $request)
     {
-        DB::transaction(function () use ($request) {
-            $user = User::create([
-                'name' => $request->name,
-                'username' => $request->nis,
-                'password' => Hash::make('password'),
-                'role' => 'siswa',
-            ]);
+        try {
+            $passwordAwal = PasswordAwalService::get();
 
-            Siswa::create([
-                'user_id' => $user->id,
-                'nis' => $request->nis,
-                'kelas_id' => $request->kelas_id,
-            ]);
-        });
+            DB::transaction(function () use ($request, $passwordAwal) {
+                $user = User::create([
+                    'name' => $request->name,
+                    'username' => $request->nis,
+                    'password' => Hash::make($passwordAwal),
+                    'role' => 'siswa',
+                    'must_change_password' => true,
+                ]);
 
-        return redirect()->route('admin.siswa.index')
-            ->with('success', 'Siswa berhasil ditambahkan.');
+                Siswa::create([
+                    'user_id' => $user->id,
+                    'nis' => $request->nis,
+                    'kelas_id' => $request->kelas_id,
+                ]);
+            });
+
+            return redirect()->route('admin.siswa.index')
+                ->with('success', 'Siswa berhasil ditambahkan.');
+        } catch (RuntimeException $e) {
+            return back()->withInput()->with('error', 'Password awal belum diatur dengan aman. Hubungi pengelola sistem.');
+        }
     }
 
     public function edit(Siswa $siswa)
@@ -122,18 +131,29 @@ class SiswaController extends Controller
 
     public function resetPassword(Siswa $siswa)
     {
-        $siswa->user->update([
-            'password' => Hash::make('password'),
-        ]);
+        try {
+            $passwordAwal = PasswordAwalService::get();
 
-        return redirect()->route('admin.siswa.index')
-            ->with('success', 'Password siswa berhasil direset ke "password".');
+            $siswa->user->update([
+                'password' => Hash::make($passwordAwal),
+                'must_change_password' => true,
+            ]);
+
+            return redirect()->route('admin.siswa.index')
+                ->with('success', 'Password siswa berhasil direset ke password awal.');
+        } catch (RuntimeException $e) {
+            return back()->with('error', 'Password awal belum diatur dengan aman. Hubungi pengelola sistem.');
+        }
     }
 
     public function import(ImportSiswaRequest $request)
     {
         try {
-            Excel::import(new SiswaImport($request->kelas_id), $request->file('file'));
+            $passwordAwal = PasswordAwalService::get();
+
+            DB::transaction(function () use ($request, $passwordAwal) {
+                Excel::import(new SiswaImport($request->kelas_id, $passwordAwal), $request->file('file'));
+            });
 
             return redirect()->route('admin.siswa.index')->with('success', 'Data siswa berhasil diimpor.');
         } catch (ValidationException $e) {
@@ -144,6 +164,8 @@ class SiswaController extends Controller
             }
 
             return back()->with('error', 'Gagal impor:<br>'.implode('<br>', $errors));
+        } catch (RuntimeException $e) {
+            return back()->with('error', 'Password awal belum diatur dengan aman. Hubungi pengelola sistem.');
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan saat mengimpor data.');
         }

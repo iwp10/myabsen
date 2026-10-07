@@ -63,7 +63,7 @@
                                                 x-data=""
                                                 x-on:click.prevent="$dispatch('open-confirm-modal', {
                                                     title: 'Konfirmasi Reset Password',
-                                                    message: 'Apakah Anda yakin ingin mereset password guru ini ke \'password\'?',
+                                                    message: 'Apakah Anda yakin ingin mereset password guru ini ke password awal?',
                                                     action: '{{ route('admin.guru.reset-password', $guru) }}',
                                                     method: 'POST',
                                                     confirmText: 'Reset Password'

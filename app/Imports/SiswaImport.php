@@ -5,6 +5,7 @@ namespace App\Imports;
 use App\Models\Siswa;
 use App\Models\User;
 use App\Services\ArsipService;
+use App\Services\PasswordAwalService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
@@ -16,9 +17,12 @@ class SiswaImport implements SkipsEmptyRows, ToModel, WithHeadingRow, WithValida
 {
     protected $kelas_id;
 
-    public function __construct($kelas_id)
+    protected $passwordAwal;
+
+    public function __construct($kelas_id, ?string $passwordAwal = null)
     {
         $this->kelas_id = $kelas_id;
+        $this->passwordAwal = $passwordAwal ?? PasswordAwalService::get();
     }
 
     public function model(array $row): Model|array|null
@@ -26,8 +30,9 @@ class SiswaImport implements SkipsEmptyRows, ToModel, WithHeadingRow, WithValida
         $user = User::create([
             'name' => $row['nama'],
             'username' => $row['nis'],
-            'password' => Hash::make('password'),
+            'password' => Hash::make($this->passwordAwal),
             'role' => 'siswa',
+            'must_change_password' => true,
         ]);
 
         return new Siswa([

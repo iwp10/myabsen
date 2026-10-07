@@ -166,9 +166,45 @@ Ketika Anda menarik pembaruan terbaru dari repository (`git pull`), jalankan per
 |---|---|
 | `php artisan test` | Menjalankan *test suite* (Feature & Unit tests). Berjalan menggunakan database MySQL `myabsen_test` (sesuai konfigurasi `phpunit.xml`) sehingga **tidak akan menghapus** data di database utama `myabsen`. |
 | `php vendor/bin/pint` | Merapikan format kode PHP (Code Style). **Wajib dijalankan sebelum commit.** |
-| `php artisan migrate:fresh --seed` | Menghapus seluruh tabel dan melakukan instalasi ulang database beserta data demo (Hati-hati!). |
+| `php artisan migrate:fresh --seed` | Menghapus seluruh tabel dan melakukan instalasi ulang database beserta data demo (Hanya untuk lokal/dev!). |
 | `php artisan config:clear` | Membersihkan cache konfigurasi (jalankan setiap kali Anda mengubah file `.env`). |
 | `npm run build` | Melakukan build aset *frontend* untuk produksi. |
+
+---
+
+## 🏭 Panduan Seeder & Migrasi (Lokal vs Produksi)
+
+### 💻 Lingkungan Lokal (Development)
+Untuk menyiapkan database lokal beserta akun dan data demo lengkap:
+```bash
+php artisan migrate:fresh --seed
+```
+*Di non-produksi, `DatabaseSeeder` otomatis menjalankan `DemoSeeder` yang mengisi data demo (admin, guru, siswa, kelas, jadwal, dan riwayat absensi).*
+
+### 🚀 Lingkungan Produksi (Deployment)
+Jalankan migrasi dan inisialisasi akun administrator tunggal:
+```bash
+php artisan migrate --force
+php artisan db:seed --class=AdminSeeder --force
+```
+
+> ⚠️ **PERINGATAN KERAS:** **Jangan pernah menjalankan `migrate:fresh` di server produksi!** `migrate:fresh` menghapus permanen seluruh tabel dan histori absensi.
+> 💡 **Proteksi Otomatis:** `DemoSeeder` secara otomatis menolak dieksekusi jika dijalankan pada environment `production` (`APP_ENV=production`).
+
+---
+
+## ⚙️ Variabel Environment Tambahan (.env)
+
+Konfigurasikan variabel berikut di file `.env` untuk keamanan akun produksi:
+
+| Variabel | Deskripsi | Aturan Produksi |
+|---|---|---|
+| `ABSENSI_PASSWORD_AWAL` | Password default untuk pembuatan guru/siswa baru & reset password oleh admin. | Wajib minimal 8 karakter dan bukan `password`. |
+| `ADMIN_NAME` | Nama akun administrator awal untuk `AdminSeeder`. | Opsional (default: `Administrator`). |
+| `ADMIN_USERNAME` | Username administrator awal untuk `AdminSeeder`. | Opsional (default: `admin`). |
+| `ADMIN_PASSWORD` | Password administrator awal untuk `AdminSeeder`. | Minimal 12 karakter dan bukan `password`. Jika kosong, dibuat acak 16 karakter dan ditampilkan sekali di terminal. |
+
+Setiap akun yang dibuat melalui seeder atau admin akan diberi kewajiban ganti password (`must_change_password`) saat login pertama kali.
 
 ---
 

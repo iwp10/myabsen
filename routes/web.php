@@ -31,7 +31,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Admin Routes
-    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['role:admin', 'password.changed'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
         Route::resource('jurusan', JurusanController::class)->except(['show']);
@@ -64,7 +64,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Guru Routes
-    Route::middleware('role:guru')->prefix('guru')->name('guru.')->group(function () {
+    Route::middleware(['role:guru', 'password.changed'])->prefix('guru')->name('guru.')->group(function () {
         Route::get('/dashboard', [AbsensiController::class, 'dashboard'])->name('dashboard');
         Route::get('/jadwal', [GuruJadwalController::class, 'index'])->name('jadwal');
         Route::get('/koreksi-absensi', [AbsensiController::class, 'koreksiAbsensi'])->name('koreksi-absensi');
@@ -74,13 +74,13 @@ Route::middleware('auth')->group(function () {
     });
 
     // Guru & Admin Routes
-    Route::middleware('role:guru,admin')->prefix('guru')->name('guru.')->group(function () {
+    Route::middleware(['role:guru,admin', 'password.changed'])->prefix('guru')->name('guru.')->group(function () {
         Route::get('/absensi/{jadwal}', [AbsensiController::class, 'show'])->name('absensi.show');
         Route::post('/absensi/{jadwal}', [AbsensiController::class, 'store'])->name('absensi.store');
     });
 
     // Siswa Routes
-    Route::middleware('role:siswa')->prefix('siswa')->name('siswa.')->group(function () {
+    Route::middleware(['role:siswa', 'password.changed'])->prefix('siswa')->name('siswa.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
         Route::get('/riwayat', [DashboardController::class, 'riwayat'])->name('riwayat');
     });
