@@ -158,15 +158,16 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-08 | 7 | chore: pembersihan file tidak terpakai (dump SQL dilepas dari git tracking, hapus view/component/request/layout sisa default Breeze, eliminasi duplikasi route password.update di routes/auth.php, seluruh 195 test PASS).
 2026-10-08 | 8 | feat: perbaikan notifikasi ganti password (banner hijau sukses dengan auto-dismiss, banner merah gagal dengan highlight kolom), pengalihan pengguna must_change_password ke dashboard role-nya, penguatan keamanan logout & back history dengan header no-store, logout idempotent untuk tamu tanpa 419/500, penanganan global TokenMismatchException (419) dengan pesan ramah, view error 419 terpadu, serta penambahan 18 feature test (seluruh 213 test PASS).
 2026-10-08 | 3,4,5,6,9,11 | feat: implementasi dropdown pilihan periode di riwayat guru (kartu dan detail matriks) serta riwayat siswa (AB-11), pencarian kelas/mapel & siswa (AB-08), ekspor Excel guru membawa periode terpilih, serta validasi penolakan ubah periode kelas berjadwal (AB-06).
+2026-10-08 | 3,7,9,11 | feat: implementasi fitur Pergantian Periode admin (salin kelas, pindahkan siswa, luluskan siswa massal via soft delete), perbaikan proteksi hapus kelas aktif, serta keutuhan riwayat kelas lama tanpa tabel baru (AB-13, 231 test PASS).
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:
 - [ ] hapus permanen dari menu Data Terhapus (belum dibuat sengaja)
-- [ ] **Audit Aturan Bisnis Lanjutan (dari `docs/AUDIT_MYABSEN.md`):**
-  - Penyempurnaan pembagi persentase untuk siswa pindah kelas/siswa baru agar tidak bias (AB-07).
-  - Tabel riwayat keanggotaan kelas per tahun ajaran (`anggota_kelas`) agar riwayat kelas siswa tidak tertimpa saat naik kelas.
-  - Audit log koreksi absensi (pencatatan nilai sebelum dan sesudah koreksi beserta alasan).
-  - Antrean ekspor latar belakang (`ShouldQueue`) untuk laporan berskala besar.
+- [ ] **Batasan dan Pertimbangan Arsitektur:**
+  - Pembagi persentase siswa pindah: Siswa yang baru pindah kelas di tengah periode memiliki pembagi persentase berbasis sesi yang ia ikuti (AB-07).
+  - Skema keanggotaan kelas tanpa tabel `anggota_kelas`: Keanggotaan kelas siswa dikelola via pembaruan `siswa.kelas_id` langsung demi menjaga kesederhanaan skema basis data MVP tanpa migrasi baru; batasan yang diketahui: tidak ada pencatatan timestamp tanggal mutasi siswa dan jadwal pelajaran diisi manual tiap periode baru.
+- [ ] Audit log koreksi absensi (pencatatan nilai sebelum dan sesudah koreksi beserta alasan).
+- [ ] Antrean ekspor latar belakang (`ShouldQueue`) untuk laporan berskala besar.
 
 
 

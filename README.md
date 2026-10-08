@@ -36,6 +36,7 @@ Aplikasi ini memiliki tiga peran utama dengan batasan akses masing-masing, serta
 - **Import Data:** Memasukkan data siswa secara massal melalui file Excel.
 - **Menu Koreksi Absensi:** Meninjau jadwal dan status sesi absensi pada tanggal lampau per kelas serta membuka form koreksi/susulan.
 - **Pengaturan Periode:** Mengelola tahun ajaran aktif dan semester aktif langsung dari antarmuka web dengan saran otomatis kalender dan modal konfirmasi pergantian.
+- **Pergantian Periode:** Mengelola transisi tahun ajaran dan semester baru dalam satu halaman terpadu: panduan alur kerja dan status periode aktif, salin struktur kelas antar-periode (otomatis lewati kelas yang sudah ada), pemindahan massal siswa antar-kelas dengan filter pencarian real-time, serta kelulusan massal siswa kelas akhir (soft delete aman tanpa menghapus akun user, terintegrasi dengan pemulihan Data Terhapus).
 - **Data Terhapus (Arsip):** Meninjau data master yang telah di-soft-delete (Guru, Siswa, Kelas, Mapel) dalam 4 tab dan memulihkannya kembali secara aman dengan validasi dependensi dan pencegahan bentrok.
 - **Laporan & Ekspor:** Mengunduh rekap absensi sekolah dalam format Excel (multi-sheet per kelas-mapel) dan dokumen cetak PDF dengan batasan aman serta filter jurusan dan bulan.
 

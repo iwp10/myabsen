@@ -59,18 +59,20 @@ class Siswa extends Model
 
         return $query->withTrashed()
             ->join('users', 'siswa.user_id', '=', 'users.id')
-            ->where('siswa.kelas_id', $kelasId)
-            ->where(function ($q) use ($sesiIdsArray) {
-                $q->whereNull('siswa.deleted_at');
+            ->where(function ($q) use ($kelasId, $sesiIdsArray) {
+                // 1. Siswa aktif kelas itu
+                $q->where(function ($sub) use ($kelasId) {
+                    $sub->where('siswa.kelas_id', $kelasId)
+                        ->whereNull('siswa.deleted_at');
+                });
+
+                // 2. Siapa pun (aktif yang sudah pindah kelas, atau terhapus) yang punya detail_absensi pada sesi-sesi cakupan tersebut
                 if (! empty($sesiIdsArray)) {
-                    $q->orWhere(function ($sub) use ($sesiIdsArray) {
-                        $sub->whereNotNull('siswa.deleted_at')
-                            ->whereExists(function ($dq) use ($sesiIdsArray) {
-                                $dq->select(DB::raw(1))
-                                    ->from('detail_absensi')
-                                    ->whereColumn('detail_absensi.siswa_id', 'siswa.id')
-                                    ->whereIn('detail_absensi.sesi_absensi_id', $sesiIdsArray);
-                            });
+                    $q->orWhereExists(function ($dq) use ($sesiIdsArray) {
+                        $dq->select(DB::raw(1))
+                            ->from('detail_absensi')
+                            ->whereColumn('detail_absensi.siswa_id', 'siswa.id')
+                            ->whereIn('detail_absensi.sesi_absensi_id', $sesiIdsArray);
                     });
                 }
             })
