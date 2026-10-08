@@ -123,6 +123,7 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] Perlindungan FK `diabsen_oleh` dan `diubah_oleh`: Migrasi baru mengubah foreign key pada tabel `sesi_absensi` menjadi `restrictOnDelete` demi melindungi histori absensi, dilengkapi penanganan pesan ramah pada controller admin.
 - [x] Penghapusan Ekspor PDF Guru: Menghapus route `guru.laporan.exportPdf`, method controller, dan test terkait atas keputusan pemilik proyek (guru hanya mengekspor Excel; admin tetap Excel dan PDF).
 - [x] Menambahkan aset dokumentasi visual dan memperbarui README.md untuk presentasi GitHub.
+- [x] Pembersihan File dan Dead Code Tak Terpakai: Pelepasan dump SQL (database/*.sql) dari git tracking, penghapusan view Blade dan komponen sisa Breeze yang tidak dirujuk (welcome, dashboard, guest layout, application-logo, auth-session-status, nav-link, responsive-nav-link), penghapusan ProfileUpdateRequest dan GuestLayout, serta eliminasi duplikasi rute password.update di routes/auth.php.
 
 ## Catatan dan hambatan
 Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
@@ -152,6 +153,7 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-06 | 1,3,9 | fix: validasi periode jadwal wajib sama dengan kelasnya pada Store & Update (AB-06), perlindungan route /profile dan /password dengan middleware role:admin,guru,siswa (AB-05), serta penambahan feature test AB-06 dan AB-05 (189 test PASS).
 2026-10-06 | 8 | feat: implementasi akun siap produksi: isolasi DemoSeeder untuk non-produksi, AdminSeeder idempotent di produksi, sentralisasi password awal aman (config/absensi.php), migrasi flag must_change_password pada users, middleware EnsurePasswordChanged untuk kewajiban ganti password profil saat login pertama, validasi penolakan password baru yang lemah/sama dengan awal (AB-10), serta 6 feature test AB-10 lulus (195 test PASS).
 2026-10-08 | 11 | docs: menambahkan bagian Visual Preview di README.md (dashboard admin, guru, siswa) dan sinkronisasi checklist progress.
+2026-10-08 | 7 | chore: pembersihan file tidak terpakai (dump SQL dilepas dari git tracking, hapus view/component/request/layout sisa default Breeze, eliminasi duplikasi route password.update di routes/auth.php, seluruh 195 test PASS).
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:
