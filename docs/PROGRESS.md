@@ -8,7 +8,7 @@ Cara pakai:
 
 ## Ringkasan
 
-MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan Siswa: otentikasi fleksibel (Username/NIP/NIS), dashboard responsif berbasis font Inter dan Tabler Icons, presensi cepat default Hadir, manajemen sesi dengan jendela koreksi 7 hari, riwayat guru dua tingkat, ekspor Excel multi-sheet matriks pertemuan (P1..Pn), ekspor PDF resmi, serta perlindungan integritas histori absensi dengan 123 automated test lulus (PASS).
+MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan Siswa: otentikasi fleksibel (Username/NIP/NIS), dashboard responsif berbasis font Inter dan Tabler Icons, presensi cepat default Hadir, manajemen sesi dengan jendela koreksi 7 hari, riwayat guru dua tingkat, ekspor Excel multi-sheet matriks pertemuan (P1..Pn), ekspor PDF resmi, serta perlindungan integritas histori absensi dengan 195 automated test lulus (1160 assertions, PASS).
 
 | Fase | Isi | Penanggung jawab | Branch | Status |
 |---|---|---|---|---|
@@ -38,7 +38,7 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 
 ### Fase 2: Auth dan role
 - [x] Breeze (Blade) terpasang, registrasi publik dihapus
-- [x] Login memakai username (bukan email)
+- [x] Login memakai username, NIP, atau NIS
 - [x] Middleware `role` dan redirect per role
 - [x] Layout dasar responsif dengan navbar per role
 - [x] Test akses per role
@@ -48,7 +48,7 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] CRUD jurusan, kelas, mapel
 - [x] CRUD guru dan siswa (akun otomatis, reset password)
 - [x] Impor siswa dari Excel
-- [x] CRUD jadwal dengan pencegahan bentrok (AB-06)
+- [x] CRUD jadwal dengan pencegahan bentrok dan keselarasan periode (AB-06)
 - [x] Pagination dan pencarian
 
 ### Fase 4: Absensi guru
@@ -81,11 +81,16 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] README (cara install dan akun demo)
 
 ### Fase 8: Siap produksi
-- [x] AdminSeeder khusus produksi (tanpa data demo)
-- [x] Password awal aman terkonfigurasi dan wajib ganti password saat login pertama (AB-10)
-- [ ] Checklist `.env` produksi
-- [ ] `docs/DEPLOY.md`
-- [ ] Uji dengan `APP_DEBUG=false` dan `php artisan optimize`
+- [x] AdminSeeder khusus produksi (tanpa data demo, idempotent)
+- [x] Password awal aman terkonfigurasi dan sentralisasi (`PasswordAwalService`, `config/absensi.php`)
+- [x] Wajib ganti password saat login pertama (`must_change_password`, middleware `EnsurePasswordChanged`, AB-10)
+- [x] DemoSeeder terpisah dari produksi (otomatis ditolak di `APP_ENV=production`)
+- [ ] `docs/DEPLOY.md` (panduan deployment ke server produksi)
+- [ ] Checklist `.env` produksi (verifikasi konfigurasi keamanan dan kredensial)
+- [ ] Prosedur cadangan database (skrip backup dan restore MySQL)
+- [ ] Uji performa & optimasi lokal (`APP_DEBUG=false` dan `php artisan optimize`)
+- [ ] Deploy ke server/hosting produksi
+- [ ] Input data asli sekolah (jurusan, kelas, guru, siswa, mapel riil)
 
 ### Fase 9: Tambahan
 - [x] Otentikasi: Sistem login fleksibel menggunakan Username, NIP (Guru), atau NIS (Siswa).
@@ -97,7 +102,7 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] UI/UX: Mengganti font utama sistem menjadi Inter untuk meningkatkan aksesibilitas dan kenyamanan membaca.
 - [x] Fitur Guru: Halaman jadwal mingguan interaktif (kartu jadwal memuat tanggal dalam 7 hari terakhir, status absensi, dan link langsung ke form absensi/koreksi/susulan).
 - [x] Fitur Guru: Menu sidebar "Jadwal & Koreksi Absensi" tepat di bawah "Jadwal Mengajar", halaman daftar 7 hari terakhir (hari ini sampai H-6) urut dari terbaru dengan status sesi, label Hari ini, dan empty state ringkas.
-- [x] Fitur Guru: Redesign riwayat absensi guru dua tingkat (halaman pemilihan kartu Kelas-Mapel dan halaman detail tabel matriks pertemuan P1..Pn).
+- [x] Fitur Guru: Redesign riwayat absensi guru dua tingkat (halaman pemilihan kartu Kelas-Mapel dan halaman detail tabel matriks pertemuan P1..Pn di `guru.riwayat.detail`).
 - [x] Fitur Admin: Menu Koreksi Absensi di sidebar dan pintasan dashboard untuk mencari jadwal berdasarkan tanggal lampau dan kelas serta melakukan koreksi/susulan absensi.
 - [x] UI/UX: Merombak Dashboard Admin dengan banner sapaan, statistik master data (Siswa, Guru, Kelas, Mapel), dan pintasan aksi cepat.
 - [x] UI/UX: Standarisasi seluruh ikon aplikasi menggunakan Tabler Icons (inline SVG) untuk tampilan yang lebih modern, konsisten, dan ringan.
@@ -151,15 +156,28 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-06 | 8 | feat: implementasi akun siap produksi: isolasi DemoSeeder untuk non-produksi, AdminSeeder idempotent di produksi, sentralisasi password awal aman (config/absensi.php), migrasi flag must_change_password pada users, middleware EnsurePasswordChanged untuk kewajiban ganti password profil saat login pertama, validasi penolakan password baru yang lemah/sama dengan awal (AB-10), serta 6 feature test AB-10 lulus (195 test PASS).
 
 ## Backlog teknis (belum dikerjakan)
-Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:
-- [ ] hapus permanen dari menu Data Terhapus (belum dibuat sengaja)
-- [ ] validasi saat mengubah periode kelas yang sudah punya jadwal
-- [ ] **Pilihan Periode di Riwayat Guru dan Siswa:** Tambahkan dropdown pemilihan tahun ajaran dan semester pada halaman riwayat guru dan riwayat siswa agar pengguna dapat meninjau histori kehadiran periode terdahulu tanpa harus mengubah periode aktif.
-- [ ] **Audit Aturan Bisnis Lanjutan (dari `docs/AUDIT_MYABSEN.md`):**
-  - Penyempurnaan pembagi persentase untuk siswa pindah kelas/siswa baru agar tidak bias (AB-07).
-  - Tabel riwayat keanggotaan kelas per tahun ajaran (`anggota_kelas`) agar riwayat kelas siswa tidak tertimpa saat naik kelas.
-  - Audit log koreksi absensi (pencatatan nilai sebelum dan sesudah koreksi beserta alasan).
-  - Antrean ekspor latar belakang (`ShouldQueue`) untuk laporan berskala besar.
+
+Tugas pemeliharaan dan pengembangan teknis lanjutan yang perlu dikerjakan:
+
+### A. Sebelum data asli masuk
+- [ ] **Cadangan database:** Pembuatan skrip dan prosedur rutin pencadangan (*backup*) serta pemulihan (*restore*) basis data MySQL sebelum data riil dimasukkan, demi mencegah kehilangan histori.
+- [ ] **Uji produksi lokal:** Pengujian performa lokal menggunakan `APP_DEBUG=false` dan eksekusi `php artisan optimize` di lingkungan staging lokal untuk memverifikasi kestabilan routing, view, dan konfigurasi sebelum rilis publik.
+- [ ] **Panduan deployment (`docs/DEPLOY.md`):** Penyusunan panduan langkah demi langkah deployment ke server hosting produksi (Nginx/Apache, SSL, worker queue, dan konfigurasi cron/scheduler).
+
+### B. Segera setelah dipakai (minggu pertama sampai bulan pertama)
+- [ ] **Audit log koreksi absensi:** Pencatatan jejak perubahan status absensi (nilai sebelum dan sesudah koreksi, waktu perubahan, user pengubah, dan alasan koreksi) untuk transparansi dan akuntabilitas sekolah.
+- [ ] **Validasi saat mengubah periode kelas yang sudah punya jadwal:** Menambahkan validasi proteksi saat admin mengubah tahun ajaran atau semester kelas yang telah memiliki jadwal aktif agar tidak terjadi anomali relasi.
+- [ ] **Pilihan periode di riwayat guru dan siswa:** Penambahan dropdown pemilihan tahun ajaran dan semester pada halaman riwayat guru dan riwayat siswa (wajib diselesaikan sebelum pergantian semester dari Ganjil ke Genap agar data semester Ganjil tetap dapat ditinjau tanpa mengubah periode aktif sistem).
+- [ ] **Pengujian lapangan dan perbaikan dari masukan guru:** Evaluasi operasional langsung di kelas oleh guru dan iterasi perbaikan berdasarkan umpan balik pengguna awal.
+
+### C. Sebelum akhir tahun ajaran / kenaikan kelas
+- [ ] **Riwayat keanggotaan kelas (`anggota_kelas`):** Pembuatan skema dan tabel relasi keanggotaan kelas per tahun ajaran agar data riwayat kelas siswa terdahulu tidak tertimpa ketika siswa naik kelas ke tingkat berikutnya.
+- [ ] **Penyempurnaan pembagi persentase untuk siswa pindah kelas:** Penyesuaian formula pembagi kehadiran bagi siswa baru/pindahan di tengah periode agar perhitungan persentase kehadiran adil dan tidak bias (AB-07).
+
+### Bila dibutuhkan (Opsional)
+- [ ] **Antrean ekspor latar belakang (Queue):** Pemrosesan ekspor laporan melalui job antrean (`ShouldQueue`) jika data kehadiran sekolah tumbuh sangat masif.
+- [ ] **Hapus permanen dari menu Data Terhapus:** Fitur *force delete* pada antarmuka admin arsip untuk menghapus permanen data master yang tidak lagi memiliki relasi.
+- [ ] **Widget pemantauan dashboard admin:** Tampilan grafik tren kehadiran harian/mingguan seluruh sekolah pada dashboard admin.
 
 
 
