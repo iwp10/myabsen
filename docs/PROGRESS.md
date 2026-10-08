@@ -22,7 +22,6 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 | 7 | Hardening | Agent | fitur/fase-7-hardening | selesai |
 | 8 | Siap produksi dan deploy | Agent | feat/siap-produksi-akun | dikerjakan |
 | 9 | Tambahan | Agent | main | selesai |
-| 11 | Improvement & Dokumentasi | Agent | main | selesai |
 
 ## Checklist per fase
 
@@ -107,7 +106,7 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] Fitur Admin: Pengaturan Periode aktif (AB-11) melalui antarmuka web, migrasi tabel pengaturan (kunci-nilai), saran otomatis berbasis tanggal kalender, modal konfirmasi pergantian, banner pengingat dashboard admin, serta pemakaian seragam di seluruh dashboard guru, dashboard siswa, riwayat guru, rekapitulasi, dan ekspor laporan.
 - [x] Fitur Ekspor: Pembatasan jumlah sheet Excel admin ('batas_sheet_ekspor' => 50) dan batas baris PDF ('batas_baris_pdf' => 2000) di config/absensi.php dengan pesan error ramah, penambahan filter Jurusan pada laporan admin, penanganan kombinasi jurusan/kelas tidak cocok, dan eliminasi N+1 query pada pembentukan sheet ekspor.
 
-### Tahap Improvement / Fase 11: Refactor Arsitektur & Dokumentasi
+### Tahap Improvement: Refactor Arsitektur
 - [x] Pemisahan Tanggung Jawab (Separation of Concerns): Controller tipis (*Thin Controller*), FormRequest khusus validasi input, Policy khusus otorisasi hak akses, Service sebagai pusat seluruh *business logic*, Model khusus relasi & persistensi data, dan View khusus layer presentasi.
 - [x] Pembersihan Fat Controller: Memindahkan query agregasi rekap per mapel dan status harian siswa dari `Siswa\DashboardController` ke `AbsensiService`.
 - [x] Implementasi Service Pattern: Memusatkan logika statistik guru dan penyiapan form absensi dari `Guru\AbsensiController` ke `AbsensiService`.
@@ -122,7 +121,6 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] Rapikan Dependensi Tailwind di `package.json`: Menghapus paket `@tailwindcss/vite` yang tidak terpakai agar konsisten dengan `tailwindcss: ^3.1.0` (ukuran bundle CSS `npm run build` tetap ~83 kB).
 - [x] Perlindungan FK `diabsen_oleh` dan `diubah_oleh`: Migrasi baru mengubah foreign key pada tabel `sesi_absensi` menjadi `restrictOnDelete` demi melindungi histori absensi, dilengkapi penanganan pesan ramah pada controller admin.
 - [x] Penghapusan Ekspor PDF Guru: Menghapus route `guru.laporan.exportPdf`, method controller, dan test terkait atas keputusan pemilik proyek (guru hanya mengekspor Excel; admin tetap Excel dan PDF).
-- [x] Menambahkan aset dokumentasi visual dan memperbarui README.md untuk presentasi GitHub.
 
 ## Catatan dan hambatan
 Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
@@ -151,7 +149,6 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-05 | 3,7,9 | feat: implementasi menu admin "Data Terhapus" (Arsip) untuk memulihkan master data yang di-soft-delete (Guru, Siswa, Kelas, Mapel) dengan validasi dependensi dan pencegahan bentrok, pesan validasi edukatif saat input NIP/NIS/kode duplikat dengan data terhapus, serta 9 feature test AB-05 lulus (PASS).
 2026-10-06 | 1,3,9 | fix: validasi periode jadwal wajib sama dengan kelasnya pada Store & Update (AB-06), perlindungan route /profile dan /password dengan middleware role:admin,guru,siswa (AB-05), serta penambahan feature test AB-06 dan AB-05 (189 test PASS).
 2026-10-06 | 8 | feat: implementasi akun siap produksi: isolasi DemoSeeder untuk non-produksi, AdminSeeder idempotent di produksi, sentralisasi password awal aman (config/absensi.php), migrasi flag must_change_password pada users, middleware EnsurePasswordChanged untuk kewajiban ganti password profil saat login pertama, validasi penolakan password baru yang lemah/sama dengan awal (AB-10), serta 6 feature test AB-10 lulus (195 test PASS).
-2026-10-08 | 11 | docs: menambahkan bagian Visual Preview di README.md (dashboard admin, guru, siswa) dan sinkronisasi checklist progress.
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:

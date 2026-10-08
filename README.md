@@ -8,22 +8,17 @@ MyAbsen adalah sistem informasi absensi siswa berbasis web yang dirancang khusus
 
 ## 📑 Daftar Isi
 - [Fitur Utama](#-fitur-utama)
-- [Visual Preview](#-visual-preview)
 - [Teknologi](#-teknologi)
 - [Panduan Instalasi Lokal](#-panduan-instalasi-lokal)
 - [Kredensial Demo](#-kredensial-demo)
-- [Pembaruan (Git Pull)](#-pembaruan-setelah-git-pull)
 - [Perintah Penting](#-perintah-penting)
-- [Panduan Seeder & Migrasi (Lokal vs Produksi)](#-panduan-seeder--migrasi-lokal-vs-produksi)
-- [Variabel Environment Tambahan (.env)](#️-variabel-environment-tambahan-env)
+- [Pembaruan (Git Pull)](#-pembaruan-setelah-git-pull)
 - [Pemecahan Masalah](#-pemecahan-masalah)
 - [Dokumentasi Proyek](#-dokumentasi-proyek)
 - [Alur Kerja Tim](#-alur-kerja-tim)
 
+
 ---
-
-## ✨ Fitur Utama
-
 Aplikasi ini memiliki tiga peran utama dengan batasan akses masing-masing, serta dilengkapi fitur aksesibilitas tingkat lanjut:
 
 ### 🌟 Fitur Unggulan (Baru)
@@ -51,27 +46,6 @@ Aplikasi ini memiliki tiga peran utama dengan batasan akses masing-masing, serta
 
 ---
 
-## 📸 Visual Preview
-
-Antarmuka MyAbsen dirancang dengan estetika modern, bersih, dan intuitif menggunakan **Tailwind CSS**, tipografi **Inter** untuk kenyamanan membaca optimal, serta set ikon konsisten dari **Tabler Icons**. Sistem ini juga mendukung mode tampilan *Light Mode* dan *Dark Mode* untuk kenyamanan visual seluruh pengguna.
-
-### 1. Dashboard Admin
-Menyajikan ringkasan statistik master data sekolah (siswa, guru, kelas, mapel), status absensi hari ini, pintasan koreksi absensi, dan kontrol cepat pengaturan periode aktif.
-
-![Dashboard Admin](docs/screenshots/admin-dashboard.png)
-
-### 2. Dashboard Guru
-Menampilkan sapaan jadwal mengajar hari ini, rekapitulasi total jam ajar, navigasi cepat ke form pengisian absensi kelas, dan status kelengkapan presensi.
-
-![Dashboard Guru](docs/screenshots/guru-dashboard.png)
-
-### 3. Dashboard Siswa
-Menyediakan pemantauan kehadiran mandiri siswa, kartu statistik persentase kehadiran transparan (kalkulasi positif Hadir, Izin, Sakit), dan rincian status kehadiran per mata pelajaran.
-
-![Dashboard Siswa](docs/screenshots/siswa-dashboard.png)
-
----
-
 ## 🛠️ Teknologi
 
 Proyek ini dibangun menggunakan *stack* teknologi berikut (sesuai dengan aturan proyek):
@@ -91,6 +65,9 @@ Proyek ini dibangun menggunakan *stack* teknologi berikut (sesuai dengan aturan 
 - **Library Tambahan:** `maatwebsite/excel` (Export/Import Excel), `barryvdh/laravel-dompdf` (Export PDF)
 
 ---
+
+## 📸 Preview Tampilan Aplikasi
+**
 
 ## 🚀 Panduan Instalasi Lokal
 
