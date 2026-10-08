@@ -12,14 +12,12 @@ Pembeda utama: absensi per mata pelajaran (bukan per hari), sehingga siswa yang 
 | Hak | Admin | Guru | Siswa |
 |---|---|---|---|
 | Kelola master data (jurusan, kelas, mapel, guru, siswa) | Ya | Tidak | Tidak |
-| Hak | Admin | Guru | Siswa |
-|---|---|---|---|
-| Kelola master data (jurusan, kelas, mapel, guru, siswa) | Ya | Tidak | Tidak |
 | Kelola jadwal | Ya | Tidak | Tidak |
 | Mengabsen | Ya (koreksi historis kapan saja pada tanggal lampau, bukan masa depan) | Ya (jadwal sendiri, tanggal dalam 7 hari terakhir yang cocok dengan hari jadwal; termasuk susulan) | Tidak |
 | Melihat rekap | Semua kelas | Kelas yang ia ajar | Milik sendiri |
 | Ekspor Excel/PDF | Ya (Excel dan PDF) | Ya (Excel saja) | Tidak |
 | Pengaturan Periode Aktif | Ya | Tidak | Tidak |
+| Pergantian Periode (Salin, Pindah, Lulus) | Ya | Tidak | Tidak |
 | Akses Data Terhapus (Pemulihan) | Ya | Tidak | Tidak |
 
 ## 3. Fitur MVP
@@ -37,6 +35,7 @@ Pembeda utama: absensi per mata pelajaran (bukan per hari), sehingga siswa yang 
 - CRUD jadwal pelajaran (kelas + mapel + guru + hari + jam) dengan validasi pencegahan jadwal bentrok serta kewajiban keselarasan periode jadwal dengan kelasnya.
 - Menu Koreksi Absensi: memilih tanggal lampau (kapan saja, bukan masa depan) dan kelas untuk melihat jadwal beserta status sesi (sudah/belum diabsen), lalu membuka form absensi untuk koreksi atau pengisian susulan.
 - Pengaturan Periode: mengatur tahun ajaran aktif dan semester aktif yang disimpan di database (tabel `pengaturan`), dengan saran otomatis berbasis tanggal kalender (Juli-Desember = Ganjil, Januari-Juni = Genap), modal konfirmasi sebelum pergantian periode, dan banner pengingat dashboard.
+- Menu Pergantian Periode: mengelola transisi akademik antar-periode (route `admin.pergantian-periode.index`), memuat 4 tab/bagian: (0) Panduan alur kerja dan penampil status periode aktif; (1) Salin Kelas: menyalin struktur kelas aktif dari periode asal ke periode tujuan (nama, tingkat, jurusan), otomatis melewati kelas yang sudah ada, tanpa menyalin jadwal atau memindahkan siswa (route `admin.pergantian-periode.salin-kelas`); (2) Pindahkan Siswa: memindahkan siswa aktif dari kelas asal ke kelas tujuan yang berbeda dengan seleksi massal dan pencarian real-time nama/NIS di sisi tampilan (route `admin.pergantian-periode.pindahkan-siswa`); (3) Luluskan Siswa: meluluskan siswa kelas akhir secara massal menggunakan soft delete model Siswa tanpa menghapus akun User (AB-05) sehingga tidak dapat login kembali namun data historis tetap utuh dan dapat dipulihkan sewaktu-waktu (route `admin.pergantian-periode.luluskan-siswa`). Seluruh aksi massal dibungkus transaksi database atomik (`DB::transaction`).
 - Menu Data Terhapus (Arsip): melihat daftar data master yang di-soft-delete (Guru, Siswa, Kelas, Mapel) dalam 4 tab terpisah dengan pencarian dan paginasi (route `admin.arsip.index`), serta memulihkan (*restore*) data secara aman dengan validasi dependensi dan pencegahan bentrok (route `admin.arsip.pulihkan`).
 - Laporan & Ekspor: melihat rekap absensi seluruh sekolah serta mengekspor ke format Excel (multi-sheet per kelas-mapel) dan dokumen cetak PDF resmi, dilengkapi filter jurusan, kelas, mapel, bulan, dan periode, serta pembatasan kapasitas ekspor aman (maksimal 50 sheet Excel dan 2000 baris PDF via `config/absensi.php`) untuk mencegah kehabisan memori (*OOM*).
 
@@ -86,6 +85,13 @@ Setiap aturan di bawah harus punya test.
   - Jika akun guru atau siswa memiliki profil yang berstatus soft delete, login ditolak dengan pesan: "Akun ini sudah tidak aktif. Silakan hubungi admin sekolah." tanpa membuka celah bypass rate limiting (rate limiter tetap mencatat kegagalan).
 - **AB-11** Periode Aktif & Filter Periode Riwayat: Periode akademik aktif (tahun ajaran dan semester) diatur oleh admin melalui menu "Pengaturan Periode" dan disimpan di basis data (tabel `pengaturan`, bukan file .env/config). Daftar master data admin (Kelas, Jadwal) bawaannya menampilkan semua periode dan bisa difilter; halaman operasional (dashboard guru, dashboard siswa, jadwal pelajaran guru/siswa, koreksi) menggunakan periode aktif sebagai filter default. Halaman riwayat guru (kartu kelas-mapel dan detail matriks pertemuan) serta riwayat siswa secara bawaan menampilkan data periode aktif, dan pengguna dapat beralih ke periode terdahulu yang memiliki data jadwal/absensi mereka melalui dropdown filter periode. Sistem menyediakan saran otomatis berbasis tanggal kalender (Juli-Desember = Ganjil, Januari-Juni = Genap) dan meminta konfirmasi pengguna sebelum periode aktif diperbarui.
 - **AB-12** Standar Waktu: Seluruh sistem, operasi tanggal, pencatatan sesi, dan jam absensi menggunakan standar zona waktu `Asia/Jakarta`.
+- **AB-13** Pergantian Periode, Pemindahan Siswa & Keutuhan Riwayat Kelas:
+  - Proteksi Hapus Kelas: Kelas yang masih memiliki siswa aktif tidak dapat dihapus (`KelasController::destroy`), sistem menolak dengan pesan ramah: `"Kelas ini masih berisi {n} siswa aktif. Pindahkan atau luluskan siswa terlebih dahulu."`. Kelas yang hanya berisi siswa yang telah di-soft-delete atau tidak memiliki siswa boleh dihapus (soft delete) dengan ketentuan tidak memiliki jadwal aktif.
+  - Keutuhan Riwayat Kelas: Daftar siswa suatu kelas pada cakupan sesi tertentu (`Siswa::scopeUntukLaporan` / `AbsensiService::getSiswaUntukLaporan`) adalah gabungan siswa aktif kelas tersebut ditambah seluruh siswa (baik aktif yang telah berpindah kelas maupun yang telah di-soft-delete) yang memiliki riwayat `detail_absensi` pada sesi-sesi cakupan tersebut. Perhitungan persentase kehadiran masing-masing siswa tetap menggunakan rumus AB-07 dari sesinya sendiri. Siswa yang telah pindah kelas tidak diberi tanda khusus, sedangkan siswa terhapus diberi tanda `(nonaktif)`. Form absensi sesi baru hanya memuat siswa aktif yang `kelas_id`-nya adalah kelas tersebut.
+  - Salin Kelas: Menyalin struktur kelas (nama, tingkat, jurusan) ke periode tujuan. Kelas dengan nama dan jurusan yang sama di periode tujuan dilewati. Kelas terhapus, jadwal, dan siswa tidak ikut disalin. Periode tujuan wajib valid dan berbeda dari periode asal.
+  - Pindahkan Siswa: Memindahkan siswa aktif ke kelas tujuan yang aktif dan berbeda (hanya memperbarui `siswa.kelas_id`; sesi dan detail absensi lama tidak diubah). Validasi server memastikan setiap siswa yang dipindahkan benar-benar siswa aktif kelas asal.
+  - Luluskan Siswa: Meluluskan siswa secara massal menggunakan soft delete model Siswa (`$siswa->delete()`). JANGAN PERNAH forceDelete, meskipun siswa belum memiliki riwayat absensi. Akun User tidak dihapus sehingga aturan AB-05 memblokir login. Siswa dapat dipulihkan melalui menu Data Terhapus.
+  - Batas Operasi: Maksimal 100 kelas per operasi salin kelas dan 500 siswa per operasi pemindahan/kelulusan. Seluruh aksi massal dijalankan dalam `DB::transaction`.
 
 ## 5. Skema database
 
@@ -173,6 +179,7 @@ Tidak dikerjakan sebelum MVP stabil dan diuji di sekolah:
 | 2026-10-06 | Persiapan akun produksi: isolasi DemoSeeder untuk non-produksi, pembuatan AdminSeeder idempotent aman di produksi, sentralisasi password awal terkonfigurasi (config/absensi.php), penambahan kolom must_change_password pada users, pembatasan akses profil/logout bagi akun dengan password awal, dan penolakan password baru yang sama dengan password awal atau kurang dari 8 karakter (AB-10) |
 | 2026-10-08 | Perbaikan notifikasi ganti password (banner hijau sukses dengan auto-dismiss, banner merah gagal dengan highlight kolom), pengalihan pengguna must_change_password ke dashboard role dengan pesan sukses, penegasan header no-store pada seluruh halaman terautentikasi (mencegah akses via tombol Back setelah logout), logout idempotent untuk tamu tanpa 419/500, penanganan global TokenMismatchException (419) dengan pesan ramah bahasa Indonesia, dan pembuatan view error 419 terpadu (AB-10) |
 | 2026-10-08 | Implementasi pilihan periode dan pencarian pada riwayat guru (kartu kelas-mapel dan matriks siswa) serta riwayat siswa, ekspor Excel guru berbasis periode terpilih, dan penolakan perubahan periode kelas jika sudah memiliki jadwal pada periode lama (AB-06, AB-08, AB-11) |
+| 2026-10-08 | Implementasi fitur Pergantian Periode (salin kelas, pindahkan siswa, luluskan siswa massal) dan perbaikan proteksi hapus kelas (AB-13). Tabel `anggota_kelas` sengaja tidak dibuat untuk mempertahankan kesederhanaan skema basis data MVP tanpa migrasi baru; batasan yang diketahui: tidak ada catatan tanggal mutasi siswa dan jadwal pelajaran diisi manual per periode. |
 
 
 

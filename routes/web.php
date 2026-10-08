@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\KoreksiAbsensiController;
 use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\MapelController;
 use App\Http\Controllers\Admin\PengaturanPeriodeController;
+use App\Http\Controllers\Admin\PergantianPeriodeController;
 use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Guru\AbsensiController;
@@ -58,6 +59,11 @@ Route::middleware(['auth', 'no-cache'])->group(function () {
 
         Route::get('pengaturan-periode', [PengaturanPeriodeController::class, 'index'])->name('pengaturan-periode.index');
         Route::post('pengaturan-periode', [PengaturanPeriodeController::class, 'update'])->name('pengaturan-periode.update');
+
+        Route::get('pergantian-periode', [PergantianPeriodeController::class, 'index'])->name('pergantian-periode.index');
+        Route::post('pergantian-periode/salin-kelas', [PergantianPeriodeController::class, 'salinKelas'])->name('pergantian-periode.salin-kelas');
+        Route::post('pergantian-periode/pindahkan-siswa', [PergantianPeriodeController::class, 'pindahkanSiswa'])->name('pergantian-periode.pindahkan-siswa');
+        Route::post('pergantian-periode/luluskan-siswa', [PergantianPeriodeController::class, 'luluskanSiswa'])->name('pergantian-periode.luluskan-siswa');
 
         Route::get('arsip', [ArsipController::class, 'index'])->name('arsip.index');
         Route::post('arsip/{jenis}/{id}/pulihkan', [ArsipController::class, 'pulihkan'])->name('arsip.pulihkan');
