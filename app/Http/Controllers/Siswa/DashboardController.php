@@ -3,20 +3,20 @@
 namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\RiwayatSiswaFilterRequest;
 use App\Models\DetailAbsensi;
 use App\Models\Mapel;
 use App\Services\AbsensiService;
+use App\Services\PeriodeService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    protected AbsensiService $absensiService;
-
-    public function __construct(AbsensiService $absensiService)
-    {
-        $this->absensiService = $absensiService;
-    }
+    public function __construct(
+        protected AbsensiService $absensiService,
+        protected PeriodeService $periodeService
+    ) {}
 
     public function dashboard(Request $request)
     {
@@ -41,20 +41,44 @@ class DashboardController extends Controller
         return view('siswa.dashboard', compact('statusHariIni', 'ringkasanKehadiran'));
     }
 
-    public function riwayat(Request $request)
+    public function riwayat(RiwayatSiswaFilterRequest $request)
     {
         $siswa = $request->user()->siswa;
+        $activePeriode = $this->absensiService->getActivePeriode();
 
         if (! $siswa) {
-            $riwayat = collect();
-            $mapels = collect();
-            $persentasePerMapel = collect();
-
-            return view('siswa.riwayat', compact('riwayat', 'mapels', 'persentasePerMapel'));
+            return view('siswa.riwayat', [
+                'riwayat' => collect(),
+                'mapels' => collect(),
+                'persentasePerMapel' => collect(),
+                'daftarPeriode' => [],
+                'selectedPeriode' => $activePeriode,
+                'filterPeriodeValue' => '',
+            ]);
         }
+
+        $daftarPeriode = $this->periodeService->getDaftarPeriodeSiswa($siswa);
+
+        $validated = $request->validated();
+        $tahunAjaran = $validated['tahun_ajaran'] ?? null;
+        $semester = $validated['semester'] ?? null;
+
+        $selectedPeriode = [
+            'tahun_ajaran' => $tahunAjaran ?: $activePeriode['tahun_ajaran'],
+            'semester' => $semester ?: $activePeriode['semester'],
+        ];
+
+        $filterPeriodeValue = $selectedPeriode['tahun_ajaran'].'|'.$selectedPeriode['semester'];
 
         $query = DetailAbsensi::with(['sesiAbsensi.jadwal.mapel', 'sesiAbsensi.jadwal.guru.user'])
             ->where('siswa_id', $siswa->id);
+
+        if (! empty($selectedPeriode['tahun_ajaran'])) {
+            $query->whereHas('sesiAbsensi.jadwal', function ($q) use ($selectedPeriode) {
+                $q->where('tahun_ajaran', $selectedPeriode['tahun_ajaran'])
+                    ->where('semester', $selectedPeriode['semester']);
+            });
+        }
 
         if ($request->filled('tanggal')) {
             $query->whereHas('sesiAbsensi', function ($q) use ($request) {
@@ -75,14 +99,29 @@ class DashboardController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        // For filter options
-        $mapels = Mapel::whereHas('jadwal', function ($q) use ($siswa) {
+        // For filter options in selected periode
+        $mapels = Mapel::whereHas('jadwal', function ($q) use ($siswa, $selectedPeriode) {
             $q->where('kelas_id', $siswa->kelas_id);
+            if (! empty($selectedPeriode['tahun_ajaran'])) {
+                $q->where('tahun_ajaran', $selectedPeriode['tahun_ajaran'])
+                    ->where('semester', $selectedPeriode['semester']);
+            }
         })->get();
 
-        // Rekap per mapel didelegasikan ke AbsensiService
-        $persentasePerMapel = $this->absensiService->getRekapPerMapelSiswa($siswa->id);
+        // Rekap per mapel didelegasikan ke AbsensiService memakai periode terpilih
+        $persentasePerMapel = $this->absensiService->getRekapPerMapelSiswa(
+            $siswa->id,
+            $selectedPeriode['tahun_ajaran'],
+            $selectedPeriode['semester']
+        );
 
-        return view('siswa.riwayat', compact('riwayat', 'mapels', 'persentasePerMapel'));
+        return view('siswa.riwayat', compact(
+            'riwayat',
+            'mapels',
+            'persentasePerMapel',
+            'daftarPeriode',
+            'selectedPeriode',
+            'filterPeriodeValue'
+        ));
     }
 }

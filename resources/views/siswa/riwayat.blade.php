@@ -7,9 +7,31 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+
+            <!-- Banner Info Periode Dilihat -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 border border-gray-100 dark:border-gray-700">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+                            Riwayat & Rekap Kehadiran
+                        </h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                            Periode Dilihat:
+                            <span class="font-semibold text-blue-600 dark:text-blue-400">
+                                {{ $selectedPeriode['tahun_ajaran'] }} - Semester {{ $selectedPeriode['semester'] }}
+                            </span>
+                            @if(isset($daftarPeriode) && collect($daftarPeriode)->firstWhere('is_aktif', true)['value'] === ($selectedPeriode['tahun_ajaran'].'|'.$selectedPeriode['semester']))
+                                <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                                    (aktif)
+                                </span>
+                            @endif
+                        </p>
+                    </div>
+                </div>
+            </div>
             
             <!-- Rekap Persentase -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border border-gray-100 dark:border-gray-700">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <h3 class="text-lg font-medium mb-4">Persentase Kehadiran per Mata Pelajaran</h3>
                     
@@ -20,7 +42,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                 </svg>
                             </div>
-                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Belum ada data kehadiran</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Belum ada data kehadiran pada periode ini</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Persentase kehadiran per mata pelajaran akan muncul setelah absensi tercatat.</p>
                         </div>
                     @else
@@ -54,18 +76,28 @@
             </div>
 
             <!-- Filter dan Tabel Riwayat -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border border-gray-100 dark:border-gray-700">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <h3 class="text-lg font-medium mb-4">Riwayat Kehadiran</h3>
                     
-                    <form method="GET" action="{{ route('siswa.riwayat') }}" class="mb-6 flex flex-col sm:flex-row gap-4">
-                        <div>
-                            <x-input-label for="tanggal" value="Tanggal" />
-                            <x-text-input id="tanggal" name="tanggal" type="date" class="mt-1 block w-full" value="{{ request('tanggal') }}" />
+                    <form method="GET" action="{{ route('siswa.riwayat') }}" class="mb-6 flex flex-col md:flex-row flex-wrap gap-4 items-end">
+                        <div class="w-full sm:w-auto">
+                            <x-input-label for="periode" value="Periode" />
+                            <select id="periode" name="periode" class="mt-1 block w-full sm:w-56 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                                @foreach($daftarPeriode as $item)
+                                    <option value="{{ $item['value'] }}" {{ $filterPeriodeValue === $item['value'] ? 'selected' : '' }}>
+                                        {{ $item['label'] }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
-                        <div>
+                        <div class="w-full sm:w-auto">
+                            <x-input-label for="tanggal" value="Tanggal" />
+                            <x-text-input id="tanggal" name="tanggal" type="date" class="mt-1 block w-full sm:w-44 text-sm" value="{{ request('tanggal') }}" />
+                        </div>
+                        <div class="w-full sm:w-auto">
                             <x-input-label for="mapel_id" value="Mata Pelajaran" />
-                            <select id="mapel_id" name="mapel_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                            <select id="mapel_id" name="mapel_id" class="mt-1 block w-full sm:w-52 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
                                 <option value="">Semua Mapel</option>
                                 @foreach($mapels as $mapel)
                                     <option value="{{ $mapel->id }}" {{ request('mapel_id') == $mapel->id ? 'selected' : '' }}>
@@ -74,12 +106,14 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="flex items-end">
-                            <x-primary-button>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition">
                                 Filter
-                            </x-primary-button>
-                            @if(request('tanggal') || request('mapel_id'))
-                                <a href="{{ route('siswa.riwayat') }}" class="ml-2 inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-gray-800 dark:text-gray-200 uppercase tracking-widest hover:bg-gray-300 dark:hover:bg-gray-600 transition">Reset</a>
+                            </button>
+                            @if(request('tanggal') || request('mapel_id') || request('periode') || request('tahun_ajaran') || request('semester'))
+                                <a href="{{ route('siswa.riwayat') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition">
+                                    Reset
+                                </a>
                             @endif
                         </div>
                     </form>
@@ -92,7 +126,7 @@
                                 </svg>
                             </div>
                             <p class="text-base font-medium text-gray-900 dark:text-gray-100">Tidak ada riwayat kehadiran</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Belum ada catatan kehadiran yang sesuai dengan filter pencarian.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Belum ada catatan kehadiran yang sesuai dengan filter pencarian pada periode ini.</p>
                         </div>
                     @else
                         <div class="overflow-x-auto">

@@ -224,15 +224,22 @@ class AbsensiService
     }
 
     /**
-     * Mendapatkan rekap persentase kehadiran siswa per mata pelajaran.
+     * Mendapatkan rekap persentase kehadiran siswa per mata pelajaran,
+     * dapat difilter berdasarkan tahun ajaran dan semester.
      */
-    public function getRekapPerMapelSiswa(int $siswaId): Collection
+    public function getRekapPerMapelSiswa(int $siswaId, ?string $tahunAjaran = null, ?string $semester = null): Collection
     {
         return DB::table('detail_absensi')
             ->join('sesi_absensi', 'detail_absensi.sesi_absensi_id', '=', 'sesi_absensi.id')
             ->join('jadwal', 'sesi_absensi.jadwal_id', '=', 'jadwal.id')
             ->join('mapel', 'jadwal.mapel_id', '=', 'mapel.id')
             ->where('detail_absensi.siswa_id', $siswaId)
+            ->when($tahunAjaran, function ($q) use ($tahunAjaran, $semester) {
+                $q->where('jadwal.tahun_ajaran', $tahunAjaran);
+                if ($semester) {
+                    $q->where('jadwal.semester', $semester);
+                }
+            })
             ->select(
                 'mapel.id',
                 'mapel.nama as mapel',
