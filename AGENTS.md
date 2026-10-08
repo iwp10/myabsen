@@ -38,20 +38,24 @@ Baca keduanya sebelum mengerjakan tugas apa pun. Jika kode bertentangan dengan P
 - Data siswa, guru, kelas, dan mapel yang sudah punya riwayat absensi tidak dihapus permanen (pakai soft delete).
 
 ## Aturan kerja
+- Aturan "PRD dulu baru kode": Jika ingin mengubah fitur atau aturan bisnis, perbarui `docs/PRD.md` terlebih dahulu, baru kemudian menulis kode.
 - Kerjakan satu fase per tugas sesuai `docs/PROGRESS.md`. Jangan membuat fitur di luar MVP.
 - Perubahan skema selalu lewat migration baru. Jangan edit migration yang sudah dijalankan.
 - Hindari N+1 (pakai eager loading) dan pasang index sesuai PRD.
-- Setiap aturan bisnis di PRD (AB-xx) harus punya test.
+- Setiap aturan bisnis di PRD (AB-xx) harus punya test (feature test).
 - Setelah tiap fase: jalankan `php artisan test`, perbarui baris fasenya di `docs/PROGRESS.md`, lalu ringkas file yang berubah.
-- Jangan menyentuh file `.env` dan jangan menaruh secret di kode.
+- Dokumen (`docs/PRD.md`, `README.md`, `docs/PROGRESS.md`) harus diperbarui bersama kode dalam PR yang sama agar tidak tertinggal.
+- Jangan menyentuh file `.env`, jangan commit file `.env` atau file dump SQL, dan jangan menaruh secret di kode.
+- Jangan pernah menulis password atau kredensial asli di dokumen maupun di kode program (gunakan nilai contoh yang aman atau variabel environment).
 - Jika ada yang ambigu atau bertentangan dengan PRD, tanya dulu, jangan berasumsi.
 
 ## Git dan tim
-- Jangan commit langsung ke `main`. Kerja di branch `fitur/...`, `perbaikan/...`, `refactor/...`, `test/...`, `chore/...`, atau `docs/...`.
+- Jangan commit langsung ke `main`. Selalu gunakan Pull Request (PR wajib). Kerja di branch `fitur/...`, `perbaikan/...`, `refactor/...`, `test/...`, `chore/...`, atau `docs/...`.
 - Format commit: `feat:`, `fix:`, `refactor:`, `test:`, `chore:`, `docs:` diikuti deskripsi singkat.
 - Setiap migrasi baru wajib disebut di PR ("jalankan php artisan migrate").
 - Jangan ubah `AGENTS.md` dan `docs/PRD.md` kecuali diminta secara eksplisit.
 - Sebelum membuat migration, pastikan branch sudah up to date dengan `main`.
 - Di `docs/PROGRESS.md`, edit hanya baris fase yang sedang dikerjakan.
-- Jangan pernah commit file `.env`.
+- Jangan pernah commit file `.env` atau file dump SQL.
+
 
