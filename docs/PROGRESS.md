@@ -84,6 +84,8 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 ### Fase 8: Siap produksi
 - [x] AdminSeeder khusus produksi (tanpa data demo)
 - [x] Password awal aman terkonfigurasi dan wajib ganti password saat login pertama (AB-10)
+- [x] Notifikasi ganti password ramah pengguna (banner hijau sukses dengan auto-dismiss, banner merah gagal dengan highlight kolom, pengalihan pengguna must_change_password ke dashboard role-nya) (AB-10)
+- [x] Penguatan keamanan sesi dan logout: header anti-cache no-store pada seluruh halaman terautentikasi (mencegah akses via tombol Back setelah logout), logout idempotent tanpa 419/500 bagi guest, penanganan global TokenMismatchException (419) dengan pesan ramah, dan view error 419 terpadu
 - [ ] Checklist `.env` produksi
 - [ ] `docs/DEPLOY.md`
 - [ ] Uji dengan `APP_DEBUG=false` dan `php artisan optimize`
@@ -154,6 +156,7 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-06 | 8 | feat: implementasi akun siap produksi: isolasi DemoSeeder untuk non-produksi, AdminSeeder idempotent di produksi, sentralisasi password awal aman (config/absensi.php), migrasi flag must_change_password pada users, middleware EnsurePasswordChanged untuk kewajiban ganti password profil saat login pertama, validasi penolakan password baru yang lemah/sama dengan awal (AB-10), serta 6 feature test AB-10 lulus (195 test PASS).
 2026-10-08 | 11 | docs: menambahkan bagian Visual Preview di README.md (dashboard admin, guru, siswa) dan sinkronisasi checklist progress.
 2026-10-08 | 7 | chore: pembersihan file tidak terpakai (dump SQL dilepas dari git tracking, hapus view/component/request/layout sisa default Breeze, eliminasi duplikasi route password.update di routes/auth.php, seluruh 195 test PASS).
+2026-10-08 | 8 | feat: perbaikan notifikasi ganti password (banner hijau sukses dengan auto-dismiss, banner merah gagal dengan highlight kolom), pengalihan pengguna must_change_password ke dashboard role-nya, penguatan keamanan logout & back history dengan header no-store, logout idempotent untuk tamu tanpa 419/500, penanganan global TokenMismatchException (419) dengan pesan ramah, view error 419 terpadu, serta penambahan 18 feature test (seluruh 213 test PASS).
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:

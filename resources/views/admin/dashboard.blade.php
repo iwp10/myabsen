@@ -8,10 +8,10 @@
     <div class="py-6 sm:py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
-            @if (session('status'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative shadow-xs" role="alert">
-                    <span class="block sm:inline">{{ session('status') }}</span>
-                </div>
+            @if (session('status') || session('success'))
+                <x-alert type="success" :autoDismiss="true">
+                    {{ session('status') ?: session('success') }}
+                </x-alert>
             @endif
 
             <!-- Banner Sapaan Atas (Solid Blue & Shadow) -->

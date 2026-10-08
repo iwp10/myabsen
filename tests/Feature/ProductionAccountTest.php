@@ -281,8 +281,9 @@ test('AB-10: 5. Setelah ganti password berhasil, flag menjadi false dan dashboar
         'password' => 'KunciBaruAdmin99!',
         'password_confirmation' => 'KunciBaruAdmin99!',
     ]);
-    $respSukses->assertRedirect(route('profile.edit'));
+    $respSukses->assertRedirect(route('admin.dashboard'));
     $respSukses->assertSessionHasNoErrors();
+    $respSukses->assertSessionHas('status', 'Password berhasil diganti.');
 
     $user->refresh();
     expect($user->must_change_password)->toBeFalse();
