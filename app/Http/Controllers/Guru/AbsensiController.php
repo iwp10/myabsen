@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ExportLaporanRequest;
 use App\Http\Requests\Guru\ShowAbsensiRequest;
 use App\Http\Requests\Guru\StoreAbsensiRequest;
+use App\Http\Requests\RiwayatGuruFilterRequest;
 use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\Kelas;
@@ -14,6 +15,7 @@ use App\Models\SesiAbsensi;
 use App\Models\Siswa;
 use App\Services\AbsensiService;
 use App\Services\LaporanService;
+use App\Services\PeriodeService;
 use App\Support\KelasMapel;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -24,7 +26,8 @@ class AbsensiController extends Controller
 {
     public function __construct(
         protected AbsensiService $absensiService,
-        protected LaporanService $laporanService
+        protected LaporanService $laporanService,
+        protected PeriodeService $periodeService
     ) {}
 
     /**
@@ -115,63 +118,107 @@ class AbsensiController extends Controller
     /**
      * Menampilkan riwayat absensi per kelas & mapel.
      */
-    public function riwayat(Request $request)
+    public function riwayat(RiwayatGuruFilterRequest $request)
     {
         $guru = Guru::where('user_id', $request->user()->id)->first();
         if (! $guru) {
-            return view('guru.riwayat', ['jadwalList' => collect()]);
+            return view('guru.riwayat', [
+                'jadwalList' => collect(),
+                'activePeriode' => $this->absensiService->getActivePeriode(),
+                'daftarPeriode' => [],
+                'selectedPeriode' => $this->absensiService->getActivePeriode(),
+                'filterPeriode' => '',
+                'search' => '',
+            ]);
         }
 
         $activePeriode = $this->absensiService->getActivePeriode();
+        $daftarPeriode = $this->periodeService->getDaftarPeriodeGuru($guru);
 
-        // Ambil semua jadwal milik guru pada periode aktif, unik per kelas+mapel
-        $jadwalList = Jadwal::with(['kelas', 'mapel'])
+        $validated = $request->validated();
+        $tahunAjaran = $validated['tahun_ajaran'] ?? null;
+        $semester = $validated['semester'] ?? null;
+
+        $selectedPeriode = [
+            'tahun_ajaran' => $tahunAjaran ?: $activePeriode['tahun_ajaran'],
+            'semester' => $semester ?: $activePeriode['semester'],
+        ];
+
+        $filterPeriodeValue = $selectedPeriode['tahun_ajaran'].'|'.$selectedPeriode['semester'];
+        $search = trim((string) ($validated['q'] ?? ''));
+
+        // Ambil semua jadwal milik guru pada periode terpilih, unik per kelas+mapel
+        $query = Jadwal::with(['kelas', 'mapel'])
             ->where('guru_id', $guru->id)
-            ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
-                $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
-                    ->where('semester', $activePeriode['semester']);
-            })
-            ->get()
+            ->where('tahun_ajaran', $selectedPeriode['tahun_ajaran'])
+            ->where('semester', $selectedPeriode['semester']);
+
+        if ($search !== '') {
+            $escaped = addcslashes($search, '%_');
+            $query->where(function ($q) use ($escaped) {
+                $q->whereHas('kelas', fn ($k) => $k->where('nama', 'like', "%{$escaped}%"))
+                    ->orWhereHas('mapel', fn ($m) => $m->where('nama', 'like', "%{$escaped}%"));
+            });
+        }
+
+        $jadwalList = $query->get()
             ->unique(fn ($j) => KelasMapel::make($j->kelas_id, $j->mapel_id))
             ->values();
 
         return view('guru.riwayat', [
             'jadwalList' => $jadwalList,
             'activePeriode' => $activePeriode,
+            'daftarPeriode' => $daftarPeriode,
+            'selectedPeriode' => $selectedPeriode,
+            'filterPeriode' => $filterPeriodeValue,
+            'search' => $search,
         ]);
     }
 
     /**
      * Menampilkan riwayat absensi untuk satu kelas & mapel tertentu.
      */
-    public function riwayatDetail(Request $request, Kelas $kelas, Mapel $mapel)
+    public function riwayatDetail(RiwayatGuruFilterRequest $request, Kelas $kelas, Mapel $mapel)
     {
         $activePeriode = $this->absensiService->getActivePeriode();
         $guru = $request->user()->guru;
+        $daftarPeriode = $guru ? $this->periodeService->getDaftarPeriodeGuru($guru) : [];
 
-        // Cari jadwal milik guru yang login pada kelas-mapel & periode aktif
+        $validated = $request->validated();
+        $tahunAjaran = $validated['tahun_ajaran'] ?? null;
+        $semester = $validated['semester'] ?? null;
+
+        $selectedPeriode = [
+            'tahun_ajaran' => $tahunAjaran ?: $activePeriode['tahun_ajaran'],
+            'semester' => $semester ?: $activePeriode['semester'],
+        ];
+
+        $filterPeriodeValue = $selectedPeriode['tahun_ajaran'].'|'.$selectedPeriode['semester'];
+        $search = trim((string) ($validated['q'] ?? ''));
+
+        // Cari jadwal milik guru yang login pada kelas-mapel & periode terpilih
         $jadwal = Jadwal::with(['kelas', 'mapel'])
             ->where('guru_id', $guru?->id)
             ->where('kelas_id', $kelas->id)
             ->where('mapel_id', $mapel->id)
-            ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
-                $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
-                    ->where('semester', $activePeriode['semester']);
-            })
+            ->where('tahun_ajaran', $selectedPeriode['tahun_ajaran'])
+            ->where('semester', $selectedPeriode['semester'])
             ->first();
 
-        // Jika tidak ada jadwal miliknya, cari jadwal kelas-mapel lain (atau 404 jika sama sekali tidak ada)
+        // Jika tidak ada jadwal miliknya, cari jadwal kelas-mapel lain pada periode terpilih (atau 404 jika sama sekali tidak ada)
         // agar JadwalPolicy memeriksa dan menolak dengan 403 Forbidden
         if (! $jadwal) {
             $jadwalLain = Jadwal::where('kelas_id', $kelas->id)
                 ->where('mapel_id', $mapel->id)
-                ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
-                    $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
-                        ->where('semester', $activePeriode['semester']);
-                })
-                ->firstOrFail();
+                ->where('tahun_ajaran', $selectedPeriode['tahun_ajaran'])
+                ->where('semester', $selectedPeriode['semester'])
+                ->first();
 
-            Gate::authorize('viewRiwayat', $jadwalLain);
+            if ($jadwalLain) {
+                Gate::authorize('viewRiwayat', $jadwalLain);
+            }
+
+            abort(404);
         }
 
         Gate::authorize('viewRiwayat', $jadwal);
@@ -179,13 +226,11 @@ class AbsensiController extends Controller
         $jadwalIds = Jadwal::where('guru_id', $guru->id)
             ->where('kelas_id', $kelas->id)
             ->where('mapel_id', $mapel->id)
-            ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
-                $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
-                    ->where('semester', $activePeriode['semester']);
-            })
+            ->where('tahun_ajaran', $selectedPeriode['tahun_ajaran'])
+            ->where('semester', $selectedPeriode['semester'])
             ->pluck('id');
 
-        // Tampilkan pertemuan pada periode aktif
+        // Tampilkan pertemuan pada periode terpilih
         $sesiList = SesiAbsensi::with('detailAbsensi')
             ->whereIn('jadwal_id', $jadwalIds)
             ->orderBy('tanggal', 'asc')
@@ -194,12 +239,28 @@ class AbsensiController extends Controller
         // Ambil daftar siswa di kelas ini (aktif + nonaktif yang memiliki riwayat sesi)
         $siswaList = $this->absensiService->getSiswaUntukLaporan($kelas->id, $sesiList->pluck('id'));
 
+        $totalSiswaSebelumFilter = $siswaList->count();
+        if ($search !== '') {
+            $kwLower = mb_strtolower($search);
+            $siswaList = $siswaList->filter(function ($siswa) use ($kwLower) {
+                $nama = mb_strtolower($siswa->nama ?? $siswa->user?->name ?? '');
+                $nis = mb_strtolower($siswa->nis ?? '');
+
+                return str_contains($nama, $kwLower) || str_contains($nis, $kwLower);
+            })->values();
+        }
+
         return view('guru.riwayat_detail', [
             'jadwal' => $jadwal,
             'kelas' => $kelas,
             'mapel' => $mapel,
             'sesiList' => $sesiList,
             'siswaList' => $siswaList,
+            'daftarPeriode' => $daftarPeriode,
+            'selectedPeriode' => $selectedPeriode,
+            'filterPeriode' => $filterPeriodeValue,
+            'search' => $search,
+            'totalSiswaSebelumFilter' => $totalSiswaSebelumFilter,
         ]);
     }
 

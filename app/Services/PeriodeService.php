@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\Pengaturan;
+use App\Models\Siswa;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Schema;
 
@@ -182,7 +184,102 @@ class PeriodeService
             // Ignore error
         }
 
-        // Urutkan terbaru: tahun_ajaran desc, lalu semester (Genap sebelum Ganjil dalam tahun yang sama)
+        return $this->formatDanUrutkanPeriodePairs($pairs, $active);
+    }
+
+    /**
+     * Mendapatkan daftar periode yang memiliki data jadwal untuk guru tertentu,
+     * ditambah periode aktif saat ini, diurutkan terbaru.
+     *
+     * @return array<int, array{tahun_ajaran: string, semester: string, value: string, label: string, is_aktif: bool}>
+     */
+    public function getDaftarPeriodeGuru(Guru $guru): array
+    {
+        $active = $this->getActivePeriode();
+        $pairs = [];
+
+        if (! empty($active['tahun_ajaran']) && ! empty($active['semester'])) {
+            $pairs[$active['tahun_ajaran'].'|'.$active['semester']] = [
+                'tahun_ajaran' => $active['tahun_ajaran'],
+                'semester' => $active['semester'],
+            ];
+        }
+
+        try {
+            if (Schema::hasTable('jadwal')) {
+                $jadwalPairs = Jadwal::where('guru_id', $guru->id)
+                    ->whereNotNull('tahun_ajaran')
+                    ->whereNotNull('semester')
+                    ->select('tahun_ajaran', 'semester')
+                    ->distinct()
+                    ->get();
+
+                foreach ($jadwalPairs as $j) {
+                    $pairs[$j->tahun_ajaran.'|'.$j->semester] = [
+                        'tahun_ajaran' => $j->tahun_ajaran,
+                        'semester' => $j->semester,
+                    ];
+                }
+            }
+        } catch (\Throwable $e) {
+            // Ignore error
+        }
+
+        return $this->formatDanUrutkanPeriodePairs($pairs, $active);
+    }
+
+    /**
+     * Mendapatkan daftar periode dari jadwal yang memiliki detail absensi untuk siswa tertentu,
+     * ditambah periode aktif saat ini, diurutkan terbaru.
+     *
+     * @return array<int, array{tahun_ajaran: string, semester: string, value: string, label: string, is_aktif: bool}>
+     */
+    public function getDaftarPeriodeSiswa(Siswa $siswa): array
+    {
+        $active = $this->getActivePeriode();
+        $pairs = [];
+
+        if (! empty($active['tahun_ajaran']) && ! empty($active['semester'])) {
+            $pairs[$active['tahun_ajaran'].'|'.$active['semester']] = [
+                'tahun_ajaran' => $active['tahun_ajaran'],
+                'semester' => $active['semester'],
+            ];
+        }
+
+        try {
+            if (Schema::hasTable('jadwal')) {
+                $jadwalPairs = Jadwal::whereHas('sesiAbsensi.detailAbsensi', function ($q) use ($siswa) {
+                    $q->where('siswa_id', $siswa->id);
+                })
+                    ->whereNotNull('tahun_ajaran')
+                    ->whereNotNull('semester')
+                    ->select('tahun_ajaran', 'semester')
+                    ->distinct()
+                    ->get();
+
+                foreach ($jadwalPairs as $j) {
+                    $pairs[$j->tahun_ajaran.'|'.$j->semester] = [
+                        'tahun_ajaran' => $j->tahun_ajaran,
+                        'semester' => $j->semester,
+                    ];
+                }
+            }
+        } catch (\Throwable $e) {
+            // Ignore error
+        }
+
+        return $this->formatDanUrutkanPeriodePairs($pairs, $active);
+    }
+
+    /**
+     * Format dan urutkan pairs periode: tahun_ajaran desc, lalu Genap sebelum Ganjil.
+     *
+     * @param  array<string, array{tahun_ajaran: string, semester: string}>  $pairs
+     * @param  array{tahun_ajaran: ?string, semester: ?string}  $active
+     * @return array<int, array{tahun_ajaran: string, semester: string, value: string, label: string, is_aktif: bool}>
+     */
+    protected function formatDanUrutkanPeriodePairs(array $pairs, array $active): array
+    {
         uasort($pairs, function ($a, $b) {
             if ($a['tahun_ajaran'] === $b['tahun_ajaran']) {
                 return $b['semester'] <=> $a['semester'];

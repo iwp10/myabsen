@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center gap-3">
-            <a href="{{ route('guru.riwayat') }}" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" title="Kembali">
+            <a href="{{ route('guru.riwayat', ['tahun_ajaran' => $selectedPeriode['tahun_ajaran'], 'semester' => $selectedPeriode['semester']]) }}" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" title="Kembali">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
@@ -13,7 +13,7 @@
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             @php
                 // Buat map: [sesi_id => [siswa_id => status]]
                 $detailMap = [];
@@ -27,32 +27,70 @@
                 $totalSiswa = $siswaList->count();
             @endphp
 
-            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg overflow-hidden">
-                {{-- Card Header --}}
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-wrap items-start justify-between gap-3">
+            {{-- Filter Periode, Pencarian Siswa, dan Tombol Export --}}
+            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-4 sm:p-6 border border-gray-100 dark:border-gray-700">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                     <div>
                         <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">
-                            {{ $mapel->nama }}
+                            {{ $mapel->nama }} &bull; {{ $kelas->nama }}
                         </h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Kelas: <span class="font-medium text-gray-700 dark:text-gray-300">{{ $kelas->nama }}</span>
-                            &bull; {{ $totalSiswa }} siswa &bull; {{ $jumlahSesi }} pertemuan
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                            Periode:
+                            <span class="font-semibold text-blue-600 dark:text-blue-400">
+                                {{ $selectedPeriode['tahun_ajaran'] }} - Semester {{ $selectedPeriode['semester'] }}
+                            </span>
+                            @if($selectedPeriode['tahun_ajaran'] === ($activePeriode['tahun_ajaran'] ?? '') && $selectedPeriode['semester'] === ($activePeriode['semester'] ?? ''))
+                                <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                                    (aktif)
+                                </span>
+                            @endif
+                            <span class="mx-1">&bull;</span>
+                            <span>{{ $totalSiswaSebelumFilter }} siswa terdaftar</span>
+                            <span class="mx-1">&bull;</span>
+                            <span>{{ $jumlahSesi }} pertemuan</span>
                         </p>
                     </div>
 
-                    {{-- Tombol Export Excel per kelas+mapel --}}
-                    <a href="{{ route('guru.laporan.export', ['kelas_mapel' => \App\Support\KelasMapel::make($kelas->id, $mapel->id)]) }}"
-                        class="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-3 py-1.5 rounded-md transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Export Excel
-                    </a>
-                </div>
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:w-auto">
+                        <form action="{{ route('guru.riwayat.detail', ['kelas' => $kelas->id, 'mapel' => $mapel->id]) }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
+                            <select name="periode" class="w-full sm:w-56 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                                @foreach($daftarPeriode as $item)
+                                    <option value="{{ $item['value'] }}" {{ $filterPeriode === $item['value'] ? 'selected' : '' }}>
+                                        {{ $item['label'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <input type="text" name="q" value="{{ $search }}" placeholder="Cari nama atau NIS siswa..." class="w-full sm:w-56 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition text-center">
+                                Cari
+                            </button>
+                            @if($search !== '' || (request()->filled('periode') && request('periode') !== ($activePeriode['tahun_ajaran'].'|'.$activePeriode['semester'])) || request()->filled('tahun_ajaran') || request()->filled('semester'))
+                                <a href="{{ route('guru.riwayat.detail', ['kelas' => $kelas->id, 'mapel' => $mapel->id]) }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-3 rounded-md text-sm flex items-center justify-center transition">
+                                    Reset
+                                </a>
+                            @endif
+                        </form>
 
+                        {{-- Tombol Export Excel: membawa periode terpilih, TANPA parameter pencarian q --}}
+                        <a href="{{ route('guru.laporan.export', ['kelas_mapel' => \App\Support\KelasMapel::make($kelas->id, $mapel->id), 'tahun_ajaran' => $selectedPeriode['tahun_ajaran'], 'semester' => $selectedPeriode['semester']]) }}"
+                            class="inline-flex items-center justify-center gap-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-3 py-2 rounded-md transition whitespace-nowrap">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Export Excel
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg overflow-hidden border border-gray-100 dark:border-gray-700">
                 @if($jumlahSesi === 0)
-                    <div class="px-6 py-8 text-center text-gray-400 dark:text-gray-500 text-sm">
-                        Belum ada pertemuan yang tercatat.
+                    <div class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                        <svg class="mx-auto h-12 w-12 mb-3 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p class="font-medium text-gray-700 dark:text-gray-300">Belum ada pertemuan yang tercatat pada periode ini.</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Sesi absensi akan tampil setelah guru melakukan absensi kelas.</p>
                     </div>
                 @else
                     {{-- Tabel Absensi Horizontal --}}
@@ -76,11 +114,11 @@
                                     <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-600 text-center font-semibold text-blue-600 dark:text-blue-400 w-10">I</th>
                                     <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-600 text-center font-semibold text-yellow-600 dark:text-yellow-400 w-10">S</th>
                                     <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-600 text-center font-semibold text-red-600 dark:text-red-400 w-10">A</th>
-                                    <th class="px-2 py-2 border-b border-gray-200 dark:border-gray-600 text-center font-semibold text-gray-600 dark:text-gray-300 w-16">%</th>
+                                    <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-600 text-center font-semibold text-gray-600 dark:text-gray-300 w-16">%</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                                @foreach($siswaList as $no => $siswa)
+                                @forelse($siswaList as $no => $siswa)
                                     @php
                                         $h = 0; $i = 0; $s = 0; $a = 0; $total = 0;
                                     @endphp
@@ -88,7 +126,7 @@
                                         <td class="sticky left-0 z-10 bg-white dark:bg-gray-800 px-3 py-2 text-center text-gray-500 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700 w-8">{{ $no + 1 }}</td>
                                         <td class="sticky left-8 z-10 bg-white dark:bg-gray-800 px-3 py-2 text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700 font-mono text-xs w-32">{{ $siswa->nis }}</td>
                                         <td class="sticky left-[10rem] z-10 bg-white dark:bg-gray-800 px-3 py-2 font-medium text-gray-800 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700 w-52">
-                                            <span>{{ $siswa->user->name }}</span>
+                                            <span>{{ $siswa->user->name ?? $siswa->nama }}</span>
                                             @if($siswa->is_nonaktif)
                                                 <span class="text-xs text-gray-400 dark:text-gray-500 font-normal ml-1">(nonaktif)</span>
                                             @endif
@@ -125,7 +163,17 @@
                                             {{ $persen }}%
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="{{ 3 + $jumlahSesi + 5 }}" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                                            @if($search !== '')
+                                                Tidak ada siswa yang sesuai dengan pencarian "{{ $search }}".
+                                            @else
+                                                Belum ada data siswa di kelas ini.
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                             {{-- Baris Rekap Per Pertemuan (Hadir/Izin/Sakit/Alpa) --}}
                             <tfoot>
