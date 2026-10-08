@@ -8,6 +8,12 @@
     <div class="py-6 sm:py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
+            @if (session('status') || session('success'))
+                <x-alert type="success" :autoDismiss="true">
+                    {{ session('status') ?: session('success') }}
+                </x-alert>
+            @endif
+
             <!-- Banner Sambutan & Identitas -->
             <div class="bg-blue-600 dark:bg-blue-700 rounded-2xl p-6 text-white shadow-md relative overflow-hidden" style="background-color: #2563eb;">
                 <div class="absolute -right-8 -bottom-10 opacity-10 pointer-events-none">

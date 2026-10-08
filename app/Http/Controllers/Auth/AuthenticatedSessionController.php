@@ -48,6 +48,10 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        if (! Auth::check()) {
+            return redirect()->route('login')->with('status', 'Anda sudah keluar.');
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

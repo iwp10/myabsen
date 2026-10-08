@@ -24,7 +24,7 @@ Route::get('/', function () {
 
 require __DIR__.'/auth.php';
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'no-cache'])->group(function () {
     Route::middleware('role:admin,guru,siswa')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/password', [PasswordController::class, 'update'])->name('password.update');
