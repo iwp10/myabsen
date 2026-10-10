@@ -54,6 +54,7 @@ class DashboardController extends Controller
                 'daftarPeriode' => [],
                 'selectedPeriode' => $activePeriode,
                 'filterPeriodeValue' => '',
+                'activeTab' => 'per_mapel',
             ]);
         }
 
@@ -62,6 +63,7 @@ class DashboardController extends Controller
         $validated = $request->validated();
         $tahunAjaran = $validated['tahun_ajaran'] ?? null;
         $semester = $validated['semester'] ?? null;
+        $activeTab = $validated['tab'] ?? 'per_mapel';
 
         $selectedPeriode = [
             'tahun_ajaran' => $tahunAjaran ?: $activePeriode['tahun_ajaran'],
@@ -125,7 +127,8 @@ class DashboardController extends Controller
             'persentasePerMapel',
             'daftarPeriode',
             'selectedPeriode',
-            'filterPeriodeValue'
+            'filterPeriodeValue',
+            'activeTab'
         ));
     }
 }

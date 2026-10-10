@@ -50,7 +50,10 @@ Aplikasi ini memiliki tiga peran utama dengan batasan akses masing-masing, serta
 ### 🎓 Siswa (Read-Only)
 - **Monitoring Pribadi:** Melihat status kehadiran harian per mata pelajaran secara langsung.
 - **Jadwal Pelajaran:** Mengakses jadwal pelajaran mingguan kelas pada periode aktif yang dikelompokkan per hari urut jam pelajaran, lengkap dengan filter hari dan sorotan hari ini.
-- **Statistik & Riwayat:** Melacak persentase tingkat kehadiran (kalkulasi positif: Hadir, Izin, dan Sakit; Alpa sebagai pengurang) dan riwayat lengkap dengan filter status kehadiran (Hadir, Izin, Sakit, Alpa), tanggal, mapel, dan periode.
+- **Riwayat Dua Tingkat:** Meninjau kehadiran dalam dua tingkat seperti Riwayat Guru:
+  - **Tab Per Mata Pelajaran (Bawaan):** Grid kartu interaktif per mata pelajaran pada periode terpilih (nama mapel, guru pengampu, persentase kehadiran AB-07, rincian H/I/S/A, total sesi, dan indikator warna).
+  - **Tab Semua Riwayat:** Daftar riwayat linier lengkap dengan filter status kehadiran (Hadir, Izin, Sakit, Alpa), tanggal, mapel, dan periode tanpa mengubah rekapitulasi persentase per mapel.
+  - **Detail Per Mapel:** Halaman matriks presensi P1..Pn berurut tanggal khusus satu baris data siswa yang login (termasuk keterangan izin/sakit/alpa) yang bersifat murni hanya-baca.
 
 ---
 

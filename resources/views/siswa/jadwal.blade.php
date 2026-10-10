@@ -137,11 +137,11 @@
                                 @endphp
 
                                 @if($jadwalsHari->isNotEmpty())
-                                    <div class="rounded-xl border transition-all duration-150 overflow-hidden {{ $isHariIni ? 'border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-950/20 shadow-xs' : 'border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50' }}">
+                                    <div class="rounded-xl border transition-all duration-150 overflow-hidden {{ $isHariIni ? 'border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-950/20 shadow-xs' : 'border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30' }}">
                                         {{-- Header Kelompok Hari --}}
-                                        <div class="px-5 py-3.5 border-b flex items-center justify-between {{ $isHariIni ? 'border-blue-200 dark:border-blue-800 bg-blue-100/60 dark:bg-blue-900/40 text-blue-900 dark:text-blue-100' : 'border-gray-200 dark:border-gray-700 bg-gray-100/70 dark:bg-gray-750 text-gray-800 dark:text-gray-200' }}">
+                                        <div class="px-5 py-3.5 border-b flex items-center justify-between {{ $isHariIni ? 'border-blue-200 dark:border-blue-800 bg-blue-100/70 dark:bg-blue-900/50 text-blue-900 dark:text-blue-100' : 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700/60 text-gray-900 dark:text-gray-100' }}">
                                             <div class="flex items-center gap-2">
-                                                <span class="font-bold text-sm sm:text-base capitalize">
+                                                <span class="font-bold text-sm sm:text-base capitalize text-gray-900 dark:text-white">
                                                     Hari {{ ucfirst($hariNama) }}
                                                 </span>
                                                 @if($isHariIni)
@@ -151,7 +151,7 @@
                                                     </span>
                                                 @endif
                                             </div>
-                                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $isHariIni ? 'bg-blue-200/80 text-blue-900 dark:bg-blue-800/80 dark:text-blue-200 border border-blue-300 dark:border-blue-700' : 'bg-gray-200/90 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600' }}">
                                                 {{ $jadwalsHari->count() }} Mata Pelajaran
                                             </span>
                                         </div>
@@ -163,21 +163,21 @@
                                                     <div>
                                                         {{-- Jam Pelajaran --}}
                                                         <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
-                                                            <span class="inline-flex items-center gap-1 font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded">
+                                                            <span class="inline-flex items-center gap-1 font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900/60 px-2 py-0.5 rounded">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 7v5l3 3"/></svg>
                                                                 {{ substr($item->jam_mulai, 0, 5) }} - {{ substr($item->jam_selesai, 0, 5) }}
                                                             </span>
                                                         </div>
 
                                                         {{-- Mata Pelajaran --}}
-                                                        <h5 class="font-bold text-base text-gray-900 dark:text-gray-100">
+                                                        <h5 class="font-bold text-base text-gray-900 dark:text-white">
                                                             {{ $item->mapel->nama }}
                                                         </h5>
 
                                                         {{-- Guru Pengampu --}}
                                                         <div class="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 shrink-0" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/></svg>
-                                                            <span class="truncate font-medium" title="{{ $item->guru->user->name }}">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/></svg>
+                                                            <span class="truncate font-medium text-gray-700 dark:text-gray-200" title="{{ $item->guru->user->name }}">
                                                                 {{ $item->guru->user->name }}
                                                             </span>
                                                         </div>
