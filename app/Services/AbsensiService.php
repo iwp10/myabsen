@@ -6,6 +6,7 @@ use App\Enums\StatusKehadiran;
 use App\Models\DetailAbsensi;
 use App\Models\Guru;
 use App\Models\Jadwal;
+use App\Models\Mapel;
 use App\Models\SesiAbsensi;
 use App\Models\Siswa;
 use App\Models\User;
@@ -229,6 +230,26 @@ class AbsensiService
      */
     public function getRekapPerMapelSiswa(int $siswaId, ?string $tahunAjaran = null, ?string $semester = null): Collection
     {
+        $guruMap = DB::table('detail_absensi')
+            ->join('sesi_absensi', 'detail_absensi.sesi_absensi_id', '=', 'sesi_absensi.id')
+            ->join('jadwal', 'sesi_absensi.jadwal_id', '=', 'jadwal.id')
+            ->join('guru', 'jadwal.guru_id', '=', 'guru.id')
+            ->join('users', 'guru.user_id', '=', 'users.id')
+            ->where('detail_absensi.siswa_id', $siswaId)
+            ->when($tahunAjaran, function ($q) use ($tahunAjaran, $semester) {
+                $q->where('jadwal.tahun_ajaran', $tahunAjaran);
+                if ($semester) {
+                    $q->where('jadwal.semester', $semester);
+                }
+            })
+            ->select('jadwal.mapel_id', 'users.name')
+            ->distinct()
+            ->get()
+            ->groupBy('mapel_id')
+            ->map(function ($rows) {
+                return $rows->pluck('name')->unique()->implode(', ');
+            });
+
         return DB::table('detail_absensi')
             ->join('sesi_absensi', 'detail_absensi.sesi_absensi_id', '=', 'sesi_absensi.id')
             ->join('jadwal', 'sesi_absensi.jadwal_id', '=', 'jadwal.id')
@@ -251,16 +272,138 @@ class AbsensiService
             )
             ->groupBy('mapel.id', 'mapel.nama')
             ->get()
-            ->map(function ($item) {
+            ->map(function ($item) use ($guruMap) {
                 $item->persentase = $this->hitungPersentaseKehadiran(
                     (int) $item->total_hadir,
                     (int) $item->total_izin,
                     (int) $item->total_sakit,
                     (int) $item->total_sesi
                 );
+                $item->guru = $guruMap->get($item->id, '-');
 
                 return $item;
             });
+    }
+
+    /**
+     * Mendapatkan detail riwayat pertemuan untuk satu mata pelajaran dan periode tertentu bagi siswa.
+     * Mengembalikan null jika siswa tidak memiliki catatan absensi untuk mapel tersebut pada periode terpilih.
+     *
+     * @return array{mapel: Mapel, guru: string, pertemuanList: Collection, ringkasan: array{total_hadir: int, total_izin: int, total_sakit: int, total_alpa: int, total_sesi: int, persentase: float}, daftarPeriodeMapel: array<int, array{tahun_ajaran: string, semester: string, value: string, label: string, is_aktif: bool}>}|null
+     */
+    public function getDetailRiwayatMapelSiswa(int $siswaId, int $mapelId, string $tahunAjaran, string $semester): ?array
+    {
+        $mapel = Mapel::find($mapelId);
+        if (! $mapel) {
+            return null;
+        }
+
+        // Ambil semua detail absensi siswa untuk mapel dan periode ini
+        $details = DetailAbsensi::with([
+            'sesiAbsensi.jadwal.guru.user',
+            'sesiAbsensi.jadwal.kelas',
+        ])
+            ->where('siswa_id', $siswaId)
+            ->whereHas('sesiAbsensi.jadwal', function ($q) use ($mapelId, $tahunAjaran, $semester) {
+                $q->where('mapel_id', $mapelId)
+                    ->where('tahun_ajaran', $tahunAjaran)
+                    ->where('semester', $semester);
+            })
+            ->join('sesi_absensi', 'detail_absensi.sesi_absensi_id', '=', 'sesi_absensi.id')
+            ->join('jadwal', 'sesi_absensi.jadwal_id', '=', 'jadwal.id')
+            ->orderBy('sesi_absensi.tanggal', 'asc')
+            ->orderBy('jadwal.jam_mulai', 'asc')
+            ->select('detail_absensi.*')
+            ->get();
+
+        if ($details->isEmpty()) {
+            return null;
+        }
+
+        $totalHadir = 0;
+        $totalIzin = 0;
+        $totalSakit = 0;
+        $totalAlpa = 0;
+
+        foreach ($details as $d) {
+            $statusVal = $d->status instanceof StatusKehadiran ? $d->status->value : (string) $d->status;
+            if ($statusVal === 'hadir') {
+                $totalHadir++;
+            } elseif ($statusVal === 'izin') {
+                $totalIzin++;
+            } elseif ($statusVal === 'sakit') {
+                $totalSakit++;
+            } elseif ($statusVal === 'alpa') {
+                $totalAlpa++;
+            }
+        }
+
+        $totalSesi = $details->count();
+        $persentase = $this->hitungPersentaseKehadiran($totalHadir, $totalIzin, $totalSakit, $totalSesi);
+
+        // Guru pengampu unik
+        $daftarGuru = $details->map(function ($d) {
+            return $d->sesiAbsensi?->jadwal?->guru?->user?->name;
+        })->filter()->unique()->values();
+
+        $namaGuru = $daftarGuru->isNotEmpty() ? $daftarGuru->implode(', ') : '-';
+
+        // Daftar periode di mana siswa memiliki catatan untuk mapel ini
+        $activePeriode = $this->getActivePeriode();
+        $periodeRows = DB::table('detail_absensi')
+            ->join('sesi_absensi', 'detail_absensi.sesi_absensi_id', '=', 'sesi_absensi.id')
+            ->join('jadwal', 'sesi_absensi.jadwal_id', '=', 'jadwal.id')
+            ->where('detail_absensi.siswa_id', $siswaId)
+            ->where('jadwal.mapel_id', $mapelId)
+            ->select('jadwal.tahun_ajaran', 'jadwal.semester')
+            ->distinct()
+            ->get();
+
+        $pairs = [];
+        foreach ($periodeRows as $p) {
+            if ($p->tahun_ajaran && $p->semester) {
+                $pairs[$p->tahun_ajaran.'|'.$p->semester] = [
+                    'tahun_ajaran' => $p->tahun_ajaran,
+                    'semester' => $p->semester,
+                ];
+            }
+        }
+
+        // Format dan urutkan
+        uasort($pairs, function ($a, $b) {
+            if ($a['tahun_ajaran'] === $b['tahun_ajaran']) {
+                return $b['semester'] <=> $a['semester'];
+            }
+
+            return strcmp($b['tahun_ajaran'], $a['tahun_ajaran']);
+        });
+
+        $daftarPeriodeMapel = [];
+        foreach ($pairs as $p) {
+            $isAktif = ($p['tahun_ajaran'] === ($activePeriode['tahun_ajaran'] ?? '') && $p['semester'] === ($activePeriode['semester'] ?? ''));
+            $daftarPeriodeMapel[] = [
+                'tahun_ajaran' => $p['tahun_ajaran'],
+                'semester' => $p['semester'],
+                'value' => $p['tahun_ajaran'].'|'.$p['semester'],
+                'label' => $p['tahun_ajaran'].' - '.$p['semester'].($isAktif ? ' (aktif)' : ''),
+                'is_aktif' => $isAktif,
+            ];
+        }
+
+        return [
+            'mapel' => $mapel,
+            'guru' => $namaGuru,
+            'pertemuanList' => $details,
+            'ringkasan' => [
+                'total_hadir' => $totalHadir,
+                'total_izin' => $totalIzin,
+                'total_sakit' => $totalSakit,
+                'total_alpa' => $totalAlpa,
+                'total_sesi' => $totalSesi,
+                'persentase' => $persentase,
+            ],
+            'daftarPeriodeMapel' => $daftarPeriodeMapel,
+        ];
     }
 
     /**

@@ -18,6 +18,7 @@ use App\Http\Controllers\Guru\JadwalController as GuruJadwalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Siswa\DashboardController;
 use App\Http\Controllers\Siswa\JadwalController as SiswaJadwalController;
+use App\Http\Controllers\Siswa\RiwayatMapelController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -91,5 +92,6 @@ Route::middleware(['auth', 'no-cache'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
         Route::get('/jadwal', [SiswaJadwalController::class, 'index'])->name('jadwal');
         Route::get('/riwayat', [DashboardController::class, 'riwayat'])->name('riwayat');
+        Route::get('/riwayat/mapel/{mapel}', [RiwayatMapelController::class, 'detail'])->name('riwayat.mapel');
     });
 });

@@ -66,6 +66,7 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] Persentase kehadiran (AB-07)
 - [x] Test akses data milik sendiri (AB-08)
 - [x] Menyesuaikan perhitungan persentase (status Hadir, Izin, dan Sakit dihitung sebagai hadir, Alpa tidak dihitung, pembagi = jumlah sesi yang sudah diabsen untuk siswa itu) dan menambahkan breakdown detail kehadiran transparan di dashboard siswa.
+- [x] Riwayat Siswa Dua Tingkat: Tab Per Mata Pelajaran (grid kartu dengan nama mapel, guru, persentase AB-07, H/I/S/A, total sesi) dan Tab Semua Riwayat, serta Tingkat 2 Detail Per Mapel (matriks presensi P1..Pn satu baris milik siswa login dengan catatan keterangan, hanya-baca, isolasi AB-08, tanpa N+1).
 
 ### Fase 6: Rekap dan ekspor
 - [x] Rekap per kelas, mapel, periode (agregasi SQL)
