@@ -22,19 +22,73 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                        <h3 class="text-lg font-bold">Daftar Siswa</h3>
-                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                            <form action="{{ route('admin.siswa.index') }}" method="GET" class="flex gap-2">
-                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau NIS..." class="w-full sm:w-64 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
-                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition">Cari</button>
-                                @if(request('search'))
-                                    <a href="{{ route('admin.siswa.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-3 rounded-md text-sm flex items-center justify-center transition">Reset</a>
-                                @endif
-                            </form>
+                        <div>
+                            <h3 class="text-lg font-bold">Daftar Siswa</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Menampilkan {{ $siswas->total() }} siswa</p>
+                        </div>
+                        <div class="flex items-center gap-2">
                             <a href="{{ route('admin.siswa.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm text-center transition">
                                 Tambah Siswa
                             </a>
                         </div>
+                    </div>
+
+                    @if ($errors->any())
+                        <div class="mb-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 px-4 py-3 rounded text-sm">
+                            <ul class="list-disc pl-5 space-y-1">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <div class="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/40">
+                        <form action="{{ route('admin.siswa.index') }}" method="GET" class="flex flex-col md:flex-row items-stretch md:items-end gap-3">
+                            <div class="w-full md:w-64">
+                                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Kelas</label>
+                                <select name="kelas_id" class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                                    <option value="">Semua kelas</option>
+                                    @foreach($kelasListGrouped as $group)
+                                        <optgroup label="{{ $group['label'] }}">
+                                            @foreach($group['items'] as $k)
+                                                <option value="{{ $k->id }}" {{ (string)$filterKelasId === (string)$k->id ? 'selected' : '' }}>
+                                                    {{ $k->tingkat }} {{ $k->nama }} - {{ $k->jurusan->kode }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="w-full md:w-48">
+                                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Urutkan</label>
+                                <select name="urut" class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                                    <option value="nama_asc" {{ in_array($urut, ['nama_asc', 'nama-az']) ? 'selected' : '' }}>Nama A-Z (bawaan)</option>
+                                    <option value="nama_desc" {{ in_array($urut, ['nama_desc', 'nama-za']) ? 'selected' : '' }}>Nama Z-A</option>
+                                    <option value="nis" {{ $urut === 'nis' ? 'selected' : '' }}>NIS</option>
+                                </select>
+                            </div>
+
+                            <div class="w-full md:flex-1">
+                                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Pencarian</label>
+                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau NIS..." class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition">
+                                    Cari
+                                </button>
+                                @php
+                                    $hasActiveFilters = request()->filled('search') || request()->filled('kelas_id') || (request()->filled('urut') && !in_array(request('urut'), ['nama_asc', 'nama-az']));
+                                @endphp
+                                @if($hasActiveFilters)
+                                    <a href="{{ route('admin.siswa.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-3 rounded-md text-sm flex items-center justify-center transition">
+                                        Reset
+                                    </a>
+                                @endif
+                            </div>
+                        </form>
                     </div>
                     
                     <div class="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-700/50">
@@ -68,6 +122,7 @@
                         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
+                                    <th scope="col" class="px-6 py-3 whitespace-nowrap">No.</th>
                                     <th scope="col" class="px-6 py-3 whitespace-nowrap">Nama</th>
                                     <th scope="col" class="px-6 py-3 whitespace-nowrap">NIS / Username</th>
                                     <th scope="col" class="px-6 py-3 whitespace-nowrap">Kelas</th>
@@ -77,6 +132,7 @@
                             <tbody>
                                 @forelse ($siswas as $siswa)
                                     <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">{{ $siswas->firstItem() ? $siswas->firstItem() + $loop->index : $loop->iteration }}</td>
                                         <td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">{{ $siswa->user->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $siswa->nis }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $siswa->kelas->tingkat }} {{ $siswa->kelas->nama }} - {{ $siswa->kelas->jurusan->kode }}</td>
@@ -110,7 +166,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-6 py-12 text-center">
+                                        <td colspan="5" class="px-6 py-12 text-center">
                                             <div class="flex flex-col items-center justify-center">
                                                 <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 mb-3">
                                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -167,14 +167,64 @@
                             </thead>
                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                 @forelse ($jadwals as $jadwal)
+                                    @php
+                                        $badgeHariMap = [
+                                            'senin' => 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300',
+                                            'selasa' => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
+                                            'rabu' => 'bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-300',
+                                            'kamis' => 'bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300',
+                                            'jumat' => 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300',
+                                            'sabtu' => 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300',
+                                        ];
+                                        $hariKey = strtolower($jadwal->hari);
+                                        $hariClass = $badgeHariMap[$hariKey] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+                                    @endphp
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $jadwal->tahun_ajaran }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $jadwal->semester }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap capitalize font-medium text-gray-900 dark:text-white">{{ $jadwal->hari }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $jadwal->kelas->nama }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $jadwal->mapel->nama }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $jadwal->guru->user->name }}</td>
+                                        {{-- Periode: teks abu-abu netral --}}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 font-medium">{{ $jadwal->tahun_ajaran }}</td>
+
+                                        {{-- Semester: badge, Ganjil biru dan Genap ungu --}}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            @if(strtolower($jadwal->semester) === 'genap')
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300">
+                                                    {{ $jadwal->semester }}
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
+                                                    {{ $jadwal->semester }}
+                                                </span>
+                                            @endif
+                                        </td>
+
+                                        {{-- Hari: badge warna berbeda tiap hari --}}
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize {{ $hariClass }}">
+                                                {{ $jadwal->hari }}
+                                            </span>
+                                        </td>
+
+                                        {{-- Jam: teks teal dengan angka monospasi/tabular --}}
+                                        <td class="px-6 py-4 whitespace-nowrap font-mono tabular-nums text-sm font-medium text-teal-700 dark:text-teal-400">
+                                            {{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }}
+                                        </td>
+
+                                        {{-- Kelas: badge indigo --}}
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300">
+                                                {{ $jadwal->kelas->nama }}
+                                            </span>
+                                        </td>
+
+                                        {{-- Mata Pelajaran: teks hijau (emerald) semi-tebal --}}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-700 dark:text-emerald-400">
+                                            {{ $jadwal->mapel->nama }}
+                                        </td>
+
+                                        {{-- Guru: teks oranye/amber --}}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-amber-800 dark:text-amber-300">
+                                            {{ $jadwal->guru->user->name }}
+                                        </td>
+
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <a href="{{ route('admin.jadwal.edit', $jadwal) }}" class="text-blue-600 dark:text-blue-400 hover:underline mr-3">Edit</a>
                                             <button type="button" 
