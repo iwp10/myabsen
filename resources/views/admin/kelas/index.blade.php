@@ -18,8 +18,9 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                         <div class="flex flex-col">
                             <h3 class="text-lg font-bold">Daftar Kelas</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Menampilkan {{ $kelas->total() }} kelas</p>
                             @if($activePeriode['tahun_ajaran'])
-                                <span class="text-sm text-green-600 dark:text-green-400">Periode Aktif: {{ $activePeriode['tahun_ajaran'] }} - {{ $activePeriode['semester'] }}</span>
+                                <span class="text-xs text-green-600 dark:text-green-400 mt-1">Periode Aktif: {{ $activePeriode['tahun_ajaran'] }} - {{ $activePeriode['semester'] }}</span>
                             @endif
                         </div>
                         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
@@ -32,9 +33,17 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                <select name="tingkat" class="w-full sm:w-36 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                                    <option value="">Semua tingkat</option>
+                                    @foreach($daftarTingkat as $t)
+                                        <option value="{{ $t }}" {{ (string)$filterTingkat === (string)$t ? 'selected' : '' }}>
+                                            Tingkat {{ $t }}
+                                        </option>
+                                    @endforeach
+                                </select>
                                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, tingkat, jurusan..." class="w-full sm:w-48 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
                                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition">Cari</button>
-                                @if(request()->hasAny(['search', 'periode', 'tahun_ajaran', 'semester']) && (request('search') || request('periode') || request('tahun_ajaran') || request('semester')))
+                                @if(request()->hasAny(['search', 'periode', 'tahun_ajaran', 'semester', 'tingkat']) && (request('search') || request('periode') || request('tahun_ajaran') || request('semester') || request('tingkat')))
                                     <a href="{{ route('admin.kelas.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-3 rounded-md text-sm flex items-center justify-center transition">Reset</a>
                                 @endif
                             </form>
@@ -43,6 +52,16 @@
                             </a>
                         </div>
                     </div>
+
+                    @if ($errors->any())
+                        <div class="mb-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 px-4 py-3 rounded text-sm">
+                            <ul class="list-disc pl-5 space-y-1">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">

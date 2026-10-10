@@ -31,8 +31,8 @@ Aplikasi ini memiliki tiga peran utama dengan batasan akses masing-masing, serta
 - **Aksesibilitas Visual:** Dilengkapi *toggle* Light Mode dan Dark Mode untuk kenyamanan mata pengguna dari berbagai rentang usia (default: Light Mode).
 
 ### 👑 Admin
-- **Master Data:** Mengelola data jurusan, kelas, mata pelajaran, guru, dan siswa dengan perlindungan riwayat data (soft delete).
-- **Manajemen Jadwal:** Mengatur jadwal pelajaran dengan validasi pencegahan jadwal bentrok, filter komprehensif (hari, kelas, guru, mapel, rentang jam), dan pencarian terpadu.
+- **Master Data:** Mengelola data jurusan, kelas, mata pelajaran, guru, dan siswa dengan perlindungan riwayat data (soft delete). Daftar siswa dilengkapi filter kelas (dikelompokkan per periode memakai optgroup dengan penanda periode aktif), pengurutan nama A-Z / Z-A / NIS, nomor urut mengikuti halaman, dan header ringkas. Daftar kelas dilengkapi filter tingkat (10, 11, 12), header ringkas, tombol reset, dan urutan bawaan rapi (periode terbaru, tingkat, nama).
+- **Manajemen Jadwal:** Mengatur jadwal pelajaran dengan validasi pencegahan jadwal bentrok, filter komprehensif (hari, kelas, guru, mapel, rentang jam), pencarian terpadu, serta tabel jadwal dengan pewarnaan per kolom kontras tinggi (badge semester biru/ungu, badge hari dengan 6 warna berbeda, teks jam monospasi teal, badge kelas indigo, teks mapel emerald, dan teks guru amber) yang nyaman di mode terang maupun gelap.
 - **Import Data:** Memasukkan data siswa secara massal melalui file Excel.
 - **Menu Koreksi Absensi:** Meninjau jadwal dan status sesi absensi pada tanggal lampau per kelas serta membuka form koreksi/susulan.
 - **Pengaturan Periode:** Mengelola tahun ajaran aktif dan semester aktif langsung dari antarmuka web dengan saran otomatis kalender dan modal konfirmasi pergantian.

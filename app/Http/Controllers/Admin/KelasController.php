@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\KelasFilterRequest;
 use App\Http\Requests\StoreKelasRequest;
 use App\Http\Requests\UpdateKelasRequest;
 use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Services\PeriodeService;
-use Illuminate\Http\Request;
 
 class KelasController extends Controller
 {
-    public function index(Request $request)
+    public function index(KelasFilterRequest $request)
     {
         $search = $request->search;
         $periodeService = app(PeriodeService::class);
@@ -22,6 +22,7 @@ class KelasController extends Controller
         $reqPeriode = $request->query('periode');
         $reqTahunAjaran = $request->query('tahun_ajaran');
         $reqSemester = $request->query('semester');
+        $filterTingkat = $request->query('tingkat');
 
         $filterTahunAjaran = null;
         $filterSemester = null;
@@ -53,6 +54,9 @@ class KelasController extends Controller
             ->when($filterSemester, function ($q) use ($filterSemester) {
                 $q->where('semester', $filterSemester);
             })
+            ->when($filterTingkat, function ($q) use ($filterTingkat) {
+                $q->where('tingkat', $filterTingkat);
+            })
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('nama', 'like', "%{$search}%")
@@ -64,10 +68,30 @@ class KelasController extends Controller
                         });
                 });
             })
-            ->orderBy('tingkat')
-            ->orderBy('nama')
+            ->orderBy('tahun_ajaran', 'desc')
+            ->orderByRaw("CASE semester WHEN 'Genap' THEN 1 WHEN 'Ganjil' THEN 2 ELSE 3 END")
+            ->orderBy('tingkat', 'asc')
+            ->orderBy('nama', 'asc')
             ->paginate(10)
             ->withQueryString();
+
+        $daftarTingkatDb = Kelas::query()
+            ->select('tingkat')
+            ->distinct()
+            ->whereNotNull('tingkat')
+            ->where('tingkat', '!=', '')
+            ->orderBy('tingkat')
+            ->pluck('tingkat')
+            ->all();
+
+        $daftarTingkat = array_values(array_unique(array_merge(['10', '11', '12'], $daftarTingkatDb)));
+        usort($daftarTingkat, function ($a, $b) {
+            if (is_numeric($a) && is_numeric($b)) {
+                return (int) $a <=> (int) $b;
+            }
+
+            return strnatcmp((string) $a, (string) $b);
+        });
 
         return view('admin.kelas.index', compact(
             'kelas',
@@ -75,7 +99,9 @@ class KelasController extends Controller
             'daftarPeriode',
             'filterPeriode',
             'filterTahunAjaran',
-            'filterSemester'
+            'filterSemester',
+            'daftarTingkat',
+            'filterTingkat'
         ));
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ImportSiswaRequest;
+use App\Http\Requests\Admin\SiswaFilterRequest;
 use App\Http\Requests\StoreSiswaRequest;
 use App\Http\Requests\UpdateSiswaRequest;
 use App\Imports\SiswaImport;
@@ -12,8 +13,8 @@ use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\User;
 use App\Services\PasswordAwalService;
+use App\Services\PeriodeService;
 use Illuminate\Database\QueryException;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
@@ -22,24 +23,40 @@ use RuntimeException;
 
 class SiswaController extends Controller
 {
-    public function index(Request $request)
+    public function index(SiswaFilterRequest $request)
     {
-        $search = $request->search;
-        $siswas = Siswa::with(['user', 'kelas.jurusan'])
+        $search = $request->query('search');
+        $filterKelasId = $request->query('kelas_id');
+        $urut = $request->query('urut', 'nama_asc');
+
+        $query = Siswa::with(['user', 'kelas.jurusan'])
+            ->join('users', 'siswa.user_id', '=', 'users.id')
+            ->select('siswa.*')
+            ->when($filterKelasId, function ($q, $kelasId) {
+                $q->where('siswa.kelas_id', $kelasId);
+            })
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('nis', 'like', "%{$search}%")
-                        ->orWhereHas('user', function ($sub) use ($search) {
-                            $sub->where('name', 'like', "%{$search}%");
-                        });
+                    $q->where('siswa.nis', 'like', "%{$search}%")
+                        ->orWhere('users.name', 'like', "%{$search}%");
                 });
-            })
-            ->paginate(10)
-            ->appends(['search' => $search]);
+            });
 
+        if ($urut === 'nama_desc' || $urut === 'nama-za') {
+            $query->orderBy(DB::raw('LOWER(users.name)'), 'desc')->orderBy('siswa.id', 'asc');
+        } elseif ($urut === 'nis') {
+            $query->orderBy('siswa.nis', 'asc')->orderBy('siswa.id', 'asc');
+        } else {
+            $query->orderBy(DB::raw('LOWER(users.name)'), 'asc')->orderBy('siswa.id', 'asc');
+        }
+
+        $siswas = $query->paginate(10)->withQueryString();
+
+        $periodeService = app(PeriodeService::class);
+        $kelasListGrouped = $periodeService->getDaftarKelasGroupedByPeriode();
         $kelas = Kelas::orderBy('tingkat')->orderBy('nama')->get();
 
-        return view('admin.siswa.index', compact('siswas', 'kelas'));
+        return view('admin.siswa.index', compact('siswas', 'kelas', 'kelasListGrouped', 'filterKelasId', 'urut', 'search'));
     }
 
     public function create()

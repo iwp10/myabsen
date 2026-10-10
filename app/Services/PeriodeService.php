@@ -8,6 +8,7 @@ use App\Models\Kelas;
 use App\Models\Pengaturan;
 use App\Models\Siswa;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Schema;
 
 class PeriodeService
@@ -303,5 +304,52 @@ class PeriodeService
         }
 
         return $result;
+    }
+
+    /**
+     * Mendapatkan daftar kelas aktif yang dikelompokkan per periode (tahun ajaran dan semester).
+     * Label grup berformat "{semester} {tahun_ajaran}" dan periode aktif ditandai "(aktif)".
+     * Urut periode terbaru dulu, lalu tingkat dan nama kelas.
+     *
+     * @return array<string, array{tahun_ajaran: string, semester: string, label: string, is_aktif: bool, items: Collection<int, Kelas>}>
+     */
+    public function getDaftarKelasGroupedByPeriode(): array
+    {
+        $active = $this->getActivePeriode();
+        $kelasList = Kelas::with('jurusan')
+            ->orderBy('tingkat')
+            ->orderBy('nama')
+            ->get();
+
+        $grouped = [];
+        foreach ($kelasList as $kelas) {
+            $ta = $kelas->tahun_ajaran ?? '-';
+            $sm = $kelas->semester ?? '-';
+            $key = $ta.'|'.$sm;
+
+            if (! isset($grouped[$key])) {
+                $isAktif = ($ta === ($active['tahun_ajaran'] ?? '') && $sm === ($active['semester'] ?? ''));
+                $label = "{$sm} {$ta}".($isAktif ? ' (aktif)' : '');
+                $grouped[$key] = [
+                    'tahun_ajaran' => $ta,
+                    'semester' => $sm,
+                    'label' => $label,
+                    'is_aktif' => $isAktif,
+                    'items' => new Collection,
+                ];
+            }
+
+            $grouped[$key]['items']->push($kelas);
+        }
+
+        uasort($grouped, function ($a, $b) {
+            if ($a['tahun_ajaran'] === $b['tahun_ajaran']) {
+                return $b['semester'] <=> $a['semester'];
+            }
+
+            return strcmp($b['tahun_ajaran'], $a['tahun_ajaran']);
+        });
+
+        return $grouped;
     }
 }
