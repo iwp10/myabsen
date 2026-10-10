@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\JadwalSiswaFilterRequest;
 use App\Services\AbsensiService;
-use Illuminate\Http\Request;
 
 class JadwalController extends Controller
 {
@@ -13,12 +13,13 @@ class JadwalController extends Controller
     /**
      * Menampilkan jadwal pelajaran siswa pada kelas dan periode aktif.
      */
-    public function index(Request $request)
+    public function index(JadwalSiswaFilterRequest $request)
     {
         $siswa = $request->user()->siswa;
-        $filterHari = $request->query('hari');
+        $filterHari = $request->validated('hari');
+        $filterMapelId = $request->validated('mapel_id') ? (int) $request->validated('mapel_id') : null;
 
-        $data = $this->absensiService->getJadwalPelajaranSiswa($siswa, $filterHari);
+        $data = $this->absensiService->getJadwalPelajaranSiswa($siswa, $filterHari, $filterMapelId);
 
         return view('siswa.jadwal', $data);
     }

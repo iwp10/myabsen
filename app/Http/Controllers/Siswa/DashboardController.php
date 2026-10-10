@@ -64,13 +64,22 @@ class DashboardController extends Controller
         $tahunAjaran = $validated['tahun_ajaran'] ?? null;
         $semester = $validated['semester'] ?? null;
         $activeTab = $validated['tab'] ?? 'per_mapel';
+        $bulan = $validated['bulan'] ?? null;
+        $periodeInput = $request->input('periode');
 
-        $selectedPeriode = [
-            'tahun_ajaran' => $tahunAjaran ?: $activePeriode['tahun_ajaran'],
-            'semester' => $semester ?: $activePeriode['semester'],
-        ];
-
-        $filterPeriodeValue = $selectedPeriode['tahun_ajaran'].'|'.$selectedPeriode['semester'];
+        if ($periodeInput === 'semua') {
+            $selectedPeriode = [
+                'tahun_ajaran' => null,
+                'semester' => null,
+            ];
+            $filterPeriodeValue = 'semua';
+        } else {
+            $selectedPeriode = [
+                'tahun_ajaran' => $tahunAjaran ?: $activePeriode['tahun_ajaran'],
+                'semester' => $semester ?: $activePeriode['semester'],
+            ];
+            $filterPeriodeValue = $selectedPeriode['tahun_ajaran'].'|'.$selectedPeriode['semester'];
+        }
 
         $query = DetailAbsensi::with(['sesiAbsensi.jadwal.mapel', 'sesiAbsensi.jadwal.guru.user'])
             ->where('siswa_id', $siswa->id);
@@ -88,6 +97,12 @@ class DashboardController extends Controller
             });
         }
 
+        if (! empty($bulan)) {
+            $query->whereHas('sesiAbsensi', function ($q) use ($bulan) {
+                $q->where('tanggal', 'like', $bulan.'-%');
+            });
+        }
+
         if ($request->filled('mapel_id')) {
             $query->whereHas('sesiAbsensi.jadwal', function ($q) use ($request) {
                 $q->where('mapel_id', $request->mapel_id);
@@ -101,6 +116,7 @@ class DashboardController extends Controller
         // Fix column ambiguity when using paginate, joining sesi_absensi
         $riwayat = $query->join('sesi_absensi', 'detail_absensi.sesi_absensi_id', '=', 'sesi_absensi.id')
             ->orderBy('sesi_absensi.tanggal', 'desc')
+            ->orderBy('detail_absensi.id', 'desc')
             ->select('detail_absensi.*')
             ->paginate(15)
             ->withQueryString();
@@ -114,11 +130,14 @@ class DashboardController extends Controller
             }
         })->get();
 
-        // Rekap per mapel didelegasikan ke AbsensiService memakai periode terpilih
+        // Rekap per mapel didelegasikan ke AbsensiService memakai periode terpilih (fallback aktif jika semua periode)
+        $rekapTahunAjaran = $selectedPeriode['tahun_ajaran'] ?: $activePeriode['tahun_ajaran'];
+        $rekapSemester = $selectedPeriode['semester'] ?: $activePeriode['semester'];
+
         $persentasePerMapel = $this->absensiService->getRekapPerMapelSiswa(
             $siswa->id,
-            $selectedPeriode['tahun_ajaran'],
-            $selectedPeriode['semester']
+            $rekapTahunAjaran,
+            $rekapSemester
         );
 
         return view('siswa.riwayat', compact(
@@ -127,6 +146,7 @@ class DashboardController extends Controller
             'persentasePerMapel',
             'daftarPeriode',
             'selectedPeriode',
+            'activePeriode',
             'filterPeriodeValue',
             'activeTab'
         ));

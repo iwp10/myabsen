@@ -41,6 +41,19 @@
                 </div>
             </div>
 
+            <!-- Error Alert -->
+            @if($errors->any())
+                <div>
+                    <x-alert type="danger" :dismissible="true">
+                        <ul class="list-disc list-inside space-y-1">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </x-alert>
+                </div>
+            @endif
+
             <!-- Kontainer Jadwal & Filter -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div class="p-5 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -54,11 +67,11 @@
                         </p>
                     </div>
 
-                    {{-- Filter Hari --}}
-                    <div class="flex items-center gap-2">
-                        <form method="GET" action="{{ route('siswa.jadwal') }}" class="flex items-center gap-2">
+                    {{-- Filter Hari & Mapel --}}
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                        <form method="GET" action="{{ route('siswa.jadwal') }}" class="flex flex-wrap items-center gap-2">
                             <label for="filter-hari" class="text-xs font-medium text-gray-600 dark:text-gray-400 sr-only">Filter Hari</label>
-                            <select id="filter-hari" name="hari" onchange="this.form.submit()" class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-xs py-1.5 px-3">
+                            <select id="filter-hari" name="hari" onchange="this.form.submit()" class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-xs text-xs py-1.5 px-3">
                                 <option value="">Semua Hari</option>
                                 @foreach(['senin' => 'Senin', 'selasa' => 'Selasa', 'rabu' => 'Rabu', 'kamis' => 'Kamis', 'jumat' => 'Jumat', 'sabtu' => 'Sabtu'] as $val => $lbl)
                                     <option value="{{ $val }}" {{ strtolower((string)$filterHari) === $val ? 'selected' : '' }}>
@@ -66,7 +79,18 @@
                                     </option>
                                 @endforeach
                             </select>
-                            @if(!empty($filterHari))
+
+                            <label for="filter-mapel" class="text-xs font-medium text-gray-600 dark:text-gray-400 sr-only">Filter Mata Pelajaran</label>
+                            <select id="filter-mapel" name="mapel_id" onchange="this.form.submit()" class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-xs text-xs py-1.5 px-3">
+                                <option value="">Semua Mapel</option>
+                                @foreach($daftarMapel as $m)
+                                    <option value="{{ $m->id }}" {{ $filterMapelId == $m->id ? 'selected' : '' }}>
+                                        {{ $m->nama }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            @if(!empty($filterHari) || !empty($filterMapelId))
                                 <a href="{{ route('siswa.jadwal') }}" class="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 px-2 py-1.5 border border-gray-300 dark:border-gray-700 rounded-md">
                                     Reset
                                 </a>
@@ -74,6 +98,30 @@
                         </form>
                     </div>
                 </div>
+
+                {{-- Banner Filter Aktif --}}
+                @if($filterHari || $filterMapelId)
+                    <div class="px-5 py-3 bg-emerald-50/70 dark:bg-emerald-950/20 border-b border-emerald-100 dark:border-emerald-900/40 flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 flex-wrap text-xs">
+                            <span class="font-semibold text-emerald-800 dark:text-emerald-300">Filter aktif:</span>
+                            @if($filterHari)
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 font-medium">
+                                    Hari: {{ ucfirst($filterHari) }}
+                                    <a href="{{ route('siswa.jadwal', array_filter(['mapel_id' => $filterMapelId])) }}" class="hover:text-emerald-950 dark:hover:text-white font-bold" aria-label="Hapus filter hari">&times;</a>
+                                </span>
+                            @endif
+                            @if($activeMapel)
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 font-medium">
+                                    Mata pelajaran: {{ $activeMapel->nama }}
+                                    <a href="{{ route('siswa.jadwal', array_filter(['hari' => $filterHari])) }}" class="hover:text-emerald-950 dark:hover:text-white font-bold" aria-label="Hapus filter mata pelajaran">&times;</a>
+                                </span>
+                            @endif
+                        </div>
+                        <a href="{{ route('siswa.jadwal') }}" class="text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 hover:underline">
+                            Reset Semua Filter
+                        </a>
+                    </div>
+                @endif
 
                 {{-- Isi Konten --}}
                 <div class="p-6">
@@ -89,7 +137,7 @@
                             </p>
                         </div>
                     @elseif($totalJadwal === 0)
-                        {{-- Empty State: Kelas Belum Ada Jadwal / Hari Kosong --}}
+                        {{-- Empty State: Kelas Belum Ada Jadwal / Hari Kosong / Filter Kosong --}}
                         <div class="py-12 text-center px-4">
                             <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-500 dark:text-blue-400 mb-3">
                                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,23 +145,23 @@
                                 </svg>
                             </div>
                             <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100">
-                                @if(!empty($filterHari))
-                                    Tidak Ada Pelajaran di Hari {{ ucfirst($filterHari) }}
+                                @if(!empty($filterHari) || !empty($filterMapelId))
+                                    Tidak Ada Jadwal Pelajaran yang Cocok
                                 @else
                                     Belum Ada Jadwal Pelajaran
                                 @endif
                             </h4>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-md mx-auto">
-                                @if(!empty($filterHari))
-                                    Kelas Anda tidak memiliki jadwal pelajaran pada hari {{ ucfirst($filterHari) }}. Coba pilih hari lain atau tampilkan seluruh hari.
+                                @if(!empty($filterHari) || !empty($filterMapelId))
+                                    Tidak ditemukan jadwal pelajaran yang sesuai dengan filter. Coba ubah atau reset filter untuk menampilkan semua jadwal.
                                 @else
                                     Jadwal pelajaran untuk kelas Anda pada periode ini belum diterbitkan oleh bagian kurikulum.
                                 @endif
                             </p>
-                            @if(!empty($filterHari))
+                            @if(!empty($filterHari) || !empty($filterMapelId))
                                 <div class="mt-4">
                                     <a href="{{ route('siswa.jadwal') }}" class="inline-flex items-center px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md transition">
-                                        Tampilkan Semua Hari
+                                        Tampilkan Semua Jadwal
                                     </a>
                                 </div>
                             @endif
@@ -141,7 +189,7 @@
                                         {{-- Header Kelompok Hari --}}
                                         <div class="px-5 py-3.5 border-b flex items-center justify-between {{ $isHariIni ? 'border-blue-200 dark:border-blue-800 bg-blue-100/70 dark:bg-blue-900/50 text-blue-900 dark:text-blue-100' : 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700/60 text-gray-900 dark:text-gray-100' }}">
                                             <div class="flex items-center gap-2">
-                                                <span class="font-bold text-sm sm:text-base capitalize text-gray-900 dark:text-white">
+                                                <span class="font-bold text-sm sm:text-base capitalize text-gray-900 dark:white">
                                                     Hari {{ ucfirst($hariNama) }}
                                                 </span>
                                                 @if($isHariIni)
@@ -159,14 +207,27 @@
                                         {{-- Kartu / Baris Jadwal Pada Hari Ini --}}
                                         <div class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                             @foreach($jadwalsHari as $item)
-                                                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-2xs hover:shadow-xs transition duration-150 flex flex-col justify-between">
+                                                @php
+                                                    $isMatchFilter = ($filterMapelId && $item->mapel_id == $filterMapelId);
+                                                    if ($isMatchFilter) {
+                                                        $cardClasses = 'bg-emerald-50/70 dark:bg-emerald-950/30 border-l-4 border-l-emerald-600 border-emerald-300 dark:border-emerald-700 shadow-xs ring-1 ring-emerald-500/30';
+                                                    } else {
+                                                        $cardClasses = 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700';
+                                                    }
+                                                @endphp
+                                                <div class="rounded-lg p-4 border shadow-2xs hover:shadow-xs transition duration-150 flex flex-col justify-between {{ $cardClasses }}">
                                                     <div>
-                                                        {{-- Jam Pelajaran --}}
+                                                        {{-- Jam Pelajaran & Badge Cocok --}}
                                                         <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
                                                             <span class="inline-flex items-center gap-1 font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900/60 px-2 py-0.5 rounded">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 7v5l3 3"/></svg>
                                                                 {{ substr($item->jam_mulai, 0, 5) }} - {{ substr($item->jam_selesai, 0, 5) }}
                                                             </span>
+                                                            @if($isMatchFilter)
+                                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+                                                                    Sesuai filter
+                                                                </span>
+                                                            @endif
                                                         </div>
 
                                                         {{-- Mata Pelajaran --}}

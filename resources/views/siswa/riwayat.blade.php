@@ -18,9 +18,13 @@
                         <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                             Periode Dilihat:
                             <span class="font-semibold text-blue-600 dark:text-blue-400">
-                                {{ $selectedPeriode['tahun_ajaran'] }} - Semester {{ $selectedPeriode['semester'] }}
+                                @if($filterPeriodeValue === 'semua')
+                                    Semua Periode
+                                @else
+                                    {{ $selectedPeriode['tahun_ajaran'] }} - Semester {{ $selectedPeriode['semester'] }}
+                                @endif
                             </span>
-                            @if(isset($daftarPeriode) && collect($daftarPeriode)->firstWhere('is_aktif', true)['value'] === ($selectedPeriode['tahun_ajaran'].'|'.$selectedPeriode['semester']))
+                            @if($filterPeriodeValue !== 'semua' && isset($daftarPeriode) && collect($daftarPeriode)->firstWhere('is_aktif', true)['value'] === ($selectedPeriode['tahun_ajaran'].'|'.$selectedPeriode['semester']))
                                 <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
                                     (aktif)
                                 </span>
@@ -166,7 +170,8 @@
                             <input type="hidden" name="tab" value="semua">
                             <div class="w-full sm:w-auto">
                                 <x-input-label for="periode" value="Periode" />
-                                <select id="periode" name="periode" class="mt-1 block w-full sm:w-56 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                                <select id="periode" name="periode" class="mt-1 block w-full sm:w-52 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                                    <option value="semua" {{ $filterPeriodeValue === 'semua' ? 'selected' : '' }}>Semua Periode</option>
                                     @foreach($daftarPeriode as $item)
                                         <option value="{{ $item['value'] }}" {{ $filterPeriodeValue === $item['value'] ? 'selected' : '' }}>
                                             {{ $item['label'] }}
@@ -175,12 +180,16 @@
                                 </select>
                             </div>
                             <div class="w-full sm:w-auto">
+                                <x-input-label for="bulan" value="Bulan" />
+                                <x-text-input id="bulan" name="bulan" type="month" class="mt-1 block w-full sm:w-36 text-sm dark:[color-scheme:dark]" value="{{ request('bulan') }}" />
+                            </div>
+                            <div class="w-full sm:w-auto">
                                 <x-input-label for="tanggal" value="Tanggal" />
-                                <x-text-input id="tanggal" name="tanggal" type="date" class="mt-1 block w-full sm:w-44 text-sm" value="{{ request('tanggal') }}" />
+                                <x-text-input id="tanggal" name="tanggal" type="date" class="mt-1 block w-full sm:w-40 text-sm dark:[color-scheme:dark]" value="{{ request('tanggal') }}" />
                             </div>
                             <div class="w-full sm:w-auto">
                                 <x-input-label for="mapel_id" value="Mata Pelajaran" />
-                                <select id="mapel_id" name="mapel_id" class="mt-1 block w-full sm:w-52 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                                <select id="mapel_id" name="mapel_id" class="mt-1 block w-full sm:w-48 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
                                     <option value="">Semua Mapel</option>
                                     @foreach($mapels as $mapel)
                                         <option value="{{ $mapel->id }}" {{ request('mapel_id') == $mapel->id ? 'selected' : '' }}>
@@ -191,7 +200,7 @@
                             </div>
                             <div class="w-full sm:w-auto">
                                 <x-input-label for="status" value="Status" />
-                                <select id="status" name="status" class="mt-1 block w-full sm:w-40 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                                <select id="status" name="status" class="mt-1 block w-full sm:w-36 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
                                     <option value="">Semua Status</option>
                                     @foreach(['hadir' => 'Hadir', 'izin' => 'Izin', 'sakit' => 'Sakit', 'alpa' => 'Alpa'] as $sVal => $sLbl)
                                         <option value="{{ $sVal }}" {{ request('status') === $sVal ? 'selected' : '' }}>
@@ -204,13 +213,20 @@
                                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition">
                                     Filter
                                 </button>
-                                @if(request('tanggal') || request('mapel_id') || (request('periode') && request('periode') !== ($activePeriode['tahun_ajaran'] ?? '').'|'.($activePeriode['semester'] ?? '')) || request('tahun_ajaran') || request('semester') || request('status'))
+                                @if(request('tanggal') || request('bulan') || request('mapel_id') || request('status') || request('periode') || request('tahun_ajaran') || request('semester'))
                                     <a href="{{ route('siswa.riwayat', ['tab' => 'semua']) }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition">
                                         Reset
                                     </a>
                                 @endif
                             </div>
                         </form>
+
+                        {{-- Header Ringkas Jumlah Catatan --}}
+                        <div class="mb-4 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                            <span class="font-medium">
+                                Menampilkan {{ $riwayat->total() }} catatan {{ request('status') ? strtolower(request('status')) : 'kehadiran' }}
+                            </span>
+                        </div>
 
                         @if($riwayat->isEmpty())
                             <div class="py-8 text-center">

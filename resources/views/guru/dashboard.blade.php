@@ -43,9 +43,19 @@
             <!-- Kartu Statistik (3 Kolom) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Total Kelas -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div role="button"
+                     tabindex="0"
+                     aria-haspopup="dialog"
+                     aria-label="Lihat daftar kelas yang diajar"
+                     @click="$dispatch('open-modal', 'modal-daftar-kelas')"
+                     @keydown.enter="$dispatch('open-modal', 'modal-daftar-kelas')"
+                     @keydown.space.prevent="$dispatch('open-modal', 'modal-daftar-kelas')"
+                     class="cursor-pointer bg-white dark:bg-gray-800 rounded-xl p-5 shadow-xs hover:shadow-md border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 transition duration-150 flex items-center justify-between focus:outline-hidden focus:ring-2 focus:ring-blue-500">
                     <div>
-                        <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Kelas</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Kelas</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 font-semibold">Klik rincian</span>
+                        </div>
                         <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
                             {{ $total_kelas }}
                         </div>
@@ -59,9 +69,19 @@
                 </div>
 
                 <!-- Total Mapel -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div role="button"
+                     tabindex="0"
+                     aria-haspopup="dialog"
+                     aria-label="Lihat daftar mata pelajaran yang diampu"
+                     @click="$dispatch('open-modal', 'modal-daftar-mapel')"
+                     @keydown.enter="$dispatch('open-modal', 'modal-daftar-mapel')"
+                     @keydown.space.prevent="$dispatch('open-modal', 'modal-daftar-mapel')"
+                     class="cursor-pointer bg-white dark:bg-gray-800 rounded-xl p-5 shadow-xs hover:shadow-md border border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 transition duration-150 flex items-center justify-between focus:outline-hidden focus:ring-2 focus:ring-indigo-500">
                     <div>
-                        <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Mapel</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Mapel</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 font-semibold">Klik rincian</span>
+                        </div>
                         <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
                             {{ $total_mapel }}
                         </div>
@@ -310,8 +330,114 @@
                             @endforeach
                         </div>
                     @endif
-                </div>
             </div>
         </div>
     </div>
+
+    <!-- Modal Daftar Kelas yang Diajar -->
+    <x-modal name="modal-daftar-kelas" maxWidth="lg">
+        <div class="p-6">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path d="M3 21l18 0" /><path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16" /></svg>
+                        Daftar Kelas yang Diajar
+                    </h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        Periode Aktif: {{ $activePeriode['tahun_ajaran'] ?? '-' }} &bull; Semester {{ $activePeriode['semester'] ?? '-' }}
+                    </p>
+                </div>
+                <button type="button" @click="$dispatch('close-modal', 'modal-daftar-kelas')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Tutup">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div class="mt-4 max-h-96 overflow-y-auto space-y-2">
+                @forelse($daftarKelas as $item)
+                    <a href="{{ route('guru.jadwal', ['kelas_id' => $item['id']]) }}"
+                       class="group flex items-center justify-between p-3.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 transition">
+                        <div>
+                            <h4 class="font-bold text-sm text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                {{ $item['nama'] }}
+                            </h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                Jurusan: {{ $item['jurusan'] }} &bull; {{ $item['jumlah_jadwal'] }} jadwal mengajar
+                            </p>
+                        </div>
+                        <span class="inline-flex items-center text-xs font-semibold text-blue-600 dark:text-blue-400 group-hover:translate-x-0.5 transition-transform gap-1">
+                            Buka Jadwal &rarr;
+                        </span>
+                    </a>
+                @empty
+                    <div class="py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                        Tidak ada kelas yang diajar pada periode ini.
+                    </div>
+                @endforelse
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+                <span>Total: <strong>{{ count($daftarKelas) }}</strong> kelas</span>
+                <button type="button" @click="$dispatch('close-modal', 'modal-daftar-kelas')" class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </x-modal>
+
+    <!-- Modal Daftar Mapel yang Diampu -->
+    <x-modal name="modal-daftar-mapel" maxWidth="lg">
+        <div class="p-6">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-600 dark:text-indigo-400" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /></svg>
+                        Daftar Mata Pelajaran yang Diampu
+                    </h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        Periode Aktif: {{ $activePeriode['tahun_ajaran'] ?? '-' }} &bull; Semester {{ $activePeriode['semester'] ?? '-' }}
+                    </p>
+                </div>
+                <button type="button" @click="$dispatch('close-modal', 'modal-daftar-mapel')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Tutup">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div class="mt-4 max-h-96 overflow-y-auto space-y-2">
+                @forelse($daftarMapel as $item)
+                    <a href="{{ route('guru.jadwal', ['mapel_id' => $item['id']]) }}"
+                       class="group flex items-center justify-between p-3.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/20 transition">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-bold text-sm text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                    {{ $item['nama'] }}
+                                </h4>
+                                @if(!empty($item['kode']) && $item['kode'] !== '-')
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-mono">
+                                        {{ $item['kode'] }}
+                                    </span>
+                                @endif
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                {{ $item['jumlah_jadwal'] }} jadwal &bull; {{ $item['jumlah_kelas'] }} kelas
+                            </p>
+                        </div>
+                        <span class="inline-flex items-center text-xs font-semibold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform gap-1">
+                            Buka Jadwal &rarr;
+                        </span>
+                    </a>
+                @empty
+                    <div class="py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                        Tidak ada mata pelajaran yang diampu pada periode ini.
+                    </div>
+                @endforelse
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+                <span>Total: <strong>{{ count($daftarMapel) }}</strong> mata pelajaran</span>
+                <button type="button" @click="$dispatch('close-modal', 'modal-daftar-mapel')" class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </x-modal>
 </x-app-layout>

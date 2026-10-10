@@ -115,6 +115,12 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] Fitur Guru: Kartu pengingat jadwal belum diabsen dalam 7 hari terakhir pada dashboard guru dengan tautan langsung dan pengecekan jam mulai hari ini.
 - [x] Fitur Guru: Penanda kehadiran rendah ("Perlu perhatian") pada siswa di bawah batas konfigurasi (config/absensi.batas_kehadiran_rendah) di riwayat detail guru.
 - [x] Fitur Siswa: Filter status kehadiran (Hadir, Izin, Sakit, Alpa) pada riwayat siswa dengan validasi FormRequest tanpa mengubah rekapitulasi persentase per mapel.
+- [x] Fitur Guru: Kartu Total Kelas dan Total Mata Pelajaran interaktif di dashboard guru dengan modal Alpine daftar kelas/mapel periode aktif dan tautan filter jadwal.
+- [x] Fitur Guru: Filter Kelas dan Mata Pelajaran pada Jadwal Mengajar guru (divalidasi JadwalGuruFilterRequest), sorotan hijau pada jadwal yang cocok, label filter aktif dengan tombol hapus filter, dan tombol reset.
+- [x] Fitur Siswa: Menu sidebar dan route "Mata Pelajaran" (siswa.mapel) menampilkan ringkasan kartu mapel, guru pengampu, jadwal sesi, empty state, dan tautan filter ke Jadwal Pelajaran.
+- [x] Fitur Siswa: Filter Mata Pelajaran pada Jadwal Pelajaran siswa (divalidasi JadwalSiswaFilterRequest), sorotan hijau sesuai filter, label filter aktif, dan eliminasi N+1 query.
+- [x] Fitur Siswa: Kartu Hadir, Izin, Sakit, Alpa di dashboard siswa interaktif tertaut ke tab Semua Riwayat dengan status dan parameter periode=semua yang sama.
+- [x] Fitur Siswa: Filter bulan (input type="month" format Y-m), opsi 'Semua Periode', header ringkas "Menampilkan {n} catatan {status}", tombol reset, dan paginasi pada tab Semua Riwayat.
 
 ### Tahap Improvement / Fase 11: Refactor Arsitektur & Dokumentasi
 - [x] Pemisahan Tanggung Jawab (Separation of Concerns): Controller tipis (*Thin Controller*), FormRequest khusus validasi input, Policy khusus otorisasi hak akses, Service sebagai pusat seluruh *business logic*, Model khusus relasi & persistensi data, dan View khusus layer presentasi.
@@ -167,6 +173,7 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-08 | 3,4,5,6,9,11 | feat: implementasi dropdown pilihan periode di riwayat guru (kartu dan detail matriks) serta riwayat siswa (AB-11), pencarian kelas/mapel & siswa (AB-08), ekspor Excel guru membawa periode terpilih, serta validasi penolakan ubah periode kelas berjadwal (AB-06).
 167: 2026-10-08 | 3,7,9,11 | feat: implementasi fitur Pergantian Periode admin (salin kelas, pindahkan siswa, luluskan siswa massal via soft delete), perbaikan proteksi hapus kelas aktif, serta keutuhan riwayat kelas lama tanpa tabel baru (AB-13, 231 test PASS).
 2026-10-10 | 3,4,5,9 | feat: implementasi empat penambahan ringan antarmuka & penyaringan tanpa migrasi baru: (1) filter jadwal admin (hari, kelas, guru, mapel, rentang jam) dan filter hari jadwal guru dengan sorotan hari ini; (2) menu & route Jadwal Pelajaran siswa (siswa.jadwal); (3) kartu pengingat jadwal belum diabsen 7 hari terakhir di dashboard guru; (4) penanda kehadiran rendah di riwayat guru (config absensi.batas_kehadiran_rendah) dan filter status riwayat siswa.
+2026-10-10 | 4,5,9 | feat: interaksi navigasi guru dan siswa: kartu dashboard interaktif dengan modal Alpine untuk guru, filter kelas & mapel jadwal mengajar guru dengan sorotan hijau, menu Mata Pelajaran siswa di sidebar (siswa.mapel), filter mapel jadwal pelajaran siswa, navigasi kartu dashboard siswa ke Semua Riwayat dengan status dan periode=semua yang sama, filter bulan (Y-m), dan header ringkas catatan kehadiran.
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:

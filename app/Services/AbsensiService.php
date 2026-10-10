@@ -161,21 +161,51 @@ class AbsensiService
     }
 
     /**
-     * Mendapatkan statistik ringkas mengajar untuk guru.
+     * Mendapatkan statistik ringkas mengajar untuk guru beserta daftar kelas dan mata pelajaran.
      */
     public function getStatistikGuru(int $guruId): array
     {
         $activePeriode = $this->getActivePeriode();
-        $query = Jadwal::where('guru_id', $guruId)
+        $jadwals = Jadwal::with(['kelas.jurusan', 'mapel'])
+            ->where('guru_id', $guruId)
             ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
                 $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
                     ->where('semester', $activePeriode['semester']);
-            });
+            })
+            ->get();
+
+        $daftarKelas = $jadwals->groupBy('kelas_id')->map(function ($items) {
+            $first = $items->first();
+            $kelas = $first->kelas;
+
+            return [
+                'id' => $first->kelas_id,
+                'nama' => $kelas ? $kelas->nama : '-',
+                'jurusan' => $kelas && $kelas->jurusan ? $kelas->jurusan->nama : '-',
+                'jumlah_jadwal' => $items->count(),
+            ];
+        })->values()->sortBy('nama')->values();
+
+        $daftarMapel = $jadwals->groupBy('mapel_id')->map(function ($items) {
+            $first = $items->first();
+            $mapel = $first->mapel;
+
+            return [
+                'id' => $first->mapel_id,
+                'nama' => $mapel ? $mapel->nama : '-',
+                'kode' => $mapel ? $mapel->kode : '-',
+                'jumlah_jadwal' => $items->count(),
+                'jumlah_kelas' => $items->pluck('kelas_id')->unique()->count(),
+            ];
+        })->values()->sortBy('nama')->values();
 
         return [
-            'total_kelas' => (clone $query)->distinct()->count('kelas_id'),
-            'total_mapel' => (clone $query)->distinct()->count('mapel_id'),
-            'total_jadwal' => (clone $query)->count(),
+            'total_kelas' => $daftarKelas->count(),
+            'total_mapel' => $daftarMapel->count(),
+            'total_jadwal' => $jadwals->count(),
+            'daftar_kelas' => $daftarKelas,
+            'daftar_mapel' => $daftarMapel,
+            'active_periode' => $activePeriode,
         ];
     }
 
@@ -599,8 +629,12 @@ class AbsensiService
     /**
      * Mendapatkan jadwal mingguan guru beserta tanggal target dalam jendela 7 hari dan status absensinya.
      */
-    public function getJadwalMingguanGuru(int $userId, ?string $filterHari = null): Collection
-    {
+    public function getJadwalMingguanGuru(
+        int $userId,
+        ?string $filterHari = null,
+        ?int $filterKelasId = null,
+        ?int $filterMapelId = null
+    ): Collection {
         $guru = Guru::where('user_id', $userId)->first();
         if (! $guru) {
             return collect();
@@ -616,6 +650,12 @@ class AbsensiService
             })
             ->when($filterHari && in_array(strtolower($filterHari), ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu']), function ($q) use ($filterHari) {
                 $q->where('hari', strtolower($filterHari));
+            })
+            ->when($filterKelasId, function ($q) use ($filterKelasId) {
+                $q->where('kelas_id', $filterKelasId);
+            })
+            ->when($filterMapelId, function ($q) use ($filterMapelId) {
+                $q->where('mapel_id', $filterMapelId);
             })
             ->orderByRaw("CASE hari 
                 WHEN 'senin' THEN 1 
@@ -945,30 +985,33 @@ class AbsensiService
      *     siswa: ?Siswa,
      * }
      */
-    public function getJadwalPelajaranSiswa(?Siswa $siswa, ?string $filterHari = null): array
-    {
+    public function getJadwalPelajaranSiswa(
+        ?Siswa $siswa,
+        ?string $filterHari = null,
+        ?int $filterMapelId = null
+    ): array {
         $activePeriode = $this->getActivePeriode();
         $hariServer = self::getHariServer(Carbon::now('Asia/Jakarta'));
 
         if (! $siswa || ! $siswa->kelas_id) {
             return [
                 'jadwalsByHari' => collect(),
+                'daftarMapel' => collect(),
                 'activePeriode' => $activePeriode,
                 'hariIni' => $hariServer,
                 'filterHari' => $filterHari,
+                'filterMapelId' => $filterMapelId,
+                'activeMapel' => null,
                 'totalJadwal' => 0,
                 'siswa' => $siswa,
             ];
         }
 
-        $query = Jadwal::with(['mapel', 'guru.user', 'kelas.jurusan'])
+        $baseQuery = Jadwal::with(['mapel', 'guru.user', 'kelas.jurusan'])
             ->where('kelas_id', $siswa->kelas_id)
             ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
                 $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
                     ->where('semester', $activePeriode['semester']);
-            })
-            ->when($filterHari && in_array(strtolower($filterHari), ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu']), function ($q) use ($filterHari) {
-                $q->where('hari', strtolower($filterHari));
             })
             ->orderByRaw("CASE hari 
                 WHEN 'senin' THEN 1 
@@ -980,18 +1023,102 @@ class AbsensiService
                 ELSE 7 END")
             ->orderBy('jam_mulai', 'asc');
 
-        $jadwals = $query->get();
-        $totalJadwal = $jadwals->count();
+        $allClassJadwals = $baseQuery->get();
 
-        // Kelompokkan per hari
-        $jadwalsByHari = $jadwals->groupBy('hari');
+        // Daftar mapel untuk filter: disaring sesuai hari jika filterHari aktif agar relevan
+        $jadwalHariTampil = $filterHari && in_array(strtolower($filterHari), ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'])
+            ? $allClassJadwals->where('hari', strtolower($filterHari))
+            : $allClassJadwals;
+
+        $daftarMapel = $jadwalHariTampil->pluck('mapel')->filter()->unique('id')->sortBy('nama')->values();
+
+        if ($filterMapelId && ! $daftarMapel->contains('id', $filterMapelId)) {
+            $selectedMapel = $allClassJadwals->pluck('mapel')->filter()->firstWhere('id', $filterMapelId);
+            if ($selectedMapel) {
+                $daftarMapel->push($selectedMapel);
+            }
+        }
+
+        $jadwals = $allClassJadwals
+            ->when($filterHari && in_array(strtolower($filterHari), ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu']), function ($col) use ($filterHari) {
+                return $col->where('hari', strtolower($filterHari));
+            })
+            ->when($filterMapelId, function ($col) use ($filterMapelId) {
+                return $col->where('mapel_id', $filterMapelId);
+            });
+
+        $activeMapel = $filterMapelId ? $allClassJadwals->pluck('mapel')->filter()->firstWhere('id', $filterMapelId) : null;
 
         return [
-            'jadwalsByHari' => $jadwalsByHari,
+            'jadwalsByHari' => $jadwals->groupBy('hari'),
+            'daftarMapel' => $daftarMapel,
             'activePeriode' => $activePeriode,
             'hariIni' => $hariServer,
             'filterHari' => $filterHari,
-            'totalJadwal' => $totalJadwal,
+            'filterMapelId' => $filterMapelId,
+            'activeMapel' => $activeMapel,
+            'totalJadwal' => $jadwals->count(),
+            'siswa' => $siswa,
+        ];
+    }
+
+    /**
+     * Mendapatkan daftar ringkasan mata pelajaran kelas siswa pada periode aktif.
+     *
+     * @return array{
+     *     mapels: Collection<int, array{mapel: Mapel, guru_nama: string, jadwals: Collection<int, string>, total_sesi: int}>,
+     *     activePeriode: array{tahun_ajaran: ?string, semester: ?string},
+     *     siswa: ?Siswa,
+     * }
+     */
+    public function getMataPelajaranSiswa(?Siswa $siswa): array
+    {
+        $activePeriode = $this->getActivePeriode();
+
+        if (! $siswa || ! $siswa->kelas_id) {
+            return [
+                'mapels' => collect(),
+                'activePeriode' => $activePeriode,
+                'siswa' => $siswa,
+            ];
+        }
+
+        $jadwals = Jadwal::with(['mapel', 'guru.user', 'kelas.jurusan'])
+            ->where('kelas_id', $siswa->kelas_id)
+            ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
+                $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
+                    ->where('semester', $activePeriode['semester']);
+            })
+            ->orderByRaw("CASE hari 
+                WHEN 'senin' THEN 1 
+                WHEN 'selasa' THEN 2 
+                WHEN 'rabu' THEN 3 
+                WHEN 'kamis' THEN 4 
+                WHEN 'jumat' THEN 5 
+                WHEN 'sabtu' THEN 6 
+                ELSE 7 END")
+            ->orderBy('jam_mulai', 'asc')
+            ->get();
+
+        $mapels = $jadwals->groupBy('mapel_id')->map(function ($items) {
+            $first = $items->first();
+            $mapel = $first->mapel;
+            $gurus = $items->pluck('guru.user.name')->filter()->unique()->values()->join(', ');
+            $jadwalRingkasan = $items->map(function ($j) {
+                return ucfirst($j->hari).' '.substr($j->jam_mulai, 0, 5).' - '.substr($j->jam_selesai, 0, 5);
+            })->values();
+
+            return [
+                'mapel' => $mapel,
+                'guru_nama' => $gurus ?: '-',
+                'jadwals' => $jadwalRingkasan,
+                'total_sesi' => $items->count(),
+            ];
+        })->values()->sortBy(fn ($item) => $item['mapel']->nama ?? '')->values();
+
+        return [
+            'mapels' => $mapels,
+            'activePeriode' => $activePeriode,
             'siswa' => $siswa,
         ];
     }
