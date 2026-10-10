@@ -41,18 +41,18 @@ Aplikasi ini memiliki tiga peran utama dengan batasan akses masing-masing, serta
 - **Laporan & Ekspor:** Mengunduh rekap absensi sekolah dalam format Excel (multi-sheet per kelas-mapel) dan dokumen cetak PDF dengan batasan aman serta filter jurusan dan bulan.
 
 ### 👨‍🏫 Guru
-- **Dashboard Cerdas:** Menampilkan jadwal mengajar pada hari tersebut, ringkasan total mengajar, dan kartu pengingat jadwal belum diabsen dalam 7 hari terakhir yang melewati jam tayang.
-- **Jadwal Mengajar:** Jadwal mingguan guru dengan filter hari dan sorotan visual pada hari pelaksanaan hari ini.
-- **Absensi Cepat:** Sistem memberikan status default **Hadir** untuk seluruh kelas. Guru hanya mengubah status siswa yang *Izin*, *Sakit*, atau *Alpa*.
-- **Menu Jadwal & Koreksi Absensi:** Mengakses jadwal mengajar dan mengoreksi/mengisi susulan absensi dalam jendela **7 hari terakhir** (hari ini s.d. H-6 yang harinya cocok).
-- **Riwayat & Laporan:** Meninjau riwayat kehadiran per kelas & mapel dalam format matriks per pertemuan (P1..Pn) dengan penanda kehadiran rendah ("Perlu perhatian") bagi siswa di bawah ambang batas kehadiran, serta mengekspor rekap kelas yang diampu ke format Excel.
+- **Dashboard:** Menampilkan jadwal mengajar pada hari tersebut, ringkasan statistik mengajar (kartu Total Kelas dan Total Mata Pelajaran interaktif membuka modal daftar kelas/mapel pada periode aktif dengan tautan langsung ke filter jadwal), dan kartu pengingat jadwal belum diabsen dalam 7 hari terakhir.
+- **Jadwal Mengajar:** Jadwal mingguan guru dengan filter hari, kelas, dan mata pelajaran, sorotan visual hijau pada item jadwal yang cocok, label filter aktif dengan tombol hapus filter, tombol reset, serta sorotan badge "Hari ini".
+- **Jadwal & Koreksi Absensi:** Mengakses jadwal mengajar dan mengoreksi/mengisi susulan absensi dalam jendela **7 hari terakhir** (hari ini s.d. H-6 yang harinya cocok).
+- **Riwayat:** Meninjau riwayat kehadiran per kelas & mapel dalam format matriks per pertemuan (P1..Pn) dengan penanda kehadiran rendah ("Perlu perhatian") bagi siswa di bawah ambang batas kehadiran, serta mengekspor rekap kelas yang diampu ke format Excel.
 
 ### 🎓 Siswa (Read-Only)
-- **Monitoring Pribadi:** Melihat status kehadiran harian per mata pelajaran secara langsung.
-- **Jadwal Pelajaran:** Mengakses jadwal pelajaran mingguan kelas pada periode aktif yang dikelompokkan per hari urut jam pelajaran, lengkap dengan filter hari dan sorotan hari ini.
-- **Riwayat Dua Tingkat:** Meninjau kehadiran dalam dua tingkat seperti Riwayat Guru:
+- **Dashboard:** Melihat status kehadiran harian per mata pelajaran secara langsung, kartu persentase kehadiran keseluruhan, serta kartu rincian kehadiran (Total Hadir, Izin, Sakit, Alpa) interaktif yang tertaut langsung ke tab Semua Riwayat dengan status dan periode yang sama.
+- **Jadwal Pelajaran:** Mengakses jadwal pelajaran mingguan kelas pada periode aktif yang dikelompokkan per hari urut jam pelajaran, lengkap dengan filter hari, filter mata pelajaran, sorotan visual hijau sesuai filter, label filter aktif, tombol reset, dan sorotan hari ini.
+- **Mata Pelajaran:** Menu baru di sidebar menampilkan daftar kartu mata pelajaran yang ada pada jadwal kelas siswa di periode aktif (nama mapel, kode, guru pengampu, ringkasan jadwal pertemuan, dan empty state ramah), dengan kartu tertaut langsung ke Jadwal Pelajaran berfilter mapel tersebut.
+- **Riwayat:** Meninjau kehadiran dalam dua tingkat:
   - **Tab Per Mata Pelajaran (Bawaan):** Grid kartu interaktif per mata pelajaran pada periode terpilih (nama mapel, guru pengampu, persentase kehadiran AB-07, rincian H/I/S/A, total sesi, dan indikator warna).
-  - **Tab Semua Riwayat:** Daftar riwayat linier lengkap dengan filter status kehadiran (Hadir, Izin, Sakit, Alpa), tanggal, mapel, dan periode tanpa mengubah rekapitulasi persentase per mapel.
+  - **Tab Semua Riwayat:** Daftar riwayat linier lengkap dengan filter status kehadiran (Hadir, Izin, Sakit, Alpa), mata pelajaran, bulan (`Y-m`), tanggal, dan periode (termasuk 'Semua Periode'), dilengkapi header ringkas "Menampilkan {n} catatan {status}" dan tombol reset.
   - **Detail Per Mapel:** Halaman matriks presensi P1..Pn berurut tanggal khusus satu baris data siswa yang login (termasuk keterangan izin/sakit/alpa) yang bersifat murni hanya-baca.
 
 ---

@@ -41,7 +41,14 @@ class AbsensiController extends Controller
         $guru = Guru::where('user_id', $request->user()->id)->first();
         $stats = $guru
             ? $this->absensiService->getStatistikGuru($guru->id)
-            : ['total_kelas' => 0, 'total_mapel' => 0, 'total_jadwal' => 0];
+            : [
+                'total_kelas' => 0,
+                'total_mapel' => 0,
+                'total_jadwal' => 0,
+                'daftar_kelas' => collect(),
+                'daftar_mapel' => collect(),
+                'active_periode' => $this->absensiService->getActivePeriode(),
+            ];
 
         $pengingatBelumDiabsen = $this->absensiService->getRingkasanJadwalBelumDiabsenGuru($request->user()->id);
 
@@ -51,6 +58,9 @@ class AbsensiController extends Controller
             'total_kelas' => $stats['total_kelas'],
             'total_mapel' => $stats['total_mapel'],
             'total_jadwal' => $stats['total_jadwal'],
+            'daftarKelas' => $stats['daftar_kelas'],
+            'daftarMapel' => $stats['daftar_mapel'],
+            'activePeriode' => $stats['active_periode'],
             'pengingatBelumDiabsen' => $pengingatBelumDiabsen,
         ]);
     }

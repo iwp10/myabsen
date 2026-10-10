@@ -8,6 +8,14 @@
     <div class="py-6 sm:py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
+            @if($errors->any())
+                <div class="mb-4">
+                    <x-alert type="danger">
+                        {{ $errors->first() }}
+                    </x-alert>
+                </div>
+            @endif
+
             <!-- Banner Header / Ringkasan Jadwal -->
             <div class="bg-blue-600 dark:bg-blue-700 rounded-2xl p-6 text-white shadow-md relative overflow-hidden" style="background-color: #2563eb;">
                 <div class="absolute -right-8 -bottom-10 opacity-10 pointer-events-none">
@@ -49,10 +57,11 @@
                         </p>
                     </div>
                     
-                    {{-- Filter Hari & Tombol Navigasi --}}
+                    {{-- Filter Hari, Kelas, Mapel & Tombol Navigasi --}}
                     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                        <form method="GET" action="{{ route('guru.jadwal') }}" class="flex items-center gap-2">
-                            <select name="hari" onchange="this.form.submit()" class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-xs py-1.5 px-3">
+                        <form method="GET" action="{{ route('guru.jadwal') }}" class="flex flex-wrap items-center gap-2">
+                            {{-- Dropdown Hari --}}
+                            <select name="hari" onchange="this.form.submit()" class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-xs text-xs py-1.5 px-3">
                                 <option value="">Semua Hari</option>
                                 @foreach(['senin' => 'Senin', 'selasa' => 'Selasa', 'rabu' => 'Rabu', 'kamis' => 'Kamis', 'jumat' => 'Jumat', 'sabtu' => 'Sabtu'] as $v => $l)
                                     <option value="{{ $v }}" {{ strtolower((string)$filterHari) === $v ? 'selected' : '' }}>
@@ -60,7 +69,28 @@
                                     </option>
                                 @endforeach
                             </select>
-                            @if(!empty($filterHari))
+
+                            {{-- Dropdown Kelas --}}
+                            <select name="kelas_id" onchange="this.form.submit()" class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-xs text-xs py-1.5 px-3">
+                                <option value="">Semua Kelas</option>
+                                @foreach($daftarKelas as $k)
+                                    <option value="{{ $k['id'] }}" {{ $filterKelasId == $k['id'] ? 'selected' : '' }}>
+                                        {{ $k['nama'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            {{-- Dropdown Mata Pelajaran --}}
+                            <select name="mapel_id" onchange="this.form.submit()" class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-xs text-xs py-1.5 px-3">
+                                <option value="">Semua Mapel</option>
+                                @foreach($daftarMapel as $m)
+                                    <option value="{{ $m['id'] }}" {{ $filterMapelId == $m['id'] ? 'selected' : '' }}>
+                                        {{ $m['nama'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            @if(!empty($filterHari) || !empty($filterKelasId) || !empty($filterMapelId))
                                 <a href="{{ route('guru.jadwal') }}" class="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 px-2 py-1.5 border border-gray-300 dark:border-gray-700 rounded-md">
                                     Reset
                                 </a>
@@ -72,6 +102,36 @@
                     </div>
                 </div>
 
+                {{-- Banner Filter Aktif --}}
+                @if($filterHari || $filterKelasId || $filterMapelId)
+                    <div class="px-5 py-3 bg-emerald-50/70 dark:bg-emerald-950/20 border-b border-emerald-100 dark:border-emerald-900/40 flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 flex-wrap text-xs">
+                            <span class="font-semibold text-emerald-800 dark:text-emerald-300">Filter aktif:</span>
+                            @if($filterHari)
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 font-medium">
+                                    Hari: {{ ucfirst($filterHari) }}
+                                    <a href="{{ route('guru.jadwal', array_filter(['kelas_id' => $filterKelasId, 'mapel_id' => $filterMapelId])) }}" class="hover:text-emerald-950 dark:hover:text-white font-bold" aria-label="Hapus filter hari">&times;</a>
+                                </span>
+                            @endif
+                            @if($activeKelas)
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 font-medium">
+                                    Kelas: {{ $activeKelas['nama'] }}
+                                    <a href="{{ route('guru.jadwal', array_filter(['hari' => $filterHari, 'mapel_id' => $filterMapelId])) }}" class="hover:text-emerald-950 dark:hover:text-white font-bold" aria-label="Hapus filter kelas">&times;</a>
+                                </span>
+                            @endif
+                            @if($activeMapel)
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 font-medium">
+                                    Mata pelajaran: {{ $activeMapel['nama'] }}
+                                    <a href="{{ route('guru.jadwal', array_filter(['hari' => $filterHari, 'kelas_id' => $filterKelasId])) }}" class="hover:text-emerald-950 dark:hover:text-white font-bold" aria-label="Hapus filter mata pelajaran">&times;</a>
+                                </span>
+                            @endif
+                        </div>
+                        <a href="{{ route('guru.jadwal') }}" class="text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 hover:underline">
+                            Reset Semua Filter
+                        </a>
+                    </div>
+                @endif
+
                 <div class="p-0">
                     @if($jadwals->isEmpty())
                         <div class="py-12 text-center px-4">
@@ -81,23 +141,23 @@
                                 </svg>
                             </div>
                             <p class="text-base font-semibold text-gray-900 dark:text-gray-100">
-                                @if(!empty($filterHari))
-                                    Tidak Ada Jadwal Mengajar di Hari {{ ucfirst($filterHari) }}
+                                @if(!empty($filterHari) || !empty($filterKelasId) || !empty($filterMapelId))
+                                    Tidak Ada Jadwal Mengajar yang Cocok
                                 @else
                                     Belum Ada Jadwal Mengajar
                                 @endif
                             </p>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-md mx-auto">
-                                @if(!empty($filterHari))
-                                    Anda tidak memiliki jadwal mengajar pada hari {{ ucfirst($filterHari) }}. Coba pilih hari lain atau tampilkan seluruh hari.
+                                @if(!empty($filterHari) || !empty($filterKelasId) || !empty($filterMapelId))
+                                    Tidak ditemukan jadwal mengajar yang sesuai dengan filter pencarian. Coba ubah atau reset filter untuk menampilkan semua jadwal.
                                 @else
                                     Anda belum memiliki jadwal mengajar yang terdaftar dalam sistem. Silakan hubungi bagian kurikulum atau operator sekolah jika terdapat kekeliruan.
                                 @endif
                             </p>
                             <div class="mt-5 flex justify-center gap-2">
-                                @if(!empty($filterHari))
+                                @if(!empty($filterHari) || !empty($filterKelasId) || !empty($filterMapelId))
                                     <a href="{{ route('guru.jadwal') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-semibold uppercase tracking-widest rounded-lg shadow-xs transition">
-                                        Tampilkan Semua Hari
+                                        Reset Semua Filter
                                     </a>
                                 @endif
                                 <a href="{{ route('guru.dashboard') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold uppercase tracking-widest rounded-lg shadow-xs transition gap-2">
@@ -112,6 +172,8 @@
                                     @php
                                         $hariLower = strtolower($jadwal->hari);
                                         $isHariIni = ($hariLower === strtolower($hariIni));
+                                        $isMatchFilter = ($filterKelasId && $jadwal->kelas_id == $filterKelasId) || ($filterMapelId && $jadwal->mapel_id == $filterMapelId);
+
                                         $badgeClasses = match($hariLower) {
                                             'senin' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border-blue-200 dark:border-blue-800',
                                             'selasa' => 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 border-purple-200 dark:border-purple-800',
@@ -122,9 +184,14 @@
                                             default => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600',
                                         };
                                         $linkTanggal = $jadwal->target_tanggal ?: \Carbon\Carbon::now('Asia/Jakarta')->toDateString();
-                                        $cardBgClasses = $isHariIni 
-                                            ? 'bg-blue-50/50 dark:bg-blue-950/20 border-blue-300 dark:border-blue-700 ring-1 ring-blue-400/30' 
-                                            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700';
+
+                                        if ($isMatchFilter) {
+                                            $cardBgClasses = 'bg-emerald-50/70 dark:bg-emerald-950/30 border-l-4 border-l-emerald-600 border-emerald-300 dark:border-emerald-700 shadow-xs ring-1 ring-emerald-500/30';
+                                        } elseif ($isHariIni) {
+                                            $cardBgClasses = 'bg-blue-50/50 dark:bg-blue-950/20 border-blue-300 dark:border-blue-700 ring-1 ring-blue-400/30';
+                                        } else {
+                                            $cardBgClasses = 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700';
+                                        }
                                     @endphp
                                     <a href="{{ route('guru.absensi.show', ['jadwal' => $jadwal->id, 'tanggal' => $linkTanggal]) }}"
                                        class="group block rounded-xl p-5 border shadow-xs hover:shadow-md hover:border-blue-500 dark:hover:border-blue-400 transition duration-150 flex flex-col justify-between {{ $cardBgClasses }}">

@@ -47,6 +47,7 @@ class RiwayatSiswaFilterRequest extends FormRequest
             ],
             'semester' => ['nullable', 'string', 'in:Ganjil,Genap'],
             'tanggal' => ['nullable', 'date'],
+            'bulan' => ['nullable', 'string', 'date_format:Y-m'],
             'mapel_id' => ['nullable', 'integer', 'exists:mapel,id'],
             'status' => ['nullable', 'string', 'in:hadir,izin,sakit,alpa'],
         ];
@@ -57,6 +58,7 @@ class RiwayatSiswaFilterRequest extends FormRequest
         return [
             'tahun_ajaran.regex' => 'Format tahun ajaran harus YYYY/YYYY.',
             'semester.in' => 'Semester harus Ganjil atau Genap.',
+            'bulan.date_format' => 'Format filter bulan tidak valid (harus YYYY-MM).',
             'status.in' => 'Status kehadiran tidak valid. Pilih antara Hadir, Izin, Sakit, atau Alpa.',
         ];
     }

@@ -124,9 +124,11 @@
                     <!-- 4 Grid Cards Breakdown Transparan -->
                     <div class="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
                         <!-- Total Hadir -->
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-xs border border-gray-200 dark:border-gray-700 flex flex-col justify-between hover:border-emerald-300 dark:hover:border-emerald-700 transition">
+                        <a href="{{ route('siswa.riwayat', ['tab' => 'semua', 'status' => 'hadir', 'periode' => 'semua']) }}"
+                           class="group bg-white dark:bg-gray-800 rounded-xl p-4 shadow-xs border border-gray-200 dark:border-gray-700 flex flex-col justify-between hover:border-emerald-400 dark:hover:border-emerald-600 hover:shadow-md transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                           aria-label="Lihat rincian riwayat hadir: {{ $ringkasanKehadiran['total_hadir'] }} pertemuan">
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">Total Hadir</span>
+                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Total Hadir</span>
                                 <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4" /><path d="M15 19l2 2l4 -4" /></svg>
                                 </div>
@@ -135,16 +137,21 @@
                                 <div class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
                                     {{ $ringkasanKehadiran['total_hadir'] }}
                                 </div>
-                                <p class="mt-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Mengikuti KBM
-                                </p>
+                                <div class="mt-1.5 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">Mengikuti KBM</span>
+                                    <span class="text-emerald-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity font-semibold flex items-center gap-0.5">
+                                        Rincian &rarr;
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                        </a>
 
                         <!-- Total Izin -->
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-xs border border-gray-200 dark:border-gray-700 flex flex-col justify-between hover:border-blue-300 dark:hover:border-blue-700 transition">
+                        <a href="{{ route('siswa.riwayat', ['tab' => 'semua', 'status' => 'izin', 'periode' => 'semua']) }}"
+                           class="group bg-white dark:bg-gray-800 rounded-xl p-4 shadow-xs border border-gray-200 dark:border-gray-700 flex flex-col justify-between hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-md transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           aria-label="Lihat rincian riwayat izin: {{ $ringkasanKehadiran['total_izin'] }} pertemuan">
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">Total Izin</span>
+                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Total Izin</span>
                                 <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 17h6" /><path d="M9 13h6" /></svg>
                                 </div>
@@ -153,16 +160,21 @@
                                 <div class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
                                     {{ $ringkasanKehadiran['total_izin'] }}
                                 </div>
-                                <p class="mt-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Dihitung Hadir
-                                </p>
+                                <div class="mt-1.5 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">Dihitung Hadir</span>
+                                    <span class="text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity font-semibold flex items-center gap-0.5">
+                                        Rincian &rarr;
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                        </a>
 
                         <!-- Total Sakit -->
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-xs border border-gray-200 dark:border-gray-700 flex flex-col justify-between hover:border-amber-300 dark:hover:border-amber-700 transition">
+                        <a href="{{ route('siswa.riwayat', ['tab' => 'semua', 'status' => 'sakit', 'periode' => 'semua']) }}"
+                           class="group bg-white dark:bg-gray-800 rounded-xl p-4 shadow-xs border border-gray-200 dark:border-gray-700 flex flex-col justify-between hover:border-amber-400 dark:hover:border-amber-600 hover:shadow-md transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-500"
+                           aria-label="Lihat rincian riwayat sakit: {{ $ringkasanKehadiran['total_sakit'] }} pertemuan">
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">Total Sakit</span>
+                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Total Sakit</span>
                                 <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12h4.5l1.5 -6l4 12l2 -9l1.5 3h4.5" /></svg>
                                 </div>
@@ -171,16 +183,21 @@
                                 <div class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
                                     {{ $ringkasanKehadiran['total_sakit'] }}
                                 </div>
-                                <p class="mt-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Dihitung Hadir
-                                </p>
+                                <div class="mt-1.5 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">Dihitung Hadir</span>
+                                    <span class="text-amber-600 dark:text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity font-semibold flex items-center gap-0.5">
+                                        Rincian &rarr;
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                        </a>
 
                         <!-- Total Alpa -->
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-xs border border-gray-200 dark:border-gray-700 flex flex-col justify-between hover:border-rose-300 dark:hover:border-rose-700 transition">
+                        <a href="{{ route('siswa.riwayat', ['tab' => 'semua', 'status' => 'alpa', 'periode' => 'semua']) }}"
+                           class="group bg-white dark:bg-gray-800 rounded-xl p-4 shadow-xs border border-gray-200 dark:border-gray-700 flex flex-col justify-between hover:border-rose-400 dark:hover:border-rose-600 hover:shadow-md transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-500"
+                           aria-label="Lihat rincian riwayat alpa: {{ $ringkasanKehadiran['total_alpa'] }} pertemuan">
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">Total Alpa</span>
+                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">Total Alpa</span>
                                 <div class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" /><path d="M12 16h.01" /></svg>
                                 </div>
@@ -189,11 +206,14 @@
                                 <div class="text-2xl sm:text-3xl font-bold {{ $ringkasanKehadiran['total_alpa'] > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-gray-900 dark:text-gray-100' }}">
                                     {{ $ringkasanKehadiran['total_alpa'] }}
                                 </div>
-                                <p class="mt-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Mengurangi %
-                                </p>
+                                <div class="mt-1.5 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">Mengurangi %</span>
+                                    <span class="text-rose-600 dark:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity font-semibold flex items-center gap-0.5">
+                                        Rincian &rarr;
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 </div>
             </div>
