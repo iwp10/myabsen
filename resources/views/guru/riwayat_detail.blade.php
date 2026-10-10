@@ -118,18 +118,44 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                                @php
+                                    $batasRendah = (int) config('absensi.batas_kehadiran_rendah', 75);
+                                @endphp
                                 @forelse($siswaList as $no => $siswa)
                                     @php
                                         $h = 0; $i = 0; $s = 0; $a = 0; $total = 0;
+                                        foreach ($sesiList as $sItem) {
+                                            $st = $detailMap[$sItem->id][$siswa->id] ?? null;
+                                            if ($st) {
+                                                $total++;
+                                                if ($st === 'hadir') $h++;
+                                                elseif ($st === 'izin') $i++;
+                                                elseif ($st === 'sakit') $s++;
+                                                elseif ($st === 'alpa') $a++;
+                                            }
+                                        }
+                                        $persen = app(\App\Services\AbsensiService::class)->hitungPersentaseKehadiran($h, $i, $s, $total);
+                                        $isPerluPerhatian = ($total > 0 && $persen < $batasRendah);
+                                        $rowBg = $isPerluPerhatian 
+                                            ? 'bg-red-50/60 dark:bg-red-950/20 hover:bg-red-100/60 dark:hover:bg-red-950/35' 
+                                            : 'hover:bg-gray-50 dark:hover:bg-gray-700/40';
+                                        $stickyBg = $isPerluPerhatian 
+                                            ? 'bg-red-50/90 dark:bg-red-950/80' 
+                                            : 'bg-white dark:bg-gray-800';
                                     @endphp
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
-                                        <td class="sticky left-0 z-10 bg-white dark:bg-gray-800 px-3 py-2 text-center text-gray-500 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700 w-8">{{ $no + 1 }}</td>
-                                        <td class="sticky left-8 z-10 bg-white dark:bg-gray-800 px-3 py-2 text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700 font-mono text-xs w-32">{{ $siswa->nis }}</td>
-                                        <td class="sticky left-[10rem] z-10 bg-white dark:bg-gray-800 px-3 py-2 font-medium text-gray-800 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700 w-52">
-                                            <span>{{ $siswa->user->name ?? $siswa->nama }}</span>
-                                            @if($siswa->is_nonaktif)
-                                                <span class="text-xs text-gray-400 dark:text-gray-500 font-normal ml-1">(nonaktif)</span>
-                                            @endif
+                                    <tr class="{{ $rowBg }}">
+                                        <td class="sticky left-0 z-10 {{ $stickyBg }} px-3 py-2 text-center text-gray-500 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700 w-8">{{ $no + 1 }}</td>
+                                        <td class="sticky left-8 z-10 {{ $stickyBg }} px-3 py-2 text-gray-600 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700 font-mono text-xs w-32">{{ $siswa->nis }}</td>
+                                        <td class="sticky left-[10rem] z-10 {{ $stickyBg }} px-3 py-2 font-medium text-gray-800 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700 w-52">
+                                            <div class="flex items-center gap-1.5 flex-wrap">
+                                                <span>{{ $siswa->user->name ?? $siswa->nama }}</span>
+                                                @if($siswa->is_nonaktif)
+                                                    <span class="text-xs text-gray-400 dark:text-gray-500 font-normal">(nonaktif)</span>
+                                                @endif
+                                                @if($isPerluPerhatian)
+                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 dark:bg-red-900/60 dark:text-red-300 border border-red-200 dark:border-red-800">Perlu perhatian</span>
+                                                @endif
+                                            </div>
                                         </td>
                                         @foreach($sesiList as $sesi)
                                             @php
@@ -141,25 +167,17 @@
                                                     'alpa'  => ['A', 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'],
                                                     default => ['·', 'text-gray-300 dark:text-gray-600'],
                                                 };
-                                                if ($status) {
-                                                    $total++;
-                                                    if ($status === 'hadir') $h++;
-                                                    elseif ($status === 'izin') $i++;
-                                                    elseif ($status === 'sakit') $s++;
-                                                    elseif ($status === 'alpa') $a++;
-                                                }
                                             @endphp
                                             <td class="px-1 py-2 border-r border-gray-100 dark:border-gray-700 w-16 text-center">
                                                 <span class="inline-block w-7 h-7 leading-7 rounded font-bold text-xs text-center {{ $bgKelas }}">{{ $kode }}</span>
                                             </td>
                                         @endforeach
                                         {{-- Ringkasan --}}
-                                        @php $persen = app(\App\Services\AbsensiService::class)->hitungPersentaseKehadiran($h, $i, $s, $total); @endphp
                                         <td class="px-2 py-2 text-center font-bold text-green-600 dark:text-green-400 border-r border-gray-100 dark:border-gray-700 w-10">{{ $h }}</td>
                                         <td class="px-2 py-2 text-center font-bold text-blue-600 dark:text-blue-400 border-r border-gray-100 dark:border-gray-700 w-10">{{ $i }}</td>
                                         <td class="px-2 py-2 text-center font-bold text-yellow-600 dark:text-yellow-400 border-r border-gray-100 dark:border-gray-700 w-10">{{ $s }}</td>
                                         <td class="px-2 py-2 text-center font-bold text-red-600 dark:text-red-400 border-r border-gray-100 dark:border-gray-700 w-10">{{ $a }}</td>
-                                        <td class="px-2 py-2 text-center text-xs font-semibold w-16 {{ $persen >= 75 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400' }}">
+                                        <td class="px-2 py-2 text-center text-xs font-semibold w-16 {{ $isPerluPerhatian ? 'text-red-600 dark:text-red-400 font-bold' : ($persen >= $batasRendah ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400') }}">
                                             {{ $persen }}%
                                         </td>
                                     </tr>
@@ -196,11 +214,12 @@
                     </div>
 
                     {{-- Keterangan --}}
-                    <div class="px-6 py-3 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-400 dark:text-gray-500 flex gap-4">
+                    <div class="px-6 py-3 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-400 dark:text-gray-500 flex flex-wrap gap-4 items-center">
                         <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded bg-green-100 dark:bg-green-900/50 inline-block"></span>H = Hadir</span>
                         <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded bg-blue-100 dark:bg-blue-900/50 inline-block"></span>I = Izin</span>
                         <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded bg-yellow-100 dark:bg-yellow-900/50 inline-block"></span>S = Sakit</span>
                         <span class="inline-flex items-center gap-1"><span class="w-4 h-4 rounded bg-red-100 dark:bg-red-900/50 inline-block"></span>A = Alpa</span>
+                        <span class="inline-flex items-center gap-1.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 dark:bg-red-900/60 dark:text-red-300 border border-red-200 dark:border-red-800">Perlu perhatian</span> = Kehadiran &lt; {{ config('absensi.batas_kehadiran_rendah', 75) }}%</span>
                         <span class="ml-auto">· = Belum diabsen / Bukan anggota</span>
                     </div>
                 @endif

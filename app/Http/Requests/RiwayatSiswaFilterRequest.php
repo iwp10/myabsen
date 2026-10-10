@@ -22,6 +22,10 @@ class RiwayatSiswaFilterRequest extends FormRequest
                 $this->merge(['semester' => $sm]);
             }
         }
+
+        if ($this->filled('status')) {
+            $this->merge(['status' => strtolower((string) $this->input('status'))]);
+        }
     }
 
     public function rules(): array
@@ -43,6 +47,7 @@ class RiwayatSiswaFilterRequest extends FormRequest
             'semester' => ['nullable', 'string', 'in:Ganjil,Genap'],
             'tanggal' => ['nullable', 'date'],
             'mapel_id' => ['nullable', 'integer', 'exists:mapel,id'],
+            'status' => ['nullable', 'string', 'in:hadir,izin,sakit,alpa'],
         ];
     }
 
@@ -51,6 +56,7 @@ class RiwayatSiswaFilterRequest extends FormRequest
         return [
             'tahun_ajaran.regex' => 'Format tahun ajaran harus YYYY/YYYY.',
             'semester.in' => 'Semester harus Ganjil atau Genap.',
+            'status.in' => 'Status kehadiran tidak valid. Pilih antara Hadir, Izin, Sakit, atau Alpa.',
         ];
     }
 }

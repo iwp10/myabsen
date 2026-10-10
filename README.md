@@ -32,7 +32,7 @@ Aplikasi ini memiliki tiga peran utama dengan batasan akses masing-masing, serta
 
 ### 👑 Admin
 - **Master Data:** Mengelola data jurusan, kelas, mata pelajaran, guru, dan siswa dengan perlindungan riwayat data (soft delete).
-- **Manajemen Jadwal:** Mengatur jadwal pelajaran dengan validasi pencegahan jadwal bentrok.
+- **Manajemen Jadwal:** Mengatur jadwal pelajaran dengan validasi pencegahan jadwal bentrok, filter komprehensif (hari, kelas, guru, mapel, rentang jam), dan pencarian terpadu.
 - **Import Data:** Memasukkan data siswa secara massal melalui file Excel.
 - **Menu Koreksi Absensi:** Meninjau jadwal dan status sesi absensi pada tanggal lampau per kelas serta membuka form koreksi/susulan.
 - **Pengaturan Periode:** Mengelola tahun ajaran aktif dan semester aktif langsung dari antarmuka web dengan saran otomatis kalender dan modal konfirmasi pergantian.
@@ -41,14 +41,16 @@ Aplikasi ini memiliki tiga peran utama dengan batasan akses masing-masing, serta
 - **Laporan & Ekspor:** Mengunduh rekap absensi sekolah dalam format Excel (multi-sheet per kelas-mapel) dan dokumen cetak PDF dengan batasan aman serta filter jurusan dan bulan.
 
 ### 👨‍🏫 Guru
-- **Dashboard Cerdas:** Menampilkan jadwal mengajar pada hari tersebut serta ringkasan total mengajar.
+- **Dashboard Cerdas:** Menampilkan jadwal mengajar pada hari tersebut, ringkasan total mengajar, dan kartu pengingat jadwal belum diabsen dalam 7 hari terakhir yang melewati jam tayang.
+- **Jadwal Mengajar:** Jadwal mingguan guru dengan filter hari dan sorotan visual pada hari pelaksanaan hari ini.
 - **Absensi Cepat:** Sistem memberikan status default **Hadir** untuk seluruh kelas. Guru hanya mengubah status siswa yang *Izin*, *Sakit*, atau *Alpa*.
 - **Menu Jadwal & Koreksi Absensi:** Mengakses jadwal mengajar dan mengoreksi/mengisi susulan absensi dalam jendela **7 hari terakhir** (hari ini s.d. H-6 yang harinya cocok).
-- **Riwayat & Laporan:** Meninjau riwayat kehadiran per kelas & mapel dalam format matriks per pertemuan (P1..Pn), serta mengekspor rekap kelas yang diampu ke format Excel.
+- **Riwayat & Laporan:** Meninjau riwayat kehadiran per kelas & mapel dalam format matriks per pertemuan (P1..Pn) dengan penanda kehadiran rendah ("Perlu perhatian") bagi siswa di bawah ambang batas kehadiran, serta mengekspor rekap kelas yang diampu ke format Excel.
 
 ### 🎓 Siswa (Read-Only)
 - **Monitoring Pribadi:** Melihat status kehadiran harian per mata pelajaran secara langsung.
-- **Statistik & Riwayat:** Melacak persentase tingkat kehadiran (kalkulasi positif: Hadir, Izin, dan Sakit; Alpa sebagai pengurang) dan riwayat lengkap per mata pelajaran.
+- **Jadwal Pelajaran:** Mengakses jadwal pelajaran mingguan kelas pada periode aktif yang dikelompokkan per hari urut jam pelajaran, lengkap dengan filter hari dan sorotan hari ini.
+- **Statistik & Riwayat:** Melacak persentase tingkat kehadiran (kalkulasi positif: Hadir, Izin, dan Sakit; Alpa sebagai pengurang) dan riwayat lengkap dengan filter status kehadiran (Hadir, Izin, Sakit, Alpa), tanggal, mapel, dan periode.
 
 ---
 
@@ -224,6 +226,7 @@ Konfigurasikan variabel berikut di file `.env` untuk keamanan akun produksi:
 | Variabel | Deskripsi | Aturan Produksi |
 |---|---|---|
 | `ABSENSI_PASSWORD_AWAL` | Password default untuk pembuatan guru/siswa baru & reset password oleh admin. | Wajib minimal 8 karakter dan bukan `password`. |
+| `ABSENSI_BATAS_KEHADIRAN_RENDAH` | Ambang batas persentase kehadiran siswa yang memerlukan perhatian khusus di riwayat guru (dalam persen). | Opsional (default: `75`). |
 | `ADMIN_NAME` | Nama akun administrator awal untuk `AdminSeeder`. | Opsional (default: `Administrator`). |
 | `ADMIN_USERNAME` | Username administrator awal untuk `AdminSeeder`. | Opsional (default: `admin`). |
 | `ADMIN_PASSWORD` | Password administrator awal untuk `AdminSeeder`. | Minimal 12 karakter dan bukan `password`. Jika kosong, dibuat acak 16 karakter dan ditampilkan sekali di terminal. |

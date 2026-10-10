@@ -108,6 +108,12 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] Fitur Ekspor: Format ekspor Excel multi-sheet matriks per pertemuan (P1..Pn) per pasangan kelas-mapel untuk guru dan admin.
 - [x] Fitur Admin: Pengaturan Periode aktif (AB-11) melalui antarmuka web, migrasi tabel pengaturan (kunci-nilai), saran otomatis berbasis tanggal kalender, modal konfirmasi pergantian, banner pengingat dashboard admin, serta pemakaian seragam di seluruh dashboard guru, dashboard siswa, riwayat guru, rekapitulasi, dan ekspor laporan.
 - [x] Fitur Ekspor: Pembatasan jumlah sheet Excel admin ('batas_sheet_ekspor' => 50) dan batas baris PDF ('batas_baris_pdf' => 2000) di config/absensi.php dengan pesan error ramah, penambahan filter Jurusan pada laporan admin, penanganan kombinasi jurusan/kelas tidak cocok, dan eliminasi N+1 query pada pembentukan sheet ekspor.
+- [x] Fitur Admin: Filter terpadu jadwal admin (hari, kelas, guru, mapel, rentang jam format H:i divalidasi JadwalFilterRequest, urutan bawaan hari lalu jam, tombol reset, dan paginasi query string).
+- [x] Fitur Guru: Filter hari pada jadwal mengajar guru dan sorotan visual pada hari ini (badge "Hari ini" dan latar lembut).
+- [x] Fitur Siswa: Menu sidebar dan route "Jadwal Pelajaran" (siswa.jadwal) kelas siswa pada periode aktif dikelompokkan per hari urut jam dengan filter hari dan empty state ramah.
+- [x] Fitur Guru: Kartu pengingat jadwal belum diabsen dalam 7 hari terakhir pada dashboard guru dengan tautan langsung dan pengecekan jam mulai hari ini.
+- [x] Fitur Guru: Penanda kehadiran rendah ("Perlu perhatian") pada siswa di bawah batas konfigurasi (config/absensi.batas_kehadiran_rendah) di riwayat detail guru.
+- [x] Fitur Siswa: Filter status kehadiran (Hadir, Izin, Sakit, Alpa) pada riwayat siswa dengan validasi FormRequest tanpa mengubah rekapitulasi persentase per mapel.
 
 ### Tahap Improvement / Fase 11: Refactor Arsitektur & Dokumentasi
 - [x] Pemisahan Tanggung Jawab (Separation of Concerns): Controller tipis (*Thin Controller*), FormRequest khusus validasi input, Policy khusus otorisasi hak akses, Service sebagai pusat seluruh *business logic*, Model khusus relasi & persistensi data, dan View khusus layer presentasi.
@@ -158,7 +164,8 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-08 | 7 | chore: pembersihan file tidak terpakai (dump SQL dilepas dari git tracking, hapus view/component/request/layout sisa default Breeze, eliminasi duplikasi route password.update di routes/auth.php, seluruh 195 test PASS).
 2026-10-08 | 8 | feat: perbaikan notifikasi ganti password (banner hijau sukses dengan auto-dismiss, banner merah gagal dengan highlight kolom), pengalihan pengguna must_change_password ke dashboard role-nya, penguatan keamanan logout & back history dengan header no-store, logout idempotent untuk tamu tanpa 419/500, penanganan global TokenMismatchException (419) dengan pesan ramah, view error 419 terpadu, serta penambahan 18 feature test (seluruh 213 test PASS).
 2026-10-08 | 3,4,5,6,9,11 | feat: implementasi dropdown pilihan periode di riwayat guru (kartu dan detail matriks) serta riwayat siswa (AB-11), pencarian kelas/mapel & siswa (AB-08), ekspor Excel guru membawa periode terpilih, serta validasi penolakan ubah periode kelas berjadwal (AB-06).
-2026-10-08 | 3,7,9,11 | feat: implementasi fitur Pergantian Periode admin (salin kelas, pindahkan siswa, luluskan siswa massal via soft delete), perbaikan proteksi hapus kelas aktif, serta keutuhan riwayat kelas lama tanpa tabel baru (AB-13, 231 test PASS).
+167: 2026-10-08 | 3,7,9,11 | feat: implementasi fitur Pergantian Periode admin (salin kelas, pindahkan siswa, luluskan siswa massal via soft delete), perbaikan proteksi hapus kelas aktif, serta keutuhan riwayat kelas lama tanpa tabel baru (AB-13, 231 test PASS).
+2026-10-10 | 3,4,5,9 | feat: implementasi empat penambahan ringan antarmuka & penyaringan tanpa migrasi baru: (1) filter jadwal admin (hari, kelas, guru, mapel, rentang jam) dan filter hari jadwal guru dengan sorotan hari ini; (2) menu & route Jadwal Pelajaran siswa (siswa.jadwal); (3) kartu pengingat jadwal belum diabsen 7 hari terakhir di dashboard guru; (4) penanda kehadiran rendah di riwayat guru (config absensi.batas_kehadiran_rendah) dan filter status riwayat siswa.
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:

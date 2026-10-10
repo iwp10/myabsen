@@ -17,6 +17,7 @@ use App\Http\Controllers\Guru\AbsensiController;
 use App\Http\Controllers\Guru\JadwalController as GuruJadwalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Siswa\DashboardController;
+use App\Http\Controllers\Siswa\JadwalController as SiswaJadwalController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -88,6 +89,7 @@ Route::middleware(['auth', 'no-cache'])->group(function () {
     // Siswa Routes
     Route::middleware(['role:siswa', 'password.changed'])->prefix('siswa')->name('siswa.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
+        Route::get('/jadwal', [SiswaJadwalController::class, 'index'])->name('jadwal');
         Route::get('/riwayat', [DashboardController::class, 'riwayat'])->name('riwayat');
     });
 });

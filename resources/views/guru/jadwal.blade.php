@@ -36,7 +36,7 @@
 
             <!-- Tabel Jadwal Mengajar -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div class="p-5 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div class="p-5 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h3 class="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                             <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -48,9 +48,28 @@
                             Daftar terurut berdasarkan hari pelaksanaan dan jam mulai pelajaran
                         </p>
                     </div>
-                    <a href="{{ route('guru.dashboard') }}" class="inline-flex items-center text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 gap-1 self-start sm:self-auto">
-                        &larr; Kembali ke Dashboard
-                    </a>
+                    
+                    {{-- Filter Hari & Tombol Navigasi --}}
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                        <form method="GET" action="{{ route('guru.jadwal') }}" class="flex items-center gap-2">
+                            <select name="hari" onchange="this.form.submit()" class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-xs py-1.5 px-3">
+                                <option value="">Semua Hari</option>
+                                @foreach(['senin' => 'Senin', 'selasa' => 'Selasa', 'rabu' => 'Rabu', 'kamis' => 'Kamis', 'jumat' => 'Jumat', 'sabtu' => 'Sabtu'] as $v => $l)
+                                    <option value="{{ $v }}" {{ strtolower((string)$filterHari) === $v ? 'selected' : '' }}>
+                                        {{ $l }} {{ strtolower($hariIni) === $v ? '(Hari Ini)' : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @if(!empty($filterHari))
+                                <a href="{{ route('guru.jadwal') }}" class="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 px-2 py-1.5 border border-gray-300 dark:border-gray-700 rounded-md">
+                                    Reset
+                                </a>
+                            @endif
+                        </form>
+                        <a href="{{ route('guru.dashboard') }}" class="inline-flex items-center text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 gap-1 self-start sm:self-auto ml-2">
+                            &larr; Dashboard
+                        </a>
+                    </div>
                 </div>
 
                 <div class="p-0">
@@ -61,11 +80,26 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
                             </div>
-                            <p class="text-base font-semibold text-gray-900 dark:text-gray-100">Belum Ada Jadwal Mengajar</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-md mx-auto">
-                                Anda belum memiliki jadwal mengajar yang terdaftar dalam sistem. Silakan hubungi bagian kurikulum atau operator sekolah jika terdapat kekeliruan.
+                            <p class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                                @if(!empty($filterHari))
+                                    Tidak Ada Jadwal Mengajar di Hari {{ ucfirst($filterHari) }}
+                                @else
+                                    Belum Ada Jadwal Mengajar
+                                @endif
                             </p>
-                            <div class="mt-5">
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-md mx-auto">
+                                @if(!empty($filterHari))
+                                    Anda tidak memiliki jadwal mengajar pada hari {{ ucfirst($filterHari) }}. Coba pilih hari lain atau tampilkan seluruh hari.
+                                @else
+                                    Anda belum memiliki jadwal mengajar yang terdaftar dalam sistem. Silakan hubungi bagian kurikulum atau operator sekolah jika terdapat kekeliruan.
+                                @endif
+                            </p>
+                            <div class="mt-5 flex justify-center gap-2">
+                                @if(!empty($filterHari))
+                                    <a href="{{ route('guru.jadwal') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-semibold uppercase tracking-widest rounded-lg shadow-xs transition">
+                                        Tampilkan Semua Hari
+                                    </a>
+                                @endif
                                 <a href="{{ route('guru.dashboard') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold uppercase tracking-widest rounded-lg shadow-xs transition gap-2">
                                     Kembali ke Dashboard
                                 </a>
@@ -77,6 +111,7 @@
                                 @foreach($jadwals as $jadwal)
                                     @php
                                         $hariLower = strtolower($jadwal->hari);
+                                        $isHariIni = ($hariLower === strtolower($hariIni));
                                         $badgeClasses = match($hariLower) {
                                             'senin' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border-blue-200 dark:border-blue-800',
                                             'selasa' => 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 border-purple-200 dark:border-purple-800',
@@ -87,15 +122,26 @@
                                             default => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600',
                                         };
                                         $linkTanggal = $jadwal->target_tanggal ?: \Carbon\Carbon::now('Asia/Jakarta')->toDateString();
+                                        $cardBgClasses = $isHariIni 
+                                            ? 'bg-blue-50/50 dark:bg-blue-950/20 border-blue-300 dark:border-blue-700 ring-1 ring-blue-400/30' 
+                                            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700';
                                     @endphp
                                     <a href="{{ route('guru.absensi.show', ['jadwal' => $jadwal->id, 'tanggal' => $linkTanggal]) }}"
-                                       class="group block bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-xs hover:shadow-md hover:border-blue-500 dark:hover:border-blue-400 transition duration-150 flex flex-col justify-between">
+                                       class="group block rounded-xl p-5 border shadow-xs hover:shadow-md hover:border-blue-500 dark:hover:border-blue-400 transition duration-150 flex flex-col justify-between {{ $cardBgClasses }}">
                                         <div>
-                                            <!-- Header Kartu: Hari & Status Badge -->
+                                            <!-- Header Kartu: Hari, Sorotan Hari Ini, & Status Badge -->
                                             <div class="flex items-center justify-between gap-2 mb-3">
-                                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border {{ $badgeClasses }}">
-                                                    {{ ucfirst($jadwal->hari) }}
-                                                </span>
+                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border {{ $badgeClasses }}">
+                                                        {{ ucfirst($jadwal->hari) }}
+                                                    </span>
+                                                    @if($isHariIni)
+                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
+                                                            <svg class="w-3 h-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                            Hari ini
+                                                        </span>
+                                                    @endif
+                                                </div>
                                                 
                                                 @if($jadwal->status_absensi === 'Sudah diabsen')
                                                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 border border-green-200 dark:border-green-800">

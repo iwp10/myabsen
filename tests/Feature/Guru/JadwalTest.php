@@ -7,6 +7,7 @@ use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 
 uses(RefreshDatabase::class);
 
@@ -106,4 +107,26 @@ test('sidebar guru menampilkan menu jadwal mengajar', function () {
     $response->assertStatus(200);
     $response->assertSee('Jadwal Mengajar');
     $response->assertSee(route('guru.jadwal'));
+});
+
+test('AB-08: filter hari menyaring jadwal mengajar guru dan jadwal guru lain tidak muncul', function () {
+    // Filter hari selasa -> hanya jadwal1 (PBO), bukan jadwal2 (BD - senin) dan bukan jadwalLain
+    $response = $this->actingAs($this->guruUser)->get(route('guru.jadwal', ['hari' => 'selasa']));
+
+    $response->assertStatus(200);
+    $response->assertSee('Pemrograman Berorientasi Objek');
+    $response->assertDontSee('Basis Data');
+    $response->assertDontSee('Matematika Terapan');
+});
+
+test('AB-08: jadwal hari ini disorot secara visual dengan badge Hari ini', function () {
+    // Set hari ini menjadi Selasa (hari jadwal1)
+    Carbon::setTestNow('2026-09-22 08:00:00'); // 2026-09-22 adalah Selasa
+
+    $response = $this->actingAs($this->guruUser)->get(route('guru.jadwal'));
+
+    $response->assertStatus(200);
+    $response->assertSee('Hari ini');
+
+    Carbon::setTestNow(); // reset
 });
