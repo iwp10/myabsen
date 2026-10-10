@@ -15,6 +15,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Batas Persentase Kehadiran Rendah
+    |--------------------------------------------------------------------------
+    |
+    | Ambang batas persentase kehadiran siswa yang memerlukan perhatian (dalam persen).
+    | Siswa dengan persentase di bawah batas ini akan diberi penanda khusus pada
+    | riwayat absensi guru.
+    |
+    */
+    'batas_kehadiran_rendah' => (int) env('ABSENSI_BATAS_KEHADIRAN_RENDAH', 75),
+
+    /*
+    |--------------------------------------------------------------------------
     | Batas Ekspor Laporan
     |--------------------------------------------------------------------------
     |

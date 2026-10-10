@@ -92,6 +92,10 @@ class DashboardController extends Controller
             });
         }
 
+        if ($request->filled('status')) {
+            $query->where('detail_absensi.status', $request->status);
+        }
+
         // Fix column ambiguity when using paginate, joining sesi_absensi
         $riwayat = $query->join('sesi_absensi', 'detail_absensi.sesi_absensi_id', '=', 'sesi_absensi.id')
             ->orderBy('sesi_absensi.tanggal', 'desc')

@@ -79,6 +79,16 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border border-gray-100 dark:border-gray-700">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <h3 class="text-lg font-medium mb-4">Riwayat Kehadiran</h3>
+
+                    @if($errors->any())
+                        <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                            <ul class="list-disc list-inside text-sm">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     
                     <form method="GET" action="{{ route('siswa.riwayat') }}" class="mb-6 flex flex-col md:flex-row flex-wrap gap-4 items-end">
                         <div class="w-full sm:w-auto">
@@ -106,11 +116,22 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="w-full sm:w-auto">
+                            <x-input-label for="status" value="Status" />
+                            <select id="status" name="status" class="mt-1 block w-full sm:w-40 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                                <option value="">Semua Status</option>
+                                @foreach(['hadir' => 'Hadir', 'izin' => 'Izin', 'sakit' => 'Sakit', 'alpa' => 'Alpa'] as $sVal => $sLbl)
+                                    <option value="{{ $sVal }}" {{ request('status') === $sVal ? 'selected' : '' }}>
+                                        {{ $sLbl }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="flex items-center gap-2 w-full sm:w-auto">
                             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition">
                                 Filter
                             </button>
-                            @if(request('tanggal') || request('mapel_id') || request('periode') || request('tahun_ajaran') || request('semester'))
+                            @if(request('tanggal') || request('mapel_id') || request('periode') || request('tahun_ajaran') || request('semester') || request('status'))
                                 <a href="{{ route('siswa.riwayat') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-3 rounded-md text-sm transition">
                                     Reset
                                 </a>

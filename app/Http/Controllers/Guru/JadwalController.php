@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Guru;
 use App\Http\Controllers\Controller;
 use App\Models\Guru;
 use App\Services\AbsensiService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class JadwalController extends Controller
@@ -17,8 +18,10 @@ class JadwalController extends Controller
     public function index(Request $request)
     {
         $guru = Guru::where('user_id', $request->user()->id)->first();
-        $jadwals = $this->absensiService->getJadwalMingguanGuru($request->user()->id);
+        $filterHari = $request->query('hari');
+        $jadwals = $this->absensiService->getJadwalMingguanGuru($request->user()->id, $filterHari);
+        $hariIni = AbsensiService::getHariServer(Carbon::now('Asia/Jakarta'));
 
-        return view('guru.jadwal', compact('jadwals', 'guru'));
+        return view('guru.jadwal', compact('jadwals', 'guru', 'filterHari', 'hariIni'));
     }
 }

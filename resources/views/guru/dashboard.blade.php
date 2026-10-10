@@ -91,6 +91,69 @@
                 </div>
             </div>
 
+            <!-- Pengingat Jadwal Belum Diabsen (7 Hari Terakhir) -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-200 dark:border-gray-700">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 {{ ($pengingatBelumDiabsen['total'] ?? 0) > 0 ? 'pb-3 border-b border-gray-100 dark:border-gray-700' : '' }}">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg {{ ($pengingatBelumDiabsen['total'] ?? 0) > 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400' : 'bg-green-100 text-green-700 dark:bg-green-950/60 dark:text-green-400' }} flex items-center justify-center shrink-0">
+                            @if(($pengingatBelumDiabsen['total'] ?? 0) > 0)
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            @else
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path d="M5 12l5 5l10 -10"/></svg>
+                            @endif
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                @if(($pengingatBelumDiabsen['total'] ?? 0) > 0)
+                                    <span>{{ $pengingatBelumDiabsen['total'] }} jadwal belum diabsen dalam 7 hari terakhir</span>
+                                @else
+                                    <span>Semua jadwal sudah diabsen.</span>
+                                @endif
+                            </h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                @if(($pengingatBelumDiabsen['total'] ?? 0) > 0)
+                                    Jadwal yang melewati jam tayang dalam jendela koreksi presensi
+                                @else
+                                    Tidak ada tanggungan pengisian presensi dalam 7 hari terakhir
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+                    @if(($pengingatBelumDiabsen['total'] ?? 0) > 0)
+                        <a href="{{ route('guru.koreksi-absensi') }}" class="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 inline-flex items-center gap-1 self-start sm:self-auto">
+                            Lihat semua &rarr;
+                        </a>
+                    @endif
+                </div>
+
+                @if(($pengingatBelumDiabsen['total'] ?? 0) > 0)
+                    <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                        @foreach($pengingatBelumDiabsen['items'] as $item)
+                            <a href="{{ route('guru.absensi.show', ['jadwal' => $item->jadwal_id, 'tanggal' => $item->tanggal]) }}"
+                               class="group block p-3 rounded-lg border border-amber-200 dark:border-amber-800/60 bg-amber-50/40 dark:bg-amber-950/20 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:border-amber-400 dark:hover:border-amber-700 transition">
+                                <div class="flex items-center justify-between gap-1 mb-1">
+                                    <span class="text-[11px] font-bold text-amber-800 dark:text-amber-300">
+                                        {{ $item->tanggal_label }}
+                                    </span>
+                                    <span class="text-[10px] text-gray-500 dark:text-gray-400">
+                                        {{ $item->jam_mulai }} - {{ $item->jam_selesai }}
+                                    </span>
+                                </div>
+                                <div class="font-bold text-sm text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+                                    {{ $item->mapel_nama }}
+                                </div>
+                                <div class="text-xs text-gray-600 dark:text-gray-400 mt-0.5 flex items-center justify-between">
+                                    <span>Kelas: {{ $item->kelas_nama }}</span>
+                                    <span class="text-blue-600 dark:text-blue-400 font-semibold group-hover:translate-x-0.5 transition-transform text-[11px]">
+                                        Absen &rarr;
+                                    </span>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
             <!-- Jadwal Mengajar Hari Ini -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div class="p-5 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

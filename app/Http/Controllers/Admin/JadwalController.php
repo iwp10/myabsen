@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\JadwalFilterRequest;
 use App\Http\Requests\StoreJadwalRequest;
 use App\Http\Requests\UpdateJadwalRequest;
 use App\Models\Guru;
@@ -10,14 +11,13 @@ use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Services\PeriodeService;
-use Illuminate\Http\Request;
 
 class JadwalController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(JadwalFilterRequest $request)
     {
         $search = $request->query('search');
         $periodeService = app(PeriodeService::class);
@@ -51,12 +51,39 @@ class JadwalController extends Controller
             }
         }
 
+        $filterHari = $request->query('hari');
+        $filterKelasId = $request->query('kelas_id');
+        $filterGuruId = $request->query('guru_id');
+        $filterMapelId = $request->query('mapel_id');
+        $filterJamMulaiDari = $request->query('jam_mulai_dari', $request->query('jam_dari'));
+        $filterJamMulaiSampai = $request->query('jam_mulai_sampai', $request->query('jam_sampai'));
+
         $jadwals = Jadwal::with(['kelas', 'mapel', 'guru.user'])
             ->when($filterTahunAjaran, function ($q) use ($filterTahunAjaran) {
                 $q->where('tahun_ajaran', $filterTahunAjaran);
             })
             ->when($filterSemester, function ($q) use ($filterSemester) {
                 $q->where('semester', $filterSemester);
+            })
+            ->when($filterHari, function ($q) use ($filterHari) {
+                $q->where('hari', strtolower($filterHari));
+            })
+            ->when($filterKelasId, function ($q) use ($filterKelasId) {
+                $q->where('kelas_id', $filterKelasId);
+            })
+            ->when($filterGuruId, function ($q) use ($filterGuruId) {
+                $q->where('guru_id', $filterGuruId);
+            })
+            ->when($filterMapelId, function ($q) use ($filterMapelId) {
+                $q->where('mapel_id', $filterMapelId);
+            })
+            ->when($filterJamMulaiDari, function ($q) use ($filterJamMulaiDari) {
+                $time = strlen($filterJamMulaiDari) === 5 ? $filterJamMulaiDari.':00' : $filterJamMulaiDari;
+                $q->where('jam_mulai', '>=', $time);
+            })
+            ->when($filterJamMulaiSampai, function ($q) use ($filterJamMulaiSampai) {
+                $time = strlen($filterJamMulaiSampai) === 5 ? $filterJamMulaiSampai.':00' : $filterJamMulaiSampai;
+                $q->where('jam_mulai', '<=', $time);
             })
             ->when($search, function ($query) use ($search) {
                 $query->whereHas('kelas', function ($q) use ($search) {
@@ -67,10 +94,33 @@ class JadwalController extends Controller
                     $q->where('name', 'like', "%{$search}%");
                 });
             })
-            ->orderBy('hari')
-            ->orderBy('jam_mulai')
+            ->orderByRaw("CASE hari 
+                WHEN 'senin' THEN 1 
+                WHEN 'selasa' THEN 2 
+                WHEN 'rabu' THEN 3 
+                WHEN 'kamis' THEN 4 
+                WHEN 'jumat' THEN 5 
+                WHEN 'sabtu' THEN 6 
+                ELSE 7 END")
+            ->orderBy('jam_mulai', 'asc')
             ->paginate(10)
             ->withQueryString();
+
+        $daftarKelasQuery = Kelas::orderBy('tingkat')->orderBy('nama');
+        if ($filterTahunAjaran && $filterSemester) {
+            $daftarKelasQuery->where('tahun_ajaran', $filterTahunAjaran)->where('semester', $filterSemester);
+        }
+        $daftarKelas = $daftarKelasQuery->get();
+        $daftarGuru = Guru::with('user')->get()->sortBy('user.name');
+        $daftarMapel = Mapel::orderBy('nama')->get();
+        $daftarHariOptions = [
+            'senin' => 'Senin',
+            'selasa' => 'Selasa',
+            'rabu' => 'Rabu',
+            'kamis' => 'Kamis',
+            'jumat' => 'Jumat',
+            'sabtu' => 'Sabtu',
+        ];
 
         return view('admin.jadwal.index', compact(
             'jadwals',
@@ -78,7 +128,17 @@ class JadwalController extends Controller
             'daftarPeriode',
             'filterPeriode',
             'filterTahunAjaran',
-            'filterSemester'
+            'filterSemester',
+            'daftarKelas',
+            'daftarGuru',
+            'daftarMapel',
+            'daftarHariOptions',
+            'filterHari',
+            'filterKelasId',
+            'filterGuruId',
+            'filterMapelId',
+            'filterJamMulaiDari',
+            'filterJamMulaiSampai'
         ));
     }
 

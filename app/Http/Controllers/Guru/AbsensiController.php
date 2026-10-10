@@ -43,12 +43,15 @@ class AbsensiController extends Controller
             ? $this->absensiService->getStatistikGuru($guru->id)
             : ['total_kelas' => 0, 'total_mapel' => 0, 'total_jadwal' => 0];
 
+        $pengingatBelumDiabsen = $this->absensiService->getRingkasanJadwalBelumDiabsenGuru($request->user()->id);
+
         return view('guru.dashboard', [
             'jadwalHariIni' => $jadwalHariIni,
             'tanggal' => $tanggal,
             'total_kelas' => $stats['total_kelas'],
             'total_mapel' => $stats['total_mapel'],
             'total_jadwal' => $stats['total_jadwal'],
+            'pengingatBelumDiabsen' => $pengingatBelumDiabsen,
         ]);
     }
 

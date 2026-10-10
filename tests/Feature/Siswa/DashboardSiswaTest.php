@@ -155,3 +155,103 @@ test('siswa hanya dapat melihat datanya sendiri (AB-08)', function () {
     $response->assertSee('KetSiswaIni');
     $response->assertDontSee('KetSiswaLain');
 });
+
+test('AB-08: siswa dapat memfilter riwayat berdasarkan status kehadiran', function () {
+    $mapel = Mapel::factory()->create(['nama' => 'Bahasa Daerah']);
+    $jadwal = Jadwal::factory()->create([
+        'kelas_id' => $this->kelas->id,
+        'mapel_id' => $mapel->id,
+        'tahun_ajaran' => '2026/2027',
+        'semester' => 'Ganjil',
+    ]);
+
+    $sesi1 = SesiAbsensi::factory()->create(['jadwal_id' => $jadwal->id, 'tanggal' => '2026-09-01']);
+    $sesi2 = SesiAbsensi::factory()->create(['jadwal_id' => $jadwal->id, 'tanggal' => '2026-09-02']);
+
+    DetailAbsensi::factory()->create([
+        'sesi_absensi_id' => $sesi1->id,
+        'siswa_id' => $this->siswa->id,
+        'status' => StatusKehadiran::HADIR,
+        'keterangan' => 'KeteranganHadirBaris',
+    ]);
+
+    DetailAbsensi::factory()->create([
+        'sesi_absensi_id' => $sesi2->id,
+        'siswa_id' => $this->siswa->id,
+        'status' => StatusKehadiran::IZIN,
+        'keterangan' => 'KeteranganIzinBaris',
+    ]);
+
+    // Filter status izin -> hanya baris izin yang tampil di tabel riwayat
+    $responseIzin = $this->actingAs($this->user)->get(route('siswa.riwayat', ['status' => 'izin']));
+    $responseIzin->assertStatus(200);
+    $responseIzin->assertSee('KeteranganIzinBaris');
+    $responseIzin->assertDontSee('KeteranganHadirBaris');
+
+    // Filter status hadir -> hanya baris hadir yang tampil
+    $responseHadir = $this->actingAs($this->user)->get(route('siswa.riwayat', ['status' => 'hadir']));
+    $responseHadir->assertStatus(200);
+    $responseHadir->assertSee('KeteranganHadirBaris');
+    $responseHadir->assertDontSee('KeteranganIzinBaris');
+});
+
+test('AB-08: filter status riwayat siswa tidak mengubah rekapitulasi dan persentase kehadiran per mapel', function () {
+    $mapel = Mapel::factory()->create(['nama' => 'Ekonomi']);
+    $jadwal = Jadwal::factory()->create([
+        'kelas_id' => $this->kelas->id,
+        'mapel_id' => $mapel->id,
+        'tahun_ajaran' => '2026/2027',
+        'semester' => 'Ganjil',
+    ]);
+
+    $sesi1 = SesiAbsensi::factory()->create(['jadwal_id' => $jadwal->id, 'tanggal' => '2026-09-01']);
+    $sesi2 = SesiAbsensi::factory()->create(['jadwal_id' => $jadwal->id, 'tanggal' => '2026-09-02']);
+
+    DetailAbsensi::factory()->create(['sesi_absensi_id' => $sesi1->id, 'siswa_id' => $this->siswa->id, 'status' => StatusKehadiran::HADIR]);
+    DetailAbsensi::factory()->create(['sesi_absensi_id' => $sesi2->id, 'siswa_id' => $this->siswa->id, 'status' => StatusKehadiran::ALPA]);
+
+    // Tanpa filter status: 1 Hadir, 1 Alpa -> persentase 50%, total sesi 2
+    $responseNormal = $this->actingAs($this->user)->get(route('siswa.riwayat'));
+    $responseNormal->assertStatus(200);
+    $responseNormal->assertSee('50%');
+    $responseNormal->assertSee('Total 2 Sesi');
+
+    // Dengan filter status 'alpa': daftar riwayat hanya menampilkan alpa, tetapi rekap per mapel tetap 50% dan Total 2 Sesi
+    $responseFilter = $this->actingAs($this->user)->get(route('siswa.riwayat', ['status' => 'alpa']));
+    $responseFilter->assertStatus(200);
+    $responseFilter->assertSee('50%');
+    $responseFilter->assertSee('Total 2 Sesi');
+});
+
+test('AB-08: filter status tidak valid pada riwayat siswa ditolak dengan error validasi', function () {
+    $response = $this->actingAs($this->user)->get(route('siswa.riwayat', ['status' => 'tidak_valid']));
+    $response->assertSessionHasErrors(['status']);
+});
+
+test('AB-08: filter status bekerja bersama filter periode, tanggal, dan mapel', function () {
+    $mapel = Mapel::factory()->create(['nama' => 'Sosiologi']);
+    $jadwal = Jadwal::factory()->create([
+        'kelas_id' => $this->kelas->id,
+        'mapel_id' => $mapel->id,
+        'tahun_ajaran' => '2026/2027',
+        'semester' => 'Ganjil',
+    ]);
+
+    $sesi = SesiAbsensi::factory()->create(['jadwal_id' => $jadwal->id, 'tanggal' => '2026-09-10']);
+    DetailAbsensi::factory()->create([
+        'sesi_absensi_id' => $sesi->id,
+        'siswa_id' => $this->siswa->id,
+        'status' => StatusKehadiran::SAKIT,
+        'keterangan' => 'DemamBerdarah',
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('siswa.riwayat', [
+        'periode' => '2026/2027|Ganjil',
+        'mapel_id' => $mapel->id,
+        'tanggal' => '2026-09-10',
+        'status' => 'sakit',
+    ]));
+
+    $response->assertStatus(200);
+    $response->assertSee('DemamBerdarah');
+});

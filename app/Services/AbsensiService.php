@@ -456,7 +456,7 @@ class AbsensiService
     /**
      * Mendapatkan jadwal mingguan guru beserta tanggal target dalam jendela 7 hari dan status absensinya.
      */
-    public function getJadwalMingguanGuru(int $userId): Collection
+    public function getJadwalMingguanGuru(int $userId, ?string $filterHari = null): Collection
     {
         $guru = Guru::where('user_id', $userId)->first();
         if (! $guru) {
@@ -470,6 +470,9 @@ class AbsensiService
             ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
                 $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
                     ->where('semester', $activePeriode['semester']);
+            })
+            ->when($filterHari && in_array(strtolower($filterHari), ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu']), function ($q) use ($filterHari) {
+                $q->where('hari', strtolower($filterHari));
             })
             ->orderByRaw("CASE hari 
                 WHEN 'senin' THEN 1 
@@ -783,6 +786,123 @@ class AbsensiService
             'total_alpa' => $totalAlpa,
             'total_sesi' => $totalSesi,
             'persentase' => $persentase,
+        ];
+    }
+
+    /**
+     * Mendapatkan daftar jadwal pelajaran kelas siswa pada periode aktif,
+     * dikelompokkan per hari (Senin sampai Sabtu) urut jam mulai.
+     *
+     * @return array{
+     *     jadwalsByHari: Collection<string, Collection<int, Jadwal>>,
+     *     activePeriode: array{tahun_ajaran: ?string, semester: ?string},
+     *     hariIni: ?string,
+     *     filterHari: ?string,
+     *     totalJadwal: int,
+     *     siswa: ?Siswa,
+     * }
+     */
+    public function getJadwalPelajaranSiswa(?Siswa $siswa, ?string $filterHari = null): array
+    {
+        $activePeriode = $this->getActivePeriode();
+        $hariServer = self::getHariServer(Carbon::now('Asia/Jakarta'));
+
+        if (! $siswa || ! $siswa->kelas_id) {
+            return [
+                'jadwalsByHari' => collect(),
+                'activePeriode' => $activePeriode,
+                'hariIni' => $hariServer,
+                'filterHari' => $filterHari,
+                'totalJadwal' => 0,
+                'siswa' => $siswa,
+            ];
+        }
+
+        $query = Jadwal::with(['mapel', 'guru.user', 'kelas.jurusan'])
+            ->where('kelas_id', $siswa->kelas_id)
+            ->when($activePeriode['tahun_ajaran'], function ($q) use ($activePeriode) {
+                $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
+                    ->where('semester', $activePeriode['semester']);
+            })
+            ->when($filterHari && in_array(strtolower($filterHari), ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu']), function ($q) use ($filterHari) {
+                $q->where('hari', strtolower($filterHari));
+            })
+            ->orderByRaw("CASE hari 
+                WHEN 'senin' THEN 1 
+                WHEN 'selasa' THEN 2 
+                WHEN 'rabu' THEN 3 
+                WHEN 'kamis' THEN 4 
+                WHEN 'jumat' THEN 5 
+                WHEN 'sabtu' THEN 6 
+                ELSE 7 END")
+            ->orderBy('jam_mulai', 'asc');
+
+        $jadwals = $query->get();
+        $totalJadwal = $jadwals->count();
+
+        // Kelompokkan per hari
+        $jadwalsByHari = $jadwals->groupBy('hari');
+
+        return [
+            'jadwalsByHari' => $jadwalsByHari,
+            'activePeriode' => $activePeriode,
+            'hariIni' => $hariServer,
+            'filterHari' => $filterHari,
+            'totalJadwal' => $totalJadwal,
+            'siswa' => $siswa,
+        ];
+    }
+
+    /**
+     * Mendapatkan ringkasan jadwal yang belum diabsen guru dalam jendela 7 hari terakhir.
+     * Jadwal hari ini hanya dihitung jika jam mulai sudah lewat (Asia/Jakarta).
+     *
+     * @return array{
+     *     total: int,
+     *     items: Collection<int, object>,
+     * }
+     */
+    public function getRingkasanJadwalBelumDiabsenGuru(int $userId): array
+    {
+        $daftarHari = $this->getJadwalKoreksiTujuhHariGuru($userId);
+        $now = Carbon::now('Asia/Jakarta');
+        $currentTimeStr = $now->format('H:i:s');
+
+        $belumDiabsenList = collect();
+
+        foreach ($daftarHari as $hariItem) {
+            $isHariIni = $hariItem['is_hari_ini'];
+            $tanggalStr = $hariItem['tanggal'];
+            $tanggalLabel = $hariItem['tanggal_label'];
+
+            foreach ($hariItem['jadwals'] as $jadwal) {
+                if ($jadwal->status_absensi !== 'Belum diabsen') {
+                    continue;
+                }
+
+                if ($isHariIni) {
+                    $jamMulai = strlen($jadwal->jam_mulai) === 5 ? $jadwal->jam_mulai.':00' : $jadwal->jam_mulai;
+                    if ($currentTimeStr < $jamMulai) {
+                        continue;
+                    }
+                }
+
+                $belumDiabsenList->push((object) [
+                    'jadwal_id' => $jadwal->id,
+                    'mapel_nama' => $jadwal->mapel->nama,
+                    'kelas_nama' => $jadwal->kelas->nama,
+                    'tanggal' => $tanggalStr,
+                    'tanggal_label' => $tanggalLabel,
+                    'jam_mulai' => substr($jadwal->jam_mulai, 0, 5),
+                    'jam_selesai' => substr($jadwal->jam_selesai, 0, 5),
+                    'hari' => $jadwal->hari,
+                ]);
+            }
+        }
+
+        return [
+            'total' => $belumDiabsenList->count(),
+            'items' => $belumDiabsenList->take(3),
         ];
     }
 }
