@@ -239,3 +239,35 @@ test('admin pergantian periode: semua SVG memiliki ukuran eksplisit dan tab memu
     $response->assertSee('Menu Jadwal');
     $response->assertDontSee('M11 7h6l-4 -4m4 4l-4 4');
 });
+
+test('riwayat siswa: markup memuat dropdown periode dengan x-ui.select (panah dan pr-10), badge (aktif) dengan whitespace-nowrap, dan pembungkus flex-wrap', function () {
+    $response = $this->actingAs($this->userSiswa1)->get(route('siswa.riwayat'));
+    $response->assertOk();
+
+    // 1. Baris Periode Dilihat + badge menggunakan flex-wrap dan gap-x-2 gap-y-1
+    $response->assertSee('flex flex-wrap items-center gap-x-2 gap-y-1', false);
+
+    // 2. Badge (aktif) memiliki shrink-0 whitespace-nowrap agar tidak menimpa teks periode pada layar sempit
+    $response->assertSee('shrink-0 whitespace-nowrap', false);
+    $response->assertSee('(aktif)');
+
+    // 3. Dropdown periode memakai x-ui.select dengan w-full, pr-10, appearance-none, dan panah
+    $response->assertSee('appearance-none', false);
+    $response->assertSee('pr-10', false);
+    $response->assertSee('pointer-events-none', false);
+});
+
+test('admin pergantian periode dan kelola siswa: markup tabel menggunakan x-ui.pilih-semua dan x-ui.pilih-baris', function () {
+    $resPeriode = $this->actingAs($this->userAdmin)->get(route('admin.pergantian-periode.index', ['tab' => 'salin']));
+    $resPeriode->assertOk();
+    $resPeriode->assertSee(':checked="semuaTerpilih"', false);
+    $resPeriode->assertSee('$el.indeterminate = Boolean(sebagian)', false);
+    $resPeriode->assertSee('@change="toggleSemua($event.target.checked)"', false);
+    $resPeriode->assertSee('toggleSatu(', false);
+
+    $resSiswa = $this->actingAs($this->userAdmin)->get(route('admin.siswa.index'));
+    $resSiswa->assertOk();
+    $resSiswa->assertSee(':checked="semuaTerpilih"', false);
+    $resSiswa->assertSee('Pilih semua siswa di halaman ini');
+    $resSiswa->assertSee('toggleSatu(', false);
+});

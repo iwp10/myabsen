@@ -25,6 +25,9 @@ $sizeClass = \App\Support\Ui::iconClass($size);
     @elseif($name === 'chevron-right')
         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
         <path d="M9 6l6 6l-6 6" />
+    @elseif($name === 'chevron-down')
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M6 9l6 6l6 -6" />
     @elseif($name === 'check')
         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
         <path d="M5 12l5 5l10 -10" />

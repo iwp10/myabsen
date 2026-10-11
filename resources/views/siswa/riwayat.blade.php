@@ -15,35 +15,37 @@
                         <h3 class="text-lg font-bold text-slate-900 dark:text-white">
                             Riwayat Kehadiran Siswa
                         </h3>
-                        <p class="text-sm text-slate-600 dark:text-slate-300 mt-0.5">
-                            Periode Dilihat:
-                            <span class="font-bold text-slate-900 dark:text-slate-100">
-                                @if($filterPeriodeValue === 'semua')
-                                    Semua Periode
-                                @else
-                                    {{ $selectedPeriode['tahun_ajaran'] }} - Semester {{ $selectedPeriode['semester'] }}
-                                @endif
+                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-600 dark:text-slate-300 mt-0.5">
+                            <span>
+                                Periode Dilihat:
+                                <strong class="font-bold text-slate-900 dark:text-slate-100">
+                                    @if($filterPeriodeValue === 'semua')
+                                        Semua Periode
+                                    @else
+                                        {{ $selectedPeriode['tahun_ajaran'] }} - Semester {{ $selectedPeriode['semester'] }}
+                                    @endif
+                                </strong>
                             </span>
                             @if($filterPeriodeValue !== 'semua' && isset($daftarPeriode) && collect($daftarPeriode)->firstWhere('is_aktif', true)['value'] === ($selectedPeriode['tahun_ajaran'].'|'.$selectedPeriode['semester']))
-                                <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-400 dark:border-emerald-500/50">
+                                <span class="shrink-0 whitespace-nowrap inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-400 dark:border-emerald-500/50">
                                     (aktif)
                                 </span>
                             @endif
-                        </p>
+                        </div>
                     </div>
 
                     <!-- Dropdown Periode untuk Tab Per Mapel -->
-                    <div x-show="tab === 'per_mapel'">
+                    <div x-show="tab === 'per_mapel'" class="w-full md:w-auto">
                         <form method="GET" action="{{ route('siswa.riwayat') }}" class="flex items-center gap-2 w-full md:w-auto">
                             <input type="hidden" name="tab" value="per_mapel">
                             <label for="periode_top" class="sr-only">Pilih Periode</label>
-                            <select id="periode_top" name="periode" onchange="this.form.submit()" class="w-full sm:w-60 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium">
+                            <x-ui.select id="periode_top" name="periode" onchange="this.form.submit()" wrapper-class="w-full sm:w-auto sm:min-w-[16rem]">
                                 @foreach($daftarPeriode as $item)
                                     <option value="{{ $item['value'] }}" {{ $filterPeriodeValue === $item['value'] ? 'selected' : '' }}>
                                         {{ $item['label'] }}
                                     </option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                             <noscript>
                                 <button type="submit" class="bg-emerald-700 dark:bg-emerald-400 text-white dark:text-slate-950 text-xs px-3 py-2 rounded-lg font-bold min-h-[44px]">Ubah</button>
                             </noscript>
@@ -167,20 +169,21 @@
                             <input type="hidden" name="tab" value="semua">
                             <div class="w-full min-w-0">
                                 <x-input-label for="periode" value="Periode" class="text-slate-800 dark:text-slate-200 font-semibold" />
-                                <select id="periode" name="periode" class="mt-1 block w-full border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium">
+                                <x-ui.select id="periode" name="periode" wrapper-class="mt-1">
                                     <option value="semua" {{ $filterPeriodeValue === 'semua' ? 'selected' : '' }}>Semua Periode</option>
                                     @foreach($daftarPeriode as $item)
                                         <option value="{{ $item['value'] }}" {{ $filterPeriodeValue === $item['value'] ? 'selected' : '' }}>
                                             {{ $item['label'] }}
                                         </option>
                                     @endforeach
-                                </select>
+                                </x-ui.select>
                             </div>
                             <div class="w-full min-w-0">
                                 <x-input-label for="bulan" value="Bulan" class="text-slate-800 dark:text-slate-200 font-semibold" />
                                 <x-ui.bulan-select
                                     id="bulan"
                                     name="bulan"
+                                    wrapper-class="mt-1"
                                     :tahun-ajaran="$selectedPeriode['tahun_ajaran'] ?? ($activePeriode['tahun_ajaran'] ?? null)"
                                     :semester="$selectedPeriode['semester'] ?? ($activePeriode['semester'] ?? null)"
                                     :selected="request('bulan')"
@@ -192,25 +195,25 @@
                             </div>
                             <div class="w-full min-w-0">
                                 <x-input-label for="mapel_id" value="Mata Pelajaran" class="text-slate-800 dark:text-slate-200 font-semibold" />
-                                <select id="mapel_id" name="mapel_id" class="mt-1 block w-full border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium">
+                                <x-ui.select id="mapel_id" name="mapel_id" wrapper-class="mt-1">
                                     <option value="">Semua Mapel</option>
                                     @foreach($mapels as $mapel)
                                         <option value="{{ $mapel->id }}" {{ (string) request('mapel_id') === (string) $mapel->id ? 'selected' : '' }}>
                                             {{ $mapel->nama }}
                                         </option>
                                     @endforeach
-                                </select>
+                                </x-ui.select>
                             </div>
                             <div class="w-full min-w-0">
                                 <x-input-label for="status" value="Status" class="text-slate-800 dark:text-slate-200 font-semibold" />
-                                <select id="status" name="status" class="mt-1 block w-full border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium">
+                                <x-ui.select id="status" name="status" wrapper-class="mt-1">
                                     <option value="">Semua Status</option>
                                     @foreach(['hadir' => 'Hadir', 'izin' => 'Izin', 'sakit' => 'Sakit', 'alpa' => 'Alpa'] as $sVal => $sLbl)
                                         <option value="{{ $sVal }}" {{ request('status') === $sVal ? 'selected' : '' }}>
                                             {{ $sLbl }}
                                         </option>
                                     @endforeach
-                                </select>
+                                </x-ui.select>
                             </div>
                             <div class="flex items-center gap-2 w-full min-w-0">
                                 <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-slate-950 font-bold py-2.5 px-4 rounded-lg text-xs uppercase tracking-wider min-h-[44px] transition shadow-xs flex items-center justify-center">

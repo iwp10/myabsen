@@ -208,6 +208,7 @@ Ketika Anda menarik pembaruan terbaru dari repository (`git pull`), jalankan per
 | Perintah | Deskripsi |
 |---|---|
 | `php artisan test` | Menjalankan *test suite* (Feature & Unit tests). Berjalan menggunakan database MySQL `myabsen_test` (sesuai konfigurasi `phpunit.xml`) sehingga **tidak akan menghapus** data di database utama `myabsen`. |
+| `npm run test:js` | Menjalankan pengujian unit JavaScript (Node.js test runner bawaan) untuk modul logika presentasi di `resources/js/tests/`. Wajib dijalankan saat memodifikasi berkas di `resources/js`. |
 | `php vendor/bin/pint` | Merapikan format kode PHP (Code Style). **Wajib dijalankan sebelum commit.** |
 | `php artisan migrate:fresh --seed` | Menghapus seluruh tabel dan melakukan instalasi ulang database beserta data demo (Hanya untuk lokal/dev!). |
 | `php artisan config:clear` | Membersihkan cache konfigurasi (jalankan setiap kali Anda mengubah file `.env`). |

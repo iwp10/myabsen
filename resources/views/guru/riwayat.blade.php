@@ -15,27 +15,29 @@
                         <h3 class="text-lg font-bold text-slate-900 dark:text-white">
                             Riwayat Absensi
                         </h3>
-                        <p class="text-sm text-slate-600 dark:text-slate-300 mt-0.5">
-                            Periode Dilihat:
-                            <span class="font-bold text-slate-900 dark:text-slate-100">
-                                {{ $selectedPeriode['tahun_ajaran'] }} - Semester {{ $selectedPeriode['semester'] }}
+                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-600 dark:text-slate-300 mt-0.5">
+                            <span>
+                                Periode Dilihat:
+                                <strong class="font-bold text-slate-900 dark:text-slate-100">
+                                    {{ $selectedPeriode['tahun_ajaran'] }} - Semester {{ $selectedPeriode['semester'] }}
+                                </strong>
                             </span>
                             @if($selectedPeriode['tahun_ajaran'] === $activePeriode['tahun_ajaran'] && $selectedPeriode['semester'] === $activePeriode['semester'])
-                                <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-400 dark:border-emerald-500/50">
+                                <span class="shrink-0 whitespace-nowrap inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-400 dark:border-emerald-500/50">
                                     (aktif)
                                 </span>
                             @endif
-                        </p>
+                        </div>
                     </div>
 
                     <form action="{{ route('guru.riwayat') }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
-                        <select name="periode" class="w-full sm:w-60 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium">
+                        <x-ui.select name="periode" wrapper-class="w-full sm:w-60">
                             @foreach($daftarPeriode as $item)
                                 <option value="{{ $item['value'] }}" {{ $filterPeriode === $item['value'] ? 'selected' : '' }}>
                                     {{ $item['label'] }}
                                 </option>
                             @endforeach
-                        </select>
+                        </x-ui.select>
                         <input type="text" name="q" value="{{ $search }}" placeholder="Cari kelas atau mapel..." class="w-full sm:w-64 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium">
                         <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-slate-950 font-bold py-2 px-5 rounded-lg text-xs uppercase tracking-wider min-h-[44px] transition text-center shadow-xs">
                             Cari

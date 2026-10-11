@@ -156,6 +156,10 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] Pengujian otomatis: `UiTest` (10 test), `TampilanKonsistenTest` (14 test penegak R1-R5 konsistensi token, SVG ukuran eksplisit & komponen baru), dan `MobileLayoutInteraksiTest` (7 feature test komprehensif); seluruh test proyek PASS.
 - [x] Standarisasi ukuran eksplisit seluruh ikon (`x-ui.icon`) sm/md/lg dan penegakan aturan R5 (seluruh SVG di view Blade memiliki class `w-*` & `h-*` atau atribut `width`/`height`).
 - [x] Penggantian input `type="month"` pada riwayat siswa menjadi komponen `<x-ui.bulan-select>` berdasarkan periode semester dengan 6 opsi berlabel Indonesia dan pencegahan validasi error pada nilai kosong.
+- [x] Standardisasi pemilihan massal terpusat via modul Javascript murni `resources/js/pilihan-massal.js` (`pilihanMassal`), komponen header `<x-ui.pilih-semua>`, komponen baris `<x-ui.pilih-baris>`, normalisasi ID string, pembersihan otomatis ID tersembunyi filter pencarian (`setTersedia`), dan 10 unit test JS murni (`npm run test:js`).
+- [x] Koreksi bug inversi status checkbox header pada tab Luluskan Siswa dan Pindahkan Siswa (`admin/pergantian_periode`) serta migrasi konsisten pada Kelola Siswa (`admin/siswa`) dan Data Terhapus (`admin/arsip`).
+- [x] Komponen pembungkus seragam `<x-ui.select>` (w-full, min-w-0, pr-10, appearance-none, min-h-[44px], truncate, ikon panah chevron-down) dan penegakan aturan konsistensi R6 di `TampilanKonsistenTest`.
+- [x] Pencegahan tabrakan teks periode & lencana status `(aktif)` pada mobile (320–484px) via pembungkus fleksibel `flex-wrap gap-x-2 gap-y-1` dan lencana `shrink-0 whitespace-nowrap`.
 
 ## Catatan dan hambatan
 Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
@@ -197,6 +201,7 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-11 | 12 | feat: perbaikan desain tahap 1 (koreksi mode gelap bar tanggal/hari ke dark:bg-slate-800, penguatan kontras teks sekunder/meta, elevasi kartu jadwal berbayang dan ber-ring, peremajaan strip rekap H/I/S/A beraksen tinted tanpa latar kusam, sticky kolom matriks opak berbayang, single source docs/DESAIN.md, penegakan aturan R1-R4 via TampilanKonsistenTest; seluruh 331 test PASS).
 2026-10-11 | 12 | feat: perbaikan tampilan dan interaksi mobile (matriks presensi kartu/chip < md di guru & siswa, filter bar 1 kolom bebas tumpang tindih di 360px, standarisasi x-ui.file-input token emerald 44px, navigasi tab pergantian periode auto-scroll & sinkronisasi URL hash; seluruh pengujian otomatis lulus).
 2026-10-11 | 12 | feat: perbaikan ukuran ikon eksplisit seluruh aplikasi (x-ui.icon, penegakan R5) dan standarisasi filter bulan siswa via x-ui.bulan-select berbasis periode (seluruh 348 test PASS).
+2026-10-11 | 12 | fix: perbaikan bug checkbox pilih-semua terbalik (modul murni pilihanMassal, x-ui.pilih-semua, x-ui.pilih-baris, test JS node:test) dan tabrakan header periode/dropdown di HP (x-ui.select, flex-wrap + badge whitespace-nowrap, penegakan R6; seluruh test PASS).
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:
