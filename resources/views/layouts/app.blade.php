@@ -116,5 +116,6 @@
         
         <!-- Global Confirm Modal -->
         <x-confirm-modal />
+        <x-confirm-massal-modal />
     </body>
 </html>

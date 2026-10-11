@@ -99,6 +99,20 @@ Setiap aturan di bawah harus punya test.
   - Pindahkan Siswa: Memindahkan siswa aktif ke kelas tujuan yang aktif dan berbeda (hanya memperbarui `siswa.kelas_id`; sesi dan detail absensi lama tidak diubah). Validasi server memastikan setiap siswa yang dipindahkan benar-benar siswa aktif kelas asal.
   - Luluskan Siswa: Meluluskan siswa secara massal menggunakan soft delete model Siswa (`$siswa->delete()`). JANGAN PERNAH forceDelete, meskipun siswa belum memiliki riwayat absensi. Akun User tidak dihapus sehingga aturan AB-05 memblokir login. Siswa dapat dipulihkan melalui menu Data Terhapus.
   - Batas Operasi: Maksimal 100 kelas per operasi salin kelas dan 500 siswa per operasi pemindahan/kelulusan. Seluruh aksi massal dijalankan dalam `DB::transaction`.
+- **AB-14** Aksi Massal Admin (Kelola Siswa & Data Terhapus):
+  - Admin dapat melakukan operasi massal pada daftar siswa (reset password dan hapus siswa) serta Data Terhapus (pemulihan arsip Guru, Siswa, Kelas, Mapel).
+  - Pilihan massal (checkbox per baris dan checkbox "pilih semua di halaman ini") dibatasi hanya untuk baris pada halaman yang sedang aktif/tampil ({n} item) dan otomatis direset saat berpindah halaman atau setelah aksi selesai.
+  - Batas volume operasi maksimal 100 data per permintaan (`ids` divalidasi via `MassalSiswaRequest` dan `MassalArsipRequest`).
+  - Modal konfirmasi wajib ditampilkan sebelum eksekusi aksi:
+    - Reset password: menginformasikan reset ke password awal tanpa menampilkan nilai password, dan akun wajib mengganti password saat login berikutnya (`must_change_password`).
+    - Hapus siswa: rincian dihitung dari data yang dimuat server (`withExists('detailAbsensi')`, tanpa N+1) membedakan {a} siswa dinonaktifkan (soft delete) dan {b} siswa dihapus permanen beserta akun (peringatan merah bila b > 0; bagian permanen disembunyikan bila b = 0).
+    - Pemulihan arsip: mengonfirmasi pemulihan {n} data terpilih beserta daftar nama (maksimal 10 nama + "dan {n} lainnya").
+  - Eksekusi dilakukan per data, tiap data dalam transaksi database tersendiri (`DB::transaction`), sehingga kegagalan satu data (misal bentrok integritas, kelas terhapus, atau FK restrict) tidak membatalkan data lain yang valid.
+  - Setiap eksekusi aksi massal mencatat satu baris `Log::info` pada channel bawaan berisi `admin_id`, jenis `aksi`, daftar `ids`, jumlah `berhasil`, dan jumlah `ditolak`, tanpa mencatat password atau data sensitif.
+  - Rute baru di bawah middleware `role:admin` dan `password.changed`:
+    - `POST admin/siswa/massal/reset-password` (`admin.siswa.massal.reset-password`)
+    - `POST admin/siswa/massal/hapus` (`admin.siswa.massal.hapus`)
+    - `POST admin/arsip/{jenis}/massal/pulihkan` (`admin.arsip.massal.pulihkan`, jenis `guru|siswa|kelas|mapel`)
 
 ## 5. Skema database
 
@@ -191,6 +205,7 @@ Tidak dikerjakan sebelum MVP stabil dan diuji di sekolah:
 | 2026-10-10 | Redesign halaman Riwayat Siswa menjadi dua tingkat mengikuti pola Riwayat Guru tanpa migrasi dan tabel baru: Tab Per Mata Pelajaran (grid kartu dengan nama mapel, guru pengampu, persentase AB-07, H/I/S/A, total sesi, indikator warna) dan Tab Semua Riwayat (daftar linier dengan filter lengkap), serta halaman Tingkat 2 Detail Per Mapel (route siswa.riwayat.mapel) berupa matriks horizontal P1..Pn hanya-baca untuk satu baris siswa bersangkutan dengan isolasi data AB-08 tanpa N+1. |
 | 2026-10-10 | Peningkatan interaksi navigasi guru dan siswa tanpa migrasi/tabel baru: (1) Kartu Total Kelas dan Total Mapel di dashboard guru interaktif membuka modal Alpine daftar kelas/mapel dengan tautan langsung ke filter Jadwal Mengajar; (2) Filter kelas dan mapel pada Jadwal Mengajar guru dengan sorotan hijau (emerald) dan banner label filter aktif; (3) Menu baru Mata Pelajaran siswa (route siswa.mapel) di sidebar antara Jadwal dan Riwayat serta filter mapel_id pada Jadwal Pelajaran siswa; (4) Kartu Hadir/Izin/Sakit/Alpa di dashboard siswa interaktif tertaut ke tab Semua Riwayat dengan status dan periode=semua yang sama, didukung filter bulan (Y-m) dan header ringkas Menampilkan {n} catatan {status}. |
 | 2026-10-11 | Peningkatan tiga tampilan admin tanpa migrasi dan tabel baru: (1) Filter kelas (optgroup per periode, urut periode terbaru) dan dropdown pengurutan nama A-Z / Z-A / NIS pada daftar siswa (SiswaFilterRequest) dengan kolom nomor urut dan header ringkas; (2) Filter tingkat pada daftar kelas (KelasFilterRequest) bersama pencarian dan periode dengan urutan bawaan periode terbaru, tingkat, nama; (3) Pewarnaan per kolom di tabel Kelola Jadwal (badge semester biru/ungu, badge hari dengan 6 warna berbeda, jam monospasi teal, badge kelas indigo, teks mapel emerald, teks guru amber) dengan kontras tinggi mode terang & gelap. |
+| 2026-10-11 | Implementasi aksi massal admin pada Kelola Siswa (reset password dan hapus siswa dengan rincian server nonaktif vs permanen) serta Data Terhapus (pemulihan massal guru, siswa, kelas, mapel), batas 100 per operasi, per data transaksi sendiri, logging tanpa data sensitif, dan pelestarian filter/paginasi (AB-14) |
 
 
 
