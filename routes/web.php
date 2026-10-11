@@ -47,6 +47,9 @@ Route::middleware(['auth', 'no-cache'])->group(function () {
         Route::resource('guru', GuruController::class)->except(['show']);
         Route::post('guru/{guru}/reset-password', [GuruController::class, 'resetPassword'])->name('guru.reset-password');
 
+        Route::post('siswa/massal/reset-password', [SiswaController::class, 'massalResetPassword'])->name('siswa.massal.reset-password');
+        Route::post('siswa/massal/hapus', [SiswaController::class, 'massalHapus'])->name('siswa.massal.hapus');
+
         Route::resource('siswa', SiswaController::class)->except(['show'])->parameters([
             'siswa' => 'siswa',
         ]);
@@ -69,7 +72,12 @@ Route::middleware(['auth', 'no-cache'])->group(function () {
         Route::post('pergantian-periode/luluskan-siswa', [PergantianPeriodeController::class, 'luluskanSiswa'])->name('pergantian-periode.luluskan-siswa');
 
         Route::get('arsip', [ArsipController::class, 'index'])->name('arsip.index');
-        Route::post('arsip/{jenis}/{id}/pulihkan', [ArsipController::class, 'pulihkan'])->name('arsip.pulihkan');
+        Route::post('arsip/{jenis}/massal/pulihkan', [ArsipController::class, 'massalPulihkan'])
+            ->whereIn('jenis', ['guru', 'siswa', 'kelas', 'mapel'])
+            ->name('arsip.massal.pulihkan');
+        Route::post('arsip/{jenis}/{id}/pulihkan', [ArsipController::class, 'pulihkan'])
+            ->whereNumber('id')
+            ->name('arsip.pulihkan');
     });
 
     // Guru Routes
