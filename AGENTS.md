@@ -64,6 +64,7 @@ Baca keduanya sebelum mengerjakan tugas apa pun. Jika kode bertentangan dengan P
 - Hindari N+1 (pakai eager loading) dan pasang index sesuai PRD.
 - Setiap aturan bisnis di PRD (AB-xx) harus punya test (feature test).
 - Setelah tiap fase: jalankan `php artisan test`, perbarui baris fasenya di `docs/PROGRESS.md`, lalu ringkas file yang berubah.
+- Bila menyentuh `resources/js`, jalankan `npm run test:js` sebelum membuat PR. Logika Alpine yang kompleks atau dapat diuji wajib dipindahkan ke modul Javascript murni di `resources/js` dan dilengkapi dengan unit test JS (`resources/js/tests/`).
 - Dokumen (`docs/PRD.md`, `README.md`, `docs/PROGRESS.md`) harus diperbarui bersama kode dalam PR yang sama agar tidak tertinggal.
 - Jangan menyentuh file `.env`, jangan commit file `.env` atau file dump SQL, dan jangan menaruh secret di kode.
 - Jangan pernah menulis password atau kredensial asli di dokumen maupun di kode program (gunakan nilai contoh yang aman atau variabel environment).

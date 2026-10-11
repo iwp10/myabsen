@@ -503,4 +503,123 @@ class TampilanKonsistenTest extends TestCase
         $this->assertStringContainsString('value="2026-10"', $rendered);
         $this->assertStringContainsString('selected', $rendered);
     }
+
+    /**
+     * R6: Setiap <select> di cakupan (guru, siswa, layouts, components, dan admin/pergantian_periode)
+     * harus memakai x-ui.select atau memiliki w-full, min-w-0, dan padding kanan untuk panah (pr-8, pr-9, atau pr-10).
+     */
+    public function test_r6_semua_select_dalam_cakupan_memenuhi_standar_atau_x_ui_select(): void
+    {
+        $base = dirname(__DIR__, 2).DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'views';
+        $scopeDirs = [
+            $base.DIRECTORY_SEPARATOR.'guru',
+            $base.DIRECTORY_SEPARATOR.'siswa',
+            $base.DIRECTORY_SEPARATOR.'layouts',
+            $base.DIRECTORY_SEPARATOR.'components',
+            $base.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'pergantian_periode',
+        ];
+
+        $violations = [];
+
+        foreach ($scopeDirs as $dir) {
+            if (! is_dir($dir)) {
+                continue;
+            }
+
+            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+            foreach ($iterator as $fileInfo) {
+                if (! $fileInfo->isFile() || ! str_ends_with($fileInfo->getFilename(), '.blade.php')) {
+                    continue;
+                }
+
+                $path = $fileInfo->getPathname();
+                $rel = str_replace(dirname(__DIR__, 2).DIRECTORY_SEPARATOR, '', $path);
+                $relForward = str_replace(DIRECTORY_SEPARATOR, '/', $rel);
+
+                $content = file_get_contents($path);
+                if (! str_contains($content, '<select')) {
+                    continue;
+                }
+
+                $isComponentDef = str_ends_with($relForward, 'components/ui/select.blade.php');
+                if ($isComponentDef) {
+                    $hasWFull = str_contains($content, 'w-full');
+                    $hasMinW0 = str_contains($content, 'min-w-0');
+                    $hasPaddingRight = (bool) preg_match('/\bpr-(?:8|9|10)\b/', $content);
+                    if (! ($hasWFull && $hasMinW0 && $hasPaddingRight)) {
+                        $violations[] = "{$relForward} | x-ui.select komponen tidak memiliki w-full/min-w-0/pr-8..10";
+                    }
+
+                    continue;
+                }
+
+                preg_match_all('/<select\b([^>]*)>/i', $content, $matches);
+                foreach ($matches[1] as $attrs) {
+                    $classStr = '';
+                    if (preg_match('~\\bclass\\s*=\\s*["\']([^"\']*)["\']~i', $attrs, $classMatch)) {
+                        $classStr = $classMatch[1];
+                    }
+
+                    $hasWFull = (bool) preg_match('/\bw-full\b/', $classStr);
+                    $hasMinW0 = (bool) preg_match('/\bmin-w-0\b/', $classStr);
+                    $hasPaddingRight = (bool) preg_match('/\bpr-(?:8|9|10)\b/', $classStr);
+
+                    if (! ($hasWFull && $hasMinW0 && $hasPaddingRight)) {
+                        $violations[] = "{$relForward} | class='{$classStr}' | <select{$attrs}>";
+                    }
+                }
+            }
+        }
+
+        $this->assertEmpty($violations, 'Pelanggaran R6 ditemukan (<select> tanpa w-full, min-w-0, atau pr-8/9/10): '.PHP_EOL.implode(PHP_EOL, $violations));
+    }
+
+    /**
+     * Uji komponen x-ui.select merender wrapper relatif, select dengan class standar, dan ikon panah.
+     */
+    public function test_x_ui_select_merender_wrapper_dan_panah(): void
+    {
+        $rendered = $this->blade('<x-ui.select name="kelas_id" id="kelas_select"><option value="1">Kelas 1</option></x-ui.select>');
+
+        $this->assertStringContainsString('relative', $rendered);
+        $this->assertStringContainsString('<select', $rendered);
+        $this->assertStringContainsString('name="kelas_id"', $rendered);
+        $this->assertStringContainsString('id="kelas_select"', $rendered);
+        $this->assertStringContainsString('w-full', $rendered);
+        $this->assertStringContainsString('min-w-0', $rendered);
+        $this->assertStringContainsString('pr-10', $rendered);
+        $this->assertStringContainsString('appearance-none', $rendered);
+        $this->assertStringContainsString('min-h-[44px]', $rendered);
+        $this->assertStringContainsString('pointer-events-none', $rendered);
+        $this->assertStringContainsString('<svg', $rendered);
+    }
+
+    /**
+     * Uji komponen x-ui.pilih-semua dan x-ui.pilih-baris.
+     */
+    public function test_x_ui_pilih_semua_dan_pilih_baris(): void
+    {
+        // Header
+        $renderedHeader = $this->blade('<x-ui.pilih-semua aria-label="Pilih semua siswa di halaman ini" :count="24" />');
+        $this->assertStringContainsString(':checked="semuaTerpilih"', $renderedHeader);
+        $this->assertStringContainsString('x-effect="$el.indeterminate = Boolean(sebagian)"', $renderedHeader);
+        $this->assertStringContainsString('@change="toggleSemua($event.target.checked)"', $renderedHeader);
+        $this->assertStringContainsString('aria-label="Pilih semua siswa di halaman ini"', $renderedHeader);
+
+        // Baris dengan ID statis
+        $renderedBaris = $this->blade('<x-ui.pilih-baris id="15" name="ids[]" aria-label="Pilih siswa Budi" />');
+        $this->assertStringContainsString('value="15"', $renderedBaris);
+        $this->assertStringContainsString(':checked="terpilih.includes(String(\'15\'))"', $renderedBaris);
+        $this->assertStringContainsString('@change="toggleSatu(\'15\')"', $renderedBaris);
+        $this->assertStringContainsString('name="ids[]"', $renderedBaris);
+        $this->assertStringContainsString('aria-label="Pilih siswa Budi"', $renderedBaris);
+
+        // Baris dengan Alpine ID
+        $renderedAlpineBaris = $this->blade('<x-ui.pilih-baris alpine-id="item.id" name="siswa_ids[]" :alpine-aria-label="\'item.name\'" />');
+        $this->assertStringContainsString(':value="item.id"', $renderedAlpineBaris);
+        $this->assertStringContainsString(':checked="terpilih.includes(String(item.id))"', $renderedAlpineBaris);
+        $this->assertStringContainsString('@change="toggleSatu(item.id)"', $renderedAlpineBaris);
+        $this->assertStringContainsString('name="siswa_ids[]"', $renderedAlpineBaris);
+        $this->assertStringContainsString(':aria-label="item.name"', $renderedAlpineBaris);
+    }
 }

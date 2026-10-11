@@ -6,57 +6,42 @@
     </x-slot>
 
     <div class="py-12"
-         x-data="{
-             pageItems: [
-                 @foreach($siswas as $siswa)
-                     { id: {{ $siswa->id }}, name: @js($siswa->user->name), hasHistory: {{ $siswa->detail_absensi_exists ? 'true' : 'false' }} },
-                 @endforeach
-             ],
-             selected: [],
-
-             get selectedItems() {
-                 return this.pageItems.filter(item => this.selected.includes(item.id));
-             },
-             get isAllSelected() {
-                 return this.pageItems.length > 0 && this.selected.length === this.pageItems.length;
-             },
-             get isIndeterminate() {
-                 return this.selected.length > 0 && this.selected.length < this.pageItems.length;
-             },
-             toggleSelectAll() {
-                 if (this.isAllSelected) {
-                     this.selected = [];
-                 } else {
-                     this.selected = this.pageItems.map(item => item.id);
+         x-data="pilihanMassal(
+             {{ json_encode($siswas->pluck('id')->map(fn($id) => (string)$id)->values()) }},
+             [],
+             {
+                 pageItems: [
+                     @foreach($siswas as $siswa)
+                         { id: {{ $siswa->id }}, name: @js($siswa->user->name), hasHistory: {{ $siswa->detail_absensi_exists ? 'true' : 'false' }} },
+                     @endforeach
+                 ],
+                 get selectedItems() {
+                     return this.pageItems.filter(item => this.terpilih.includes(String(item.id)));
+                 },
+                 openResetModal() {
+                     $dispatch('open-confirm-massal-modal', {
+                         title: 'Konfirmasi Reset Password Siswa',
+                         type: 'siswa-reset',
+                         action: '{{ route('admin.siswa.massal.reset-password') }}' + window.location.search,
+                         method: 'POST',
+                         confirmText: 'Reset Password',
+                         confirmColor: 'warning',
+                         items: this.selectedItems
+                     });
+                 },
+                 openHapusModal() {
+                     $dispatch('open-confirm-massal-modal', {
+                         title: 'Konfirmasi Hapus Siswa',
+                         type: 'siswa-hapus',
+                         action: '{{ route('admin.siswa.massal.hapus') }}' + window.location.search,
+                         method: 'POST',
+                         confirmText: 'Hapus Siswa',
+                         confirmColor: 'danger',
+                         items: this.selectedItems
+                     });
                  }
-             },
-             clearSelection() {
-                 this.selected = [];
-             },
-             openResetModal() {
-                 $dispatch('open-confirm-massal-modal', {
-                     title: 'Konfirmasi Reset Password Siswa',
-                     type: 'siswa-reset',
-                     action: '{{ route('admin.siswa.massal.reset-password') }}' + window.location.search,
-                     method: 'POST',
-                     confirmText: 'Reset Password',
-                     confirmColor: 'warning',
-                     items: this.selectedItems
-                 });
-             },
-             openHapusModal() {
-                 $dispatch('open-confirm-massal-modal', {
-                     title: 'Konfirmasi Hapus Siswa',
-                     type: 'siswa-hapus',
-                     action: '{{ route('admin.siswa.massal.hapus') }}' + window.location.search,
-                     method: 'POST',
-                     confirmText: 'Hapus Siswa',
-                     confirmColor: 'danger',
-                     items: this.selectedItems
-                 });
              }
-         }"
-         x-effect="if ($refs.selectAllCheckbox) { $refs.selectAllCheckbox.indeterminate = isIndeterminate; }">
+         )">
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @if (session('success'))
@@ -186,15 +171,7 @@
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
                                     <th scope="col" class="px-4 py-3 whitespace-nowrap w-10">
-                                        <div class="flex items-center gap-2">
-                                            <input type="checkbox"
-                                                x-ref="selectAllCheckbox"
-                                                :checked="isAllSelected"
-                                                @change="toggleSelectAll"
-                                                aria-label="Pilih semua siswa di halaman ini"
-                                                class="rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-blue-600 focus:ring-blue-500 dark:[color-scheme:dark]">
-                                            <span class="sr-only">Pilih semua di halaman ini ({{ $siswas->count() }})</span>
-                                        </div>
+                                        <x-ui.pilih-semua aria-label="Pilih semua siswa di halaman ini" :count="$siswas->count()" />
                                     </th>
                                     <th scope="col" class="px-4 py-3 whitespace-nowrap">
                                         <div class="flex items-center gap-1.5">
@@ -213,13 +190,9 @@
                             <tbody>
                                 @forelse ($siswas as $siswa)
                                     <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                                        :class="{ 'bg-blue-50/60 dark:bg-blue-950/20': selected.includes({{ $siswa->id }}) }">
+                                        :class="{ 'bg-blue-50/60 dark:bg-blue-950/20': terpilih.includes(String('{{ $siswa->id }}')) }">
                                         <td class="px-4 py-4 whitespace-nowrap">
-                                            <input type="checkbox"
-                                                :value="{{ $siswa->id }}"
-                                                x-model.number="selected"
-                                                aria-label="Pilih siswa {{ $siswa->user->name }}"
-                                                class="rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-blue-600 focus:ring-blue-500 dark:[color-scheme:dark]">
+                                            <x-ui.pilih-baris :id="$siswa->id" name="ids[]" :aria-label="'Pilih siswa ' . $siswa->user->name" />
                                         </td>
                                         <td class="px-4 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400">
                                             {{ $siswas->firstItem() ? $siswas->firstItem() + $loop->index : $loop->iteration }}
@@ -286,7 +259,7 @@
         </div>
 
         <!-- Bilah Aksi Massal (Floating Bottom Bar) -->
-        <div x-show="selected.length > 0"
+        <div x-show="terpilih.length > 0"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 translate-y-4"
              x-transition:enter-end="opacity-100 translate-y-0"
@@ -297,10 +270,10 @@
              class="fixed bottom-4 inset-x-4 sm:inset-x-auto sm:right-8 sm:left-auto sm:max-w-xl z-40 bg-white/95 dark:bg-gray-800/95 backdrop-blur shadow-2xl rounded-xl border border-gray-200 dark:border-gray-700 p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
 
             <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 w-full sm:w-auto">
-                <span class="inline-flex items-center justify-center size-6 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-bold text-xs" x-text="selected.length"></span>
-                <span class="font-medium"><span x-text="selected.length"></span> dipilih</span>
+                <span class="inline-flex items-center justify-center size-6 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-bold text-xs" x-text="terpilih.length"></span>
+                <span class="font-medium"><span x-text="terpilih.length"></span> dipilih</span>
                 <span class="text-gray-300 dark:text-gray-600">|</span>
-                <button type="button" @click="clearSelection" class="text-xs text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 underline focus:outline-none">
+                <button type="button" @click="reset()" class="text-xs text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 underline focus:outline-none">
                     Batalkan pilihan
                 </button>
             </div>
@@ -308,13 +281,13 @@
             <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
                 <button type="button"
                         @click="openResetModal"
-                        :disabled="selected.length === 0"
+                        :disabled="terpilih.length === 0"
                         class="px-3 py-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-medium text-xs rounded-md shadow-sm transition disabled:opacity-50">
                     Reset password yang dipilih
                 </button>
                 <button type="button"
                         @click="openHapusModal"
-                        :disabled="selected.length === 0"
+                        :disabled="terpilih.length === 0"
                         class="px-3 py-2 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-medium text-xs rounded-md shadow-sm transition disabled:opacity-50">
                     Hapus yang dipilih
                 </button>

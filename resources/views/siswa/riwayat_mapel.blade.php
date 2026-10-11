@@ -39,10 +39,10 @@
                                 Guru: <strong class="text-slate-900 dark:text-slate-100">{{ $guru }}</strong>
                             </span>
                             <span>&bull;</span>
-                            <span>
-                                Periode: <strong class="text-slate-900 dark:text-slate-100">{{ $selectedPeriode['tahun_ajaran'] }} - Semester {{ $selectedPeriode['semester'] }}</strong>
+                            <span class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                <span>Periode: <strong class="text-slate-900 dark:text-slate-100">{{ $selectedPeriode['tahun_ajaran'] }} - Semester {{ $selectedPeriode['semester'] }}</strong></span>
                                 @if($selectedPeriode['tahun_ajaran'] === ($activePeriode['tahun_ajaran'] ?? '') && $selectedPeriode['semester'] === ($activePeriode['semester'] ?? ''))
-                                    <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-400 dark:border-emerald-500/50">
+                                    <span class="shrink-0 whitespace-nowrap inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-400 dark:border-emerald-500/50">
                                         (aktif)
                                     </span>
                                 @endif
@@ -54,13 +54,13 @@
                     @if(count($daftarPeriodeMapel) > 1)
                         <form method="GET" action="{{ route('siswa.riwayat.mapel', $mapel) }}" class="flex items-center gap-2 w-full sm:w-auto">
                             <label for="periode_select" class="text-xs font-bold text-slate-800 dark:text-slate-200 whitespace-nowrap">Ganti Periode:</label>
-                            <select id="periode_select" name="periode" onchange="this.form.submit()" class="w-full sm:w-60 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium">
+                            <x-ui.select id="periode_select" name="periode" onchange="this.form.submit()" wrapper-class="w-full sm:w-60">
                                 @foreach($daftarPeriodeMapel as $p)
                                     <option value="{{ $p['value'] }}" {{ $filterPeriodeValue === $p['value'] ? 'selected' : '' }}>
                                         {{ $p['label'] }}
                                     </option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                             <noscript>
                                 <button type="submit" class="bg-emerald-700 dark:bg-emerald-400 text-white dark:text-slate-950 text-xs px-3 py-2 rounded-lg font-bold min-h-[44px]">Ubah</button>
                             </noscript>

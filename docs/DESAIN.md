@@ -174,4 +174,21 @@ Semua pasangan warna teks dan elemen UI di atas **100% LULUS** standar WCAG AA (
    - Filter bulan di antarmuka siswa tidak mengandalkan `<input type="month">` yang rawan jatuh kembali (*fallback*) menjadi teks bebas di berbagai browser seluler.
    - Menggunakan komponen dropdown terstandarisasi `<x-ui.bulan-select>` yang otomatis menampilkan opsi "Semua bulan" dan 6 bulan resmi dalam semester terkait (Ganjil: Juli-Desember; Genap: Januari-Juni) dengan label bahasa Indonesia ramah pengguna.
    - Bilah filter disusun sejajar rapi (`items-end`) dengan tinggi seragam `min-h-[44px]` dan membentang penuh 1-kolom di HP.
+7. **Standarisasi Dropdown Seragam (`x-ui.select`)**:
+   - Seluruh elemen dropdown `<select>` wajib menggunakan komponen pembungkus terstandarisasi `<x-ui.select>` atau memiliki kombinasi class `w-full min-w-0 pr-10 appearance-none min-h-[44px] truncate`.
+   - Ikon panah bawah konsisten (`chevron-down`, `w-4 h-4`) diletakkan di posisi absolut kanan (`right-0 pr-3 pointer-events-none`) dengan warna kontras token `text-slate-500 dark:text-slate-400`.
+   - Dropdown selalu memenuhi kontainer (`w-full`), tidak memicu overflow di layar sempit (`min-w-0`), dan opsi panjang terpotong rapi dengan elipsis (`truncate`) tanpa menimpa ikon panah.
+   - Mode gelap mendukung `dark:[color-scheme:dark]` untuk tampilan popover pilihan sistem yang serasi.
+8. **Pola Baris Informasi Periode & Lencana Status (`(aktif)`)**:
+   - Pasangan teks informasi "Periode Dilihat: {periode}" dan lencana `(aktif)` wajib dibungkus kontainer fleksibel `flex flex-wrap items-center gap-x-2 gap-y-1`.
+   - Teks periode diizinkan membungkus alami pada layar sempit, sedangkan lencana status wajib memiliki class `shrink-0 whitespace-nowrap` agar lencana turun dengan rapi ke baris berikutnya di lebar layar 320–484px tanpa pernah menimpa teks periode.
+   - Diterapkan seragam di kartu header riwayat siswa (`siswa/riwayat`, `siswa/riwayat_mapel`) dan guru (`guru/riwayat`, `guru/riwayat_detail`).
+9. **Standarisasi Pemilihan Massal Terpusat (`pilihanMassal`, `x-ui.pilih-semua`, `x-ui.pilih-baris`)**:
+   - Logika status checkbox pemilihan massal dipusatkan pada satu modul Javascript murni `resources/js/pilihan-massal.js` (`pilihanMassal`), tanpa manipulasi DOM langsung, dan wajib diuji unit test JS independen (`npm run test:js`).
+   - Menggantikan logika manual terpisah di Salin Kelas, Pindahkan Siswa, Luluskan Siswa (`admin/pergantian_periode`), Kelola Siswa (`admin/siswa`), dan Data Terhapus (`admin/arsip`).
+   - Checkbox header (`<x-ui.pilih-semua>`) mengikat `:checked="semuaTerpilih"`, efek reaktif `x-effect="$el.indeterminate = Boolean(sebagian)"`, dan `@change="toggleSemua($event.target.checked)"` menggunakan nilai centang baru yang diklik (mencegah bug inversi status).
+   - Checkbox baris (`<x-ui.pilih-baris>`) mengikat `:checked="terpilih.includes(String(id))"` dan `@change="toggleSatu(id)"`.
+   - Seluruh ID selalu dinormalkan menjadi tipe string agar kompatibel dengan form array `ids[]`.
+   - Sinkron dengan filter pencarian sisi klien melalui `setTersedia(idTersedia)`: baris yang tersembunyi otomatis dibuang dari array `terpilih` sehingga pengguna tidak memproses data yang tidak terlihat.
+   - Mempertahankan target ketuk minimal 44px (`min-h-[44px]`), label aksesibilitas eksplisit (`aria-label`), dan token warna border/fokus sesuai desain.
 

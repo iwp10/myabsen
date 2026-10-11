@@ -67,40 +67,40 @@
                         {{-- Dropdown Hari --}}
                         <div class="w-full min-w-0">
                             <label for="filter-guru-hari" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Hari</label>
-                            <select id="filter-guru-hari" name="hari" onchange="this.form.submit()" class="w-full min-w-0 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:outline-none focus:ring-4 focus:ring-emerald-500 rounded-xl text-base sm:text-xs min-h-[44px] py-2 pl-3 pr-8">
+                            <x-ui.select id="filter-guru-hari" name="hari" onchange="this.form.submit()">
                                 <option value="">Semua Hari</option>
                                 @foreach(['senin' => 'Senin', 'selasa' => 'Selasa', 'rabu' => 'Rabu', 'kamis' => 'Kamis', 'jumat' => 'Jumat', 'sabtu' => 'Sabtu'] as $v => $l)
                                     <option value="{{ $v }}" {{ strtolower((string)$filterHari) === $v ? 'selected' : '' }}>
                                         {{ $l }} {{ strtolower($hariIni) === $v ? '(Hari Ini)' : '' }}
                                     </option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </div>
 
                         {{-- Dropdown Kelas --}}
                         <div class="w-full min-w-0">
                             <label for="filter-guru-kelas" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kelas</label>
-                            <select id="filter-guru-kelas" name="kelas_id" onchange="this.form.submit()" class="w-full min-w-0 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:outline-none focus:ring-4 focus:ring-emerald-500 rounded-xl text-base sm:text-xs min-h-[44px] py-2 pl-3 pr-8">
+                            <x-ui.select id="filter-guru-kelas" name="kelas_id" onchange="this.form.submit()">
                                 <option value="">Semua Kelas</option>
                                 @foreach($daftarKelas as $k)
                                     <option value="{{ $k['id'] }}" {{ $filterKelasId == $k['id'] ? 'selected' : '' }}>
                                         {{ $k['nama'] }}
                                     </option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </div>
 
                         {{-- Dropdown Mata Pelajaran --}}
                         <div class="w-full min-w-0">
                             <label for="filter-guru-mapel" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mata Pelajaran</label>
-                            <select id="filter-guru-mapel" name="mapel_id" onchange="this.form.submit()" class="w-full min-w-0 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:outline-none focus:ring-4 focus:ring-emerald-500 rounded-xl text-base sm:text-xs min-h-[44px] py-2 pl-3 pr-8">
+                            <x-ui.select id="filter-guru-mapel" name="mapel_id" onchange="this.form.submit()">
                                 <option value="">Semua Mapel</option>
                                 @foreach($daftarMapel as $m)
                                     <option value="{{ $m['id'] }}" {{ $filterMapelId == $m['id'] ? 'selected' : '' }}>
                                         {{ $m['nama'] }}
                                     </option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </div>
 
                         @if(!empty($filterHari) || !empty($filterKelasId) || !empty($filterMapelId))

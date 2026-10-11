@@ -252,10 +252,10 @@
                         <input type="hidden" name="tab" value="salin">
                         <div class="max-w-md">
                             <x-input-label for="filter_periode_asal" :value="__('Pilih Periode Asal (Sumber Kelas)')" />
-                            <select id="filter_periode_asal"
-                                    name="periode_asal"
-                                    onchange="this.form.submit()"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 dark:focus:border-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 rounded-md shadow-sm text-sm">
+                            <x-ui.select id="filter_periode_asal"
+                                         name="periode_asal"
+                                         onchange="this.form.submit()"
+                                         wrapper-class="mt-1">
                                 @forelse($daftarPeriodeAsal as $p)
                                     <option value="{{ $p['value'] }}" {{ $periodeAsal === $p['value'] ? 'selected' : '' }}>
                                         {{ $p['label'] }}
@@ -263,24 +263,13 @@
                                 @empty
                                     <option value="">Belum ada kelas aktif di database</option>
                                 @endforelse
-                            </select>
+                            </x-ui.select>
                         </div>
                     </form>
 
                     <!-- Form Salin Kelas -->
                     @if($kelasPeriodeAsal->isNotEmpty())
-                        <div x-data="{
-                            selectedKelas: {{ json_encode($kelasPeriodeAsal->pluck('id')->values()->all()) }},
-                            allKelasIds: {{ json_encode($kelasPeriodeAsal->pluck('id')->values()->all()) }},
-                            confirmModal: false,
-                            toggleAll() {
-                                if (this.selectedKelas.length === this.allKelasIds.length) {
-                                    this.selectedKelas = [];
-                                } else {
-                                    this.selectedKelas = [...this.allKelasIds];
-                                }
-                            }
-                        }">
+                        <div x-data="pilihanMassal({{ json_encode($kelasPeriodeAsal->pluck('id')->map(fn($id) => (string)$id)->values()->all()) }}, {{ json_encode($kelasPeriodeAsal->pluck('id')->map(fn($id) => (string)$id)->values()->all()) }}, { confirmModal: false })">
                             <form id="formSalinKelas" method="POST" action="{{ route('admin.pergantian-periode.salin-kelas') }}" class="space-y-6">
                                 @csrf
                                 <input type="hidden" name="periode_asal" value="{{ $periodeAsal }}">
@@ -294,25 +283,25 @@
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl">
                                         <div>
                                             <x-input-label for="tahun_ajaran_tujuan" :value="__('Tahun Ajaran Tujuan')" />
-                                            <select id="tahun_ajaran_tujuan"
-                                                    name="tahun_ajaran_tujuan"
-                                                    required
-                                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 dark:focus:border-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 rounded-md shadow-sm text-sm">
+                                            <x-ui.select id="tahun_ajaran_tujuan"
+                                                         name="tahun_ajaran_tujuan"
+                                                         required
+                                                         wrapper-class="mt-1">
                                                 @foreach($daftarTahunAjaran as $thn)
                                                     <option value="{{ $thn }}">{{ $thn }}</option>
                                                 @endforeach
-                                            </select>
+                                            </x-ui.select>
                                         </div>
 
                                         <div>
                                             <x-input-label for="semester_tujuan" :value="__('Semester Tujuan')" />
-                                            <select id="semester_tujuan"
-                                                    name="semester_tujuan"
-                                                    required
-                                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 dark:focus:border-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 rounded-md shadow-sm text-sm">
+                                            <x-ui.select id="semester_tujuan"
+                                                         name="semester_tujuan"
+                                                         required
+                                                         wrapper-class="mt-1">
                                                 <option value="Ganjil">Ganjil</option>
                                                 <option value="Genap">Genap</option>
-                                            </select>
+                                            </x-ui.select>
                                         </div>
                                     </div>
                                 </div>
@@ -324,7 +313,7 @@
                                             Daftar Kelas di Periode Asal ({{ $kelasPeriodeAsal->count() }} kelas)
                                         </h4>
                                         <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">
-                                            <span x-text="selectedKelas.length"></span> dari {{ $kelasPeriodeAsal->count() }} kelas dipilih
+                                            <span x-text="terpilih.length"></span> dari {{ $kelasPeriodeAsal->count() }} kelas dipilih
                                         </span>
                                     </div>
 
@@ -333,10 +322,7 @@
                                             <thead class="bg-gray-50 dark:bg-gray-900/50">
                                                 <tr>
                                                     <th scope="col" class="px-4 py-3 text-left w-12">
-                                                        <input type="checkbox"
-                                                               @change="toggleAll()"
-                                                               :checked="selectedKelas.length === allKelasIds.length"
-                                                               class="rounded border-gray-300 dark:border-gray-700 text-blue-600 shadow-sm focus:ring-blue-500">
+                                                        <x-ui.pilih-semua aria-label="Pilih semua kelas di periode asal" />
                                                     </th>
                                                     <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Nama Kelas</th>
                                                     <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Tingkat</th>
@@ -347,11 +333,7 @@
                                                 @foreach($kelasPeriodeAsal as $k)
                                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                                         <td class="px-4 py-3">
-                                                            <input type="checkbox"
-                                                                   name="kelas_ids[]"
-                                                                   value="{{ $k->id }}"
-                                                                   x-model="selectedKelas"
-                                                                   class="rounded border-gray-300 dark:border-gray-700 text-blue-600 shadow-sm focus:ring-blue-500">
+                                                            <x-ui.pilih-baris :id="$k->id" name="kelas_ids[]" :aria-label="'Pilih kelas ' . $k->nama" />
                                                         </td>
                                                         <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{{ $k->nama }}</td>
                                                         <td class="px-4 py-3 text-gray-600 dark:text-gray-400">Kelas {{ $k->tingkat }}</td>
@@ -365,9 +347,9 @@
 
                                 <div class="flex items-center justify-end gap-3 pt-3">
                                     <button type="button"
-                                            @click="if (selectedKelas.length > 0) { confirmModal = true } else { alert('Pilih minimal satu kelas untuk disalin.') }"
+                                            @click="if (terpilih.length > 0) { confirmModal = true } else { alert('Pilih minimal satu kelas untuk disalin.') }"
                                             class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                        Salin Kelas Terpilih (<span x-text="selectedKelas.length"></span>)
+                                        Salin Kelas Terpilih (<span x-text="terpilih.length"></span>)
                                     </button>
                                 </div>
 
@@ -384,7 +366,7 @@
                                             <div>
                                                 <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">Konfirmasi Salin Kelas</h3>
                                                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                                                    Apakah Anda yakin ingin menyalin <span class="font-bold text-gray-900 dark:text-gray-100" x-text="selectedKelas.length"></span> kelas terpilih ke periode tujuan?
+                                                    Apakah Anda yakin ingin menyalin <span class="font-bold text-gray-900 dark:text-gray-100" x-text="terpilih.length"></span> kelas terpilih ke periode tujuan?
                                                 </p>
                                                 <p class="text-xs text-amber-600 dark:text-amber-400 mt-2">
                                                     Catatan: Kelas yang sudah ada di periode tujuan akan otomatis dilewati. Jadwal dan siswa tidak ikut disalin.
@@ -435,17 +417,17 @@
 
                             <div>
                                 <x-input-label for="select_kelas_asal" :value="__('Kelas Asal (Sumber Siswa)')" />
-                                <select id="select_kelas_asal"
-                                        name="kelas_asal_id"
-                                        onchange="this.form.submit()"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 dark:focus:border-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 rounded-md shadow-sm text-sm">
+                                <x-ui.select id="select_kelas_asal"
+                                             name="kelas_asal_id"
+                                             onchange="this.form.submit()"
+                                             wrapper-class="mt-1">
                                     <option value="">-- Pilih Kelas Asal --</option>
                                     @foreach($daftarKelasAktif as $ka)
                                         <option value="{{ $ka->id }}" {{ (string)$kelasAsalId === (string)$ka->id ? 'selected' : '' }}>
                                             {{ $ka->nama }} ({{ $ka->tahun_ajaran }} - {{ $ka->semester }})
                                         </option>
                                     @endforeach
-                                </select>
+                                </x-ui.select>
                             </div>
 
                             <div>
@@ -462,32 +444,30 @@
                         @php
                             $namaKelasAsal = $daftarKelasAktif->firstWhere('id', (int)$kelasAsalId)?->nama ?? 'Kelas Asal';
                         @endphp
-                        <div x-data="{
-                            selectedSiswa: {{ json_encode($siswaKelasAsal->pluck('id')->values()->all()) }},
-                            allSiswa: {{ json_encode($siswaKelasAsal->map(fn($s) => ['id' => $s->id, 'nis' => $s->nis, 'name' => $s->user?->name ?? ''])->values()->all()) }},
-                            search: '',
-                            kelasTujuanNama: '',
-                            confirmModal: false,
-                            get filteredSiswa() {
-                                if (!this.search.trim()) return this.allSiswa;
-                                const q = this.search.toLowerCase();
-                                return this.allSiswa.filter(s => s.nis.toLowerCase().includes(q) || s.name.toLowerCase().includes(q));
-                            },
-                            toggleAll() {
-                                const currentFilteredIds = this.filteredSiswa.map(s => s.id);
-                                const allSelected = currentFilteredIds.every(id => this.selectedSiswa.includes(id));
-                                if (allSelected) {
-                                    this.selectedSiswa = this.selectedSiswa.filter(id => !currentFilteredIds.includes(id));
-                                } else {
-                                    const toAdd = currentFilteredIds.filter(id => !this.selectedSiswa.includes(id));
-                                    this.selectedSiswa = [...this.selectedSiswa, ...toAdd];
+                        <div x-data="pilihanMassal(
+                            {{ json_encode($siswaKelasAsal->pluck('id')->map(fn($id) => (string)$id)->values()->all()) }},
+                            {{ json_encode($siswaKelasAsal->pluck('id')->map(fn($id) => (string)$id)->values()->all()) }},
+                            {
+                                allSiswa: {{ json_encode($siswaKelasAsal->map(fn($s) => ['id' => (string)$s->id, 'nis' => $s->nis, 'name' => $s->user?->name ?? ''])->values()->all()) }},
+                                search: '',
+                                kelasTujuanNama: '',
+                                confirmModal: false,
+                                get filteredSiswa() {
+                                    if (!this.search.trim()) return this.allSiswa;
+                                    const q = this.search.toLowerCase();
+                                    return this.allSiswa.filter(s => s.nis.toLowerCase().includes(q) || s.name.toLowerCase().includes(q));
+                                },
+                                updateTujuanName(e) {
+                                    const sel = e.target;
+                                    this.kelasTujuanNama = sel.options[sel.selectedIndex]?.text || '';
+                                },
+                                init() {
+                                    this.$watch('search', () => {
+                                        this.setTersedia(this.filteredSiswa.map(s => s.id));
+                                    });
                                 }
-                            },
-                            updateTujuanName(e) {
-                                const sel = e.target;
-                                this.kelasTujuanNama = sel.options[sel.selectedIndex]?.text || '';
                             }
-                        }">
+                        )">
                             <form id="formPindahkanSiswa" method="POST" action="{{ route('admin.pergantian-periode.pindahkan-siswa') }}" class="space-y-6">
                                 @csrf
                                 <input type="hidden" name="kelas_asal_id" value="{{ $kelasAsalId }}">
@@ -495,11 +475,11 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end p-4 bg-blue-50/40 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-xl">
                                     <div>
                                         <x-input-label for="kelas_tujuan_id" :value="__('Pilih Kelas Tujuan')" />
-                                        <select id="kelas_tujuan_id"
-                                                name="kelas_tujuan_id"
-                                                required
-                                                @change="updateTujuanName($event)"
-                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 dark:focus:border-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 rounded-md shadow-sm text-sm">
+                                        <x-ui.select id="kelas_tujuan_id"
+                                                     name="kelas_tujuan_id"
+                                                     required
+                                                     @change="updateTujuanName($event)"
+                                                     wrapper-class="mt-1">
                                             <option value="">-- Pilih Kelas Tujuan --</option>
                                             @foreach($daftarKelasAktif as $kt)
                                                 @if((int)$kt->id !== (int)$kelasAsalId)
@@ -508,7 +488,7 @@
                                                     </option>
                                                 @endif
                                             @endforeach
-                                        </select>
+                                        </x-ui.select>
                                     </div>
 
                                     <div>
@@ -528,11 +508,16 @@
 
                                 <div>
                                     <div class="flex items-center justify-between mb-3">
-                                        <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100">
-                                            Siswa Aktif Kelas {{ $namaKelasAsal }} ({{ $siswaKelasAsal->count() }} siswa)
-                                        </h4>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                                Siswa Aktif Kelas {{ $namaKelasAsal }} ({{ $siswaKelasAsal->count() }} siswa)
+                                            </h4>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                                Pilih semua yang terlihat (<span x-text="idTersedia.length"></span>)
+                                            </span>
+                                        </div>
                                         <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">
-                                            <span x-text="selectedSiswa.length"></span> siswa terpilih
+                                            <span x-text="terpilih.length"></span> siswa terpilih
                                         </span>
                                     </div>
 
@@ -541,9 +526,7 @@
                                             <thead class="bg-gray-50 dark:bg-gray-900/50">
                                                 <tr>
                                                     <th scope="col" class="px-4 py-3 text-left w-12">
-                                                        <input type="checkbox"
-                                                               @change="toggleAll()"
-                                                               class="rounded border-gray-300 dark:border-gray-700 text-blue-600 shadow-sm focus:ring-blue-500">
+                                                        <x-ui.pilih-semua aria-label="Pilih semua siswa di kelas asal" />
                                                     </th>
                                                     <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">NIS</th>
                                                     <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Nama Siswa</th>
@@ -553,11 +536,7 @@
                                                 <template x-for="item in filteredSiswa" :key="item.id">
                                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                                         <td class="px-4 py-3">
-                                                            <input type="checkbox"
-                                                                   name="siswa_ids[]"
-                                                                   :value="item.id"
-                                                                   x-model="selectedSiswa"
-                                                                   class="rounded border-gray-300 dark:border-gray-700 text-blue-600 shadow-sm focus:ring-blue-500">
+                                                            <x-ui.pilih-baris alpine-id="item.id" name="siswa_ids[]" :alpine-aria-label="'\'Pilih siswa \' + item.name'" />
                                                         </td>
                                                         <td class="px-4 py-3 font-mono text-gray-600 dark:text-gray-400" x-text="item.nis"></td>
                                                         <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100" x-text="item.name"></td>
@@ -581,14 +560,14 @@
                                                     alert('Silakan pilih kelas tujuan terlebih dahulu.');
                                                     return;
                                                 }
-                                                if (selectedSiswa.length === 0) {
+                                                if (terpilih.length === 0) {
                                                     alert('Pilih minimal satu siswa untuk dipindahkan.');
                                                     return;
                                                 }
                                                 confirmModal = true;
                                             "
                                             class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                        Pindahkan Siswa Terpilih (<span x-text="selectedSiswa.length"></span>)
+                                        Pindahkan Siswa Terpilih (<span x-text="terpilih.length"></span>)
                                     </button>
                                 </div>
 
@@ -605,7 +584,7 @@
                                             <div>
                                                 <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">Konfirmasi Pemindahan Siswa</h3>
                                                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                                                    Pindahkan <span class="font-bold text-gray-900 dark:text-gray-100" x-text="selectedSiswa.length"></span> siswa ke <span class="font-bold text-blue-600 dark:text-blue-400" x-text="kelasTujuanNama || 'kelas tujuan'"></span>?
+                                                    Pindahkan <span class="font-bold text-gray-900 dark:text-gray-100" x-text="terpilih.length"></span> siswa ke <span class="font-bold text-blue-600 dark:text-blue-400" x-text="kelasTujuanNama || 'kelas tujuan'"></span>?
                                                 </p>
                                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                                     Hanya kelas aktif siswa yang diperbarui. Detail kehadiran dan sesi absensi historis di kelas sebelumnya tetap aman.
@@ -659,17 +638,17 @@
                             <input type="hidden" name="tab" value="lulus">
 
                             <x-input-label for="select_kelas_lulus" :value="__('Pilih Kelas Siswa yang Lulus')" />
-                            <select id="select_kelas_lulus"
-                                    name="kelas_id"
-                                    onchange="this.form.submit()"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 dark:focus:border-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 rounded-md shadow-sm text-sm">
+                            <x-ui.select id="select_kelas_lulus"
+                                         name="kelas_id"
+                                         onchange="this.form.submit()"
+                                         wrapper-class="mt-1">
                                 <option value="">-- Pilih Kelas --</option>
                                 @foreach($daftarKelasAktif as $kl)
                                     <option value="{{ $kl->id }}" {{ (string)$kelasLulusId === (string)$kl->id ? 'selected' : '' }}>
                                         {{ $kl->nama }} (Tingkat {{ $kl->tingkat }} &bull; {{ $kl->tahun_ajaran }})
                                     </option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </form>
                     </div>
 
@@ -678,27 +657,25 @@
                         @php
                             $namaKelasLulus = $daftarKelasAktif->firstWhere('id', (int)$kelasLulusId)?->nama ?? 'Kelas';
                         @endphp
-                        <div x-data="{
-                            selectedSiswa: {{ json_encode($siswaLulus->pluck('id')->values()->all()) }},
-                            allSiswa: {{ json_encode($siswaLulus->map(fn($s) => ['id' => $s->id, 'nis' => $s->nis, 'name' => $s->user?->name ?? ''])->values()->all()) }},
-                            search: '',
-                            confirmModal: false,
-                            get filteredSiswa() {
-                                if (!this.search.trim()) return this.allSiswa;
-                                const q = this.search.toLowerCase();
-                                return this.allSiswa.filter(s => s.nis.toLowerCase().includes(q) || s.name.toLowerCase().includes(q));
-                            },
-                            toggleAll() {
-                                const currentFilteredIds = this.filteredSiswa.map(s => s.id);
-                                const allSelected = currentFilteredIds.every(id => this.selectedSiswa.includes(id));
-                                if (allSelected) {
-                                    this.selectedSiswa = this.selectedSiswa.filter(id => !currentFilteredIds.includes(id));
-                                } else {
-                                    const toAdd = currentFilteredIds.filter(id => !this.selectedSiswa.includes(id));
-                                    this.selectedSiswa = [...this.selectedSiswa, ...toAdd];
+                        <div x-data="pilihanMassal(
+                            {{ json_encode($siswaLulus->pluck('id')->map(fn($id) => (string)$id)->values()->all()) }},
+                            {{ json_encode($siswaLulus->pluck('id')->map(fn($id) => (string)$id)->values()->all()) }},
+                            {
+                                allSiswa: {{ json_encode($siswaLulus->map(fn($s) => ['id' => (string)$s->id, 'nis' => $s->nis, 'name' => $s->user?->name ?? ''])->values()->all()) }},
+                                search: '',
+                                confirmModal: false,
+                                get filteredSiswa() {
+                                    if (!this.search.trim()) return this.allSiswa;
+                                    const q = this.search.toLowerCase();
+                                    return this.allSiswa.filter(s => s.nis.toLowerCase().includes(q) || s.name.toLowerCase().includes(q));
+                                },
+                                init() {
+                                    this.$watch('search', () => {
+                                        this.setTersedia(this.filteredSiswa.map(s => s.id));
+                                    });
                                 }
                             }
-                        }">
+                        )">
                             <form id="formLuluskanSiswa" method="POST" action="{{ route('admin.pergantian-periode.luluskan-siswa') }}" class="space-y-6">
                                 @csrf
                                 <input type="hidden" name="kelas_id" value="{{ $kelasLulusId }}">
@@ -708,9 +685,14 @@
                                         <h4 class="text-sm font-bold text-gray-900 dark:text-gray-100">
                                             Siswa Aktif Kelas {{ $namaKelasLulus }} ({{ $siswaLulus->count() }} siswa)
                                         </h4>
-                                        <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">
-                                            <span x-text="selectedSiswa.length"></span> siswa terpilih untuk diluluskan
-                                        </span>
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                                Pilih semua yang terlihat (<span x-text="idTersedia.length"></span>)
+                                            </span>
+                                            <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">
+                                                <span x-text="terpilih.length"></span> siswa terpilih untuk diluluskan
+                                            </span>
+                                        </div>
                                     </div>
 
                                     <div class="w-full sm:w-72 relative">
@@ -729,9 +711,7 @@
                                         <thead class="bg-gray-50 dark:bg-gray-900/50">
                                             <tr>
                                                 <th scope="col" class="px-4 py-3 text-left w-12">
-                                                    <input type="checkbox"
-                                                           @change="toggleAll()"
-                                                           class="rounded border-gray-300 dark:border-gray-700 text-red-600 shadow-sm focus:ring-red-500">
+                                                    <x-ui.pilih-semua color="red" aria-label="Pilih semua siswa yang akan diluluskan" />
                                                 </th>
                                                 <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">NIS</th>
                                                 <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Nama Siswa</th>
@@ -741,11 +721,7 @@
                                             <template x-for="item in filteredSiswa" :key="item.id">
                                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                                     <td class="px-4 py-3">
-                                                        <input type="checkbox"
-                                                               name="siswa_ids[]"
-                                                               :value="item.id"
-                                                               x-model="selectedSiswa"
-                                                               class="rounded border-gray-300 dark:border-gray-700 text-red-600 shadow-sm focus:ring-red-500">
+                                                        <x-ui.pilih-baris alpine-id="item.id" name="siswa_ids[]" color="red" :alpine-aria-label="'\'Pilih siswa \' + item.name'" />
                                                     </td>
                                                     <td class="px-4 py-3 font-mono text-gray-600 dark:text-gray-400" x-text="item.nis"></td>
                                                     <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100" x-text="item.name"></td>
@@ -762,9 +738,9 @@
 
                                 <div class="flex items-center justify-end gap-3 pt-3">
                                     <button type="button"
-                                            @click="if (selectedSiswa.length > 0) { confirmModal = true } else { alert('Pilih minimal satu siswa untuk diluluskan.') }"
+                                            @click="if (terpilih.length > 0) { confirmModal = true } else { alert('Pilih minimal satu siswa untuk diluluskan.') }"
                                             class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                        Luluskan Siswa Terpilih (<span x-text="selectedSiswa.length"></span>)
+                                        Luluskan Siswa Terpilih (<span x-text="terpilih.length"></span>)
                                     </button>
                                 </div>
 
@@ -781,7 +757,7 @@
                                             <div>
                                                 <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">Konfirmasi Kelulusan Siswa</h3>
                                                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                                                    Apakah Anda yakin ingin meluluskan <span class="font-bold text-red-600 dark:text-red-400" x-text="selectedSiswa.length"></span> siswa terpilih dari kelas {{ $namaKelasLulus }}?
+                                                    Apakah Anda yakin ingin meluluskan <span class="font-bold text-red-600 dark:text-red-400" x-text="terpilih.length"></span> siswa terpilih dari kelas {{ $namaKelasLulus }}?
                                                 </p>
                                                 <div class="mt-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400 space-y-1">
                                                     <p>&bull; Akun mereka tidak bisa login lagi.</p>
