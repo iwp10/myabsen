@@ -67,31 +67,25 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
                     <!-- Kartu Persentase Utama -->
-                    <div class="lg:col-span-4 bg-white dark:bg-gray-800 rounded-xl p-5 shadow-xs border border-gray-200 dark:border-gray-700 flex flex-col justify-between">
+                    <div class="lg:col-span-4 bg-white dark:bg-gray-800 rounded-xl p-5 shadow-xs border-2 border-gray-300 dark:border-gray-600 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <span class="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">
                                     Total Persentase Kehadiran
                                 </span>
                                 @if($totalSesi > 0)
-                                    @if($isTargetReached)
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                                            &ge; 80% Memenuhi
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
-                                            &lt; 80% Di Bawah Target
-                                        </span>
-                                    @endif
+                                    <span class="{{ \App\Support\Ui::persenBadge($persentase) }}">
+                                        {{ $persentase >= config('absensi.batas_kehadiran_rendah', 75) ? 'Memenuhi Target' : 'Di Bawah Target' }}
+                                    </span>
                                 @else
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
                                         Belum Ada Data
                                     </span>
                                 @endif
                             </div>
 
                             <div class="mt-3 flex items-baseline gap-2">
-                                <span class="text-4xl font-extrabold tracking-tight {{ $totalSesi > 0 ? ($isTargetReached ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400') : 'text-gray-700 dark:text-gray-300' }}">
+                                <span class="text-4xl font-extrabold tracking-tight {{ $totalSesi > 0 ? \App\Support\Ui::persenWarna($persentase) : 'text-gray-700 dark:text-gray-300' }}">
                                     {{ $persentase }}%
                                 </span>
                                 <span class="text-xs text-gray-500 dark:text-gray-400">
@@ -101,14 +95,14 @@
 
                             <!-- Progress Bar Persentase -->
                             <div class="w-full bg-gray-200 dark:bg-gray-700 h-2.5 rounded-full mt-3 overflow-hidden">
-                                <div class="h-2.5 rounded-full transition-all duration-500 {{ $totalSesi > 0 ? ($isTargetReached ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-rose-500 dark:bg-rose-400') : 'bg-gray-400' }}"
+                                <div class="h-2.5 rounded-full transition-all duration-500 {{ $totalSesi > 0 ? ($persentase >= config('absensi.batas_kehadiran_rendah', 75) ? 'bg-emerald-600 dark:bg-emerald-400' : 'bg-red-600 dark:bg-red-400') : 'bg-gray-400' }}"
                                      style="width: {{ min(100, max(0, $persentase)) }}%;">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Keterangan Rumus Transparan -->
-                        <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/60 text-[11px] text-gray-500 dark:text-gray-400 flex items-start gap-1.5">
+                        <div class="mt-4 pt-3 border-t-2 border-gray-200 dark:border-gray-700 text-[11px] text-gray-600 dark:text-gray-300 flex items-start gap-1.5">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                                 <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
@@ -116,110 +110,74 @@
                                 <path d="M11 12h1v4h1" />
                             </svg>
                             <span>
-                                Rumus: <span class="font-medium text-gray-700 dark:text-gray-300">((Hadir + Izin + Sakit) / Total Pertemuan) &times; 100</span>. Kategori Alpa adalah satu-satunya yang mengurangi persentase.
+                                Rumus: <span class="font-bold text-gray-800 dark:text-gray-200">((Hadir + Izin + Sakit) / Total Pertemuan) &times; 100</span>. Kategori Alpa adalah satu-satunya yang mengurangi persentase.
                             </span>
                         </div>
                     </div>
 
-                    <!-- 4 Grid Cards Breakdown Transparan -->
-                    <div class="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <!-- 4 Grid Cards Breakdown Transparan (2 Kolom di HP) -->
+                    <div class="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                         <!-- Total Hadir -->
-                        <a href="{{ route('siswa.riwayat', ['tab' => 'semua', 'status' => 'hadir', 'periode' => 'semua']) }}"
-                           class="group bg-white dark:bg-gray-800 rounded-xl p-4 shadow-xs border border-gray-200 dark:border-gray-700 flex flex-col justify-between hover:border-emerald-400 dark:hover:border-emerald-600 hover:shadow-md transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                           aria-label="Lihat rincian riwayat hadir: {{ $ringkasanKehadiran['total_hadir'] }} pertemuan">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Total Hadir</span>
-                                <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4" /><path d="M15 19l2 2l4 -4" /></svg>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <div class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
-                                    {{ $ringkasanKehadiran['total_hadir'] }}
-                                </div>
-                                <div class="mt-1.5 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">Mengikuti KBM</span>
-                                    <span class="text-emerald-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity font-semibold flex items-center gap-0.5">
-                                        Rincian &rarr;
-                                    </span>
-                                </div>
-                            </div>
-                        </a>
+                        <x-ui.stat-card
+                            label="Total Hadir"
+                            :value="$ringkasanKehadiran['total_hadir']"
+                            color="hadir"
+                            description="Mengikuti KBM"
+                            :href="route('siswa.riwayat', ['tab' => 'semua', 'status' => 'hadir', 'periode' => 'semua'])"
+                            aria-label="Lihat rincian riwayat hadir: {{ $ringkasanKehadiran['total_hadir'] }} pertemuan"
+                        >
+                            <x-slot:iconSlot>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4" /><path d="M15 19l2 2l4 -4" /></svg>
+                            </x-slot:iconSlot>
+                        </x-ui.stat-card>
 
                         <!-- Total Izin -->
-                        <a href="{{ route('siswa.riwayat', ['tab' => 'semua', 'status' => 'izin', 'periode' => 'semua']) }}"
-                           class="group bg-white dark:bg-gray-800 rounded-xl p-4 shadow-xs border border-gray-200 dark:border-gray-700 flex flex-col justify-between hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-md transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           aria-label="Lihat rincian riwayat izin: {{ $ringkasanKehadiran['total_izin'] }} pertemuan">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Total Izin</span>
-                                <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 17h6" /><path d="M9 13h6" /></svg>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <div class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
-                                    {{ $ringkasanKehadiran['total_izin'] }}
-                                </div>
-                                <div class="mt-1.5 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">Dihitung Hadir</span>
-                                    <span class="text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity font-semibold flex items-center gap-0.5">
-                                        Rincian &rarr;
-                                    </span>
-                                </div>
-                            </div>
-                        </a>
+                        <x-ui.stat-card
+                            label="Total Izin"
+                            :value="$ringkasanKehadiran['total_izin']"
+                            color="izin"
+                            description="Dihitung Hadir"
+                            :href="route('siswa.riwayat', ['tab' => 'semua', 'status' => 'izin', 'periode' => 'semua'])"
+                            aria-label="Lihat rincian riwayat izin: {{ $ringkasanKehadiran['total_izin'] }} pertemuan"
+                        >
+                            <x-slot:iconSlot>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 17h6" /><path d="M9 13h6" /></svg>
+                            </x-slot:iconSlot>
+                        </x-ui.stat-card>
 
                         <!-- Total Sakit -->
-                        <a href="{{ route('siswa.riwayat', ['tab' => 'semua', 'status' => 'sakit', 'periode' => 'semua']) }}"
-                           class="group bg-white dark:bg-gray-800 rounded-xl p-4 shadow-xs border border-gray-200 dark:border-gray-700 flex flex-col justify-between hover:border-amber-400 dark:hover:border-amber-600 hover:shadow-md transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-500"
-                           aria-label="Lihat rincian riwayat sakit: {{ $ringkasanKehadiran['total_sakit'] }} pertemuan">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Total Sakit</span>
-                                <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12h4.5l1.5 -6l4 12l2 -9l1.5 3h4.5" /></svg>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <div class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
-                                    {{ $ringkasanKehadiran['total_sakit'] }}
-                                </div>
-                                <div class="mt-1.5 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">Dihitung Hadir</span>
-                                    <span class="text-amber-600 dark:text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity font-semibold flex items-center gap-0.5">
-                                        Rincian &rarr;
-                                    </span>
-                                </div>
-                            </div>
-                        </a>
+                        <x-ui.stat-card
+                            label="Total Sakit"
+                            :value="$ringkasanKehadiran['total_sakit']"
+                            color="sakit"
+                            description="Dihitung Hadir"
+                            :href="route('siswa.riwayat', ['tab' => 'semua', 'status' => 'sakit', 'periode' => 'semua'])"
+                            aria-label="Lihat rincian riwayat sakit: {{ $ringkasanKehadiran['total_sakit'] }} pertemuan"
+                        >
+                            <x-slot:iconSlot>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-amber-600 dark:text-amber-400" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12h4.5l1.5 -6l4 12l2 -9l1.5 3h4.5" /></svg>
+                            </x-slot:iconSlot>
+                        </x-ui.stat-card>
 
                         <!-- Total Alpa -->
-                        <a href="{{ route('siswa.riwayat', ['tab' => 'semua', 'status' => 'alpa', 'periode' => 'semua']) }}"
-                           class="group bg-white dark:bg-gray-800 rounded-xl p-4 shadow-xs border border-gray-200 dark:border-gray-700 flex flex-col justify-between hover:border-rose-400 dark:hover:border-rose-600 hover:shadow-md transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-500"
-                           aria-label="Lihat rincian riwayat alpa: {{ $ringkasanKehadiran['total_alpa'] }} pertemuan">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">Total Alpa</span>
-                                <div class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" /><path d="M12 16h.01" /></svg>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <div class="text-2xl sm:text-3xl font-bold {{ $ringkasanKehadiran['total_alpa'] > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-gray-900 dark:text-gray-100' }}">
-                                    {{ $ringkasanKehadiran['total_alpa'] }}
-                                </div>
-                                <div class="mt-1.5 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">Mengurangi %</span>
-                                    <span class="text-rose-600 dark:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity font-semibold flex items-center gap-0.5">
-                                        Rincian &rarr;
-                                    </span>
-                                </div>
-                            </div>
-                        </a>
+                        <x-ui.stat-card
+                            label="Total Alpa"
+                            :value="$ringkasanKehadiran['total_alpa']"
+                            color="alpa"
+                            description="Mengurangi %"
+                            :href="route('siswa.riwayat', ['tab' => 'semua', 'status' => 'alpa', 'periode' => 'semua'])"
+                            aria-label="Lihat rincian riwayat alpa: {{ $ringkasanKehadiran['total_alpa'] }} pertemuan"
+                        >
+                            <x-slot:iconSlot>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-600 dark:text-red-400" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" /><path d="M12 16h.01" /></svg>
+                            </x-slot:iconSlot>
+                        </x-ui.stat-card>
                     </div>
                 </div>
             </div>
 
             <!-- Jadwal & Status Hari Ini -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xs border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xs border-2 border-gray-300 dark:border-gray-600 overflow-hidden">
                 <div class="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <div>
                         <h3 class="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">

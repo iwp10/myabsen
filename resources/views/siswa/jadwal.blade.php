@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
             <!-- Banner Header / Info Siswa & Periode Aktif -->
-            <div class="bg-blue-600 dark:bg-blue-700 rounded-2xl p-6 text-white shadow-md relative overflow-hidden" style="background-color: #2563eb;">
+            <div class="bg-blue-600 dark:bg-blue-700 rounded-2xl p-6 text-white shadow-md relative overflow-hidden border-2 border-blue-700 dark:border-blue-600" style="background-color: #2563eb;">
                 <div class="absolute -right-8 -bottom-10 opacity-10 pointer-events-none">
                     <svg class="w-56 h-56 text-white" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
@@ -55,23 +55,23 @@
             @endif
 
             <!-- Kontainer Jadwal & Filter -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div class="p-5 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border-2 border-gray-300 dark:border-gray-600 overflow-hidden">
+                <div class="p-5 border-b-2 border-gray-300 dark:border-gray-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h3 class="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/><path d="M11 15h1"/><path d="M12 15v3"/></svg>
                             Jadwal Mingguan Pelajaran
                         </h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        <p class="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
                             Dikelompokkan berdasarkan hari dan diurutkan sesuai jam pelajaran
                         </p>
                     </div>
 
                     {{-- Filter Hari & Mapel --}}
                     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                        <form method="GET" action="{{ route('siswa.jadwal') }}" class="flex flex-wrap items-center gap-2">
+                        <form method="GET" action="{{ route('siswa.jadwal') }}" class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
                             <label for="filter-hari" class="text-xs font-medium text-gray-600 dark:text-gray-400 sr-only">Filter Hari</label>
-                            <select id="filter-hari" name="hari" onchange="this.form.submit()" class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-xs text-xs py-1.5 px-3">
+                            <select id="filter-hari" name="hari" onchange="this.form.submit()" class="border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 rounded-lg text-base sm:text-xs min-h-[44px] sm:min-h-0 py-2 sm:py-1.5 px-3">
                                 <option value="">Semua Hari</option>
                                 @foreach(['senin' => 'Senin', 'selasa' => 'Selasa', 'rabu' => 'Rabu', 'kamis' => 'Kamis', 'jumat' => 'Jumat', 'sabtu' => 'Sabtu'] as $val => $lbl)
                                     <option value="{{ $val }}" {{ strtolower((string)$filterHari) === $val ? 'selected' : '' }}>
@@ -81,7 +81,7 @@
                             </select>
 
                             <label for="filter-mapel" class="text-xs font-medium text-gray-600 dark:text-gray-400 sr-only">Filter Mata Pelajaran</label>
-                            <select id="filter-mapel" name="mapel_id" onchange="this.form.submit()" class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-xs text-xs py-1.5 px-3">
+                            <select id="filter-mapel" name="mapel_id" onchange="this.form.submit()" class="border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 rounded-lg text-base sm:text-xs min-h-[44px] sm:min-h-0 py-2 sm:py-1.5 px-3">
                                 <option value="">Semua Mapel</option>
                                 @foreach($daftarMapel as $m)
                                     <option value="{{ $m->id }}" {{ $filterMapelId == $m->id ? 'selected' : '' }}>
@@ -91,7 +91,7 @@
                             </select>
 
                             @if(!empty($filterHari) || !empty($filterMapelId))
-                                <a href="{{ route('siswa.jadwal') }}" class="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 px-2 py-1.5 border border-gray-300 dark:border-gray-700 rounded-md">
+                                <a href="{{ route('siswa.jadwal') }}" class="inline-flex items-center justify-center text-xs font-bold text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white px-3 py-2 sm:py-1.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg min-h-[44px] sm:min-h-0">
                                     Reset
                                 </a>
                             @endif
@@ -101,23 +101,23 @@
 
                 {{-- Banner Filter Aktif --}}
                 @if($filterHari || $filterMapelId)
-                    <div class="px-5 py-3 bg-emerald-50/70 dark:bg-emerald-950/20 border-b border-emerald-100 dark:border-emerald-900/40 flex flex-wrap items-center justify-between gap-3">
+                    <div class="px-5 py-3 bg-emerald-50/70 dark:bg-emerald-950/20 border-b-2 border-emerald-200 dark:border-emerald-800 flex flex-wrap items-center justify-between gap-3">
                         <div class="flex items-center gap-2 flex-wrap text-xs">
-                            <span class="font-semibold text-emerald-800 dark:text-emerald-300">Filter aktif:</span>
+                            <span class="font-bold text-emerald-800 dark:text-emerald-300">Filter aktif:</span>
                             @if($filterHari)
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 font-medium">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 font-semibold border border-emerald-300 dark:border-emerald-700">
                                     Hari: {{ ucfirst($filterHari) }}
-                                    <a href="{{ route('siswa.jadwal', array_filter(['mapel_id' => $filterMapelId])) }}" class="hover:text-emerald-950 dark:hover:text-white font-bold" aria-label="Hapus filter hari">&times;</a>
+                                    <a href="{{ route('siswa.jadwal', array_filter(['mapel_id' => $filterMapelId])) }}" class="hover:text-emerald-950 dark:hover:text-white font-bold ml-1" aria-label="Hapus filter hari">&times;</a>
                                 </span>
                             @endif
                             @if($activeMapel)
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 font-medium">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 font-semibold border border-emerald-300 dark:border-emerald-700">
                                     Mata pelajaran: {{ $activeMapel->nama }}
-                                    <a href="{{ route('siswa.jadwal', array_filter(['hari' => $filterHari])) }}" class="hover:text-emerald-950 dark:hover:text-white font-bold" aria-label="Hapus filter mata pelajaran">&times;</a>
+                                    <a href="{{ route('siswa.jadwal', array_filter(['hari' => $filterHari])) }}" class="hover:text-emerald-950 dark:hover:text-white font-bold ml-1" aria-label="Hapus filter mata pelajaran">&times;</a>
                                 </span>
                             @endif
                         </div>
-                        <a href="{{ route('siswa.jadwal') }}" class="text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 hover:underline">
+                        <a href="{{ route('siswa.jadwal') }}" class="text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 underline">
                             Reset Semua Filter
                         </a>
                     </div>
@@ -128,30 +128,30 @@
                     @if(! $siswa || ! $siswa->kelas_id)
                         {{-- Empty State: Siswa Belum Ada Kelas --}}
                         <div class="py-12 text-center px-4">
-                            <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-500 dark:text-amber-400 mb-3">
+                            <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-500 dark:text-amber-400 mb-3 border-2 border-amber-200 dark:border-amber-800">
                                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                             </div>
-                            <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100">Belum Terdaftar di Kelas</h4>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-md mx-auto">
+                            <h4 class="text-base font-bold text-gray-900 dark:text-gray-100">Belum Terdaftar di Kelas</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1 max-w-md mx-auto">
                                 Akun Anda belum terhubung dengan kelas aktif manapun. Silakan hubungi bagian kurikulum atau wali kelas untuk penempatan kelas Anda.
                             </p>
                         </div>
                     @elseif($totalJadwal === 0)
                         {{-- Empty State: Kelas Belum Ada Jadwal / Hari Kosong / Filter Kosong --}}
                         <div class="py-12 text-center px-4">
-                            <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-500 dark:text-blue-400 mb-3">
+                            <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-500 dark:text-blue-400 mb-3 border-2 border-blue-200 dark:border-blue-800">
                                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
                             </div>
-                            <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                            <h4 class="text-base font-bold text-gray-900 dark:text-gray-100">
                                 @if(!empty($filterHari) || !empty($filterMapelId))
                                     Tidak Ada Jadwal Pelajaran yang Cocok
                                 @else
                                     Belum Ada Jadwal Pelajaran
                                 @endif
                             </h4>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-md mx-auto">
+                            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1 max-w-md mx-auto">
                                 @if(!empty($filterHari) || !empty($filterMapelId))
                                     Tidak ditemukan jadwal pelajaran yang sesuai dengan filter. Coba ubah atau reset filter untuk menampilkan semua jadwal.
                                 @else
@@ -160,7 +160,7 @@
                             </p>
                             @if(!empty($filterHari) || !empty($filterMapelId))
                                 <div class="mt-4">
-                                    <a href="{{ route('siswa.jadwal') }}" class="inline-flex items-center px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md transition">
+                                    <a href="{{ route('siswa.jadwal') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition min-h-[44px]">
                                         Tampilkan Semua Jadwal
                                     </a>
                                 </div>
@@ -185,11 +185,11 @@
                                 @endphp
 
                                 @if($jadwalsHari->isNotEmpty())
-                                    <div class="rounded-xl border transition-all duration-150 overflow-hidden {{ $isHariIni ? 'border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-950/20 shadow-xs' : 'border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30' }}">
+                                    <div class="rounded-xl border-2 transition-all duration-150 overflow-hidden {{ $isHariIni ? 'border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-950/20 shadow-xs' : 'border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-900/30' }}">
                                         {{-- Header Kelompok Hari --}}
-                                        <div class="px-5 py-3.5 border-b flex items-center justify-between {{ $isHariIni ? 'border-blue-200 dark:border-blue-800 bg-blue-100/70 dark:bg-blue-900/50 text-blue-900 dark:text-blue-100' : 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700/60 text-gray-900 dark:text-gray-100' }}">
+                                        <div class="px-5 py-3.5 border-b-2 flex items-center justify-between {{ $isHariIni ? 'border-blue-200 dark:border-blue-800 bg-blue-100/70 dark:bg-blue-900/50 text-blue-900 dark:text-blue-100' : 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-750 text-gray-900 dark:text-gray-100' }}">
                                             <div class="flex items-center gap-2">
-                                                <span class="font-bold text-sm sm:text-base capitalize text-gray-900 dark:white">
+                                                <span class="font-bold text-sm sm:text-base capitalize text-gray-900 dark:text-white">
                                                     Hari {{ ucfirst($hariNama) }}
                                                 </span>
                                                 @if($isHariIni)
@@ -199,7 +199,7 @@
                                                     </span>
                                                 @endif
                                             </div>
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $isHariIni ? 'bg-blue-200/80 text-blue-900 dark:bg-blue-800/80 dark:text-blue-200 border border-blue-300 dark:border-blue-700' : 'bg-gray-200/90 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600' }}">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold {{ $isHariIni ? 'bg-blue-200/80 text-blue-900 dark:bg-blue-800/80 dark:text-blue-200 border border-blue-300 dark:border-blue-700' : 'bg-gray-200/90 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600' }}">
                                                 {{ $jadwalsHari->count() }} Mata Pelajaran
                                             </span>
                                         </div>
@@ -210,21 +210,21 @@
                                                 @php
                                                     $isMatchFilter = ($filterMapelId && $item->mapel_id == $filterMapelId);
                                                     if ($isMatchFilter) {
-                                                        $cardClasses = 'bg-emerald-50/70 dark:bg-emerald-950/30 border-l-4 border-l-emerald-600 border-emerald-300 dark:border-emerald-700 shadow-xs ring-1 ring-emerald-500/30';
+                                                        $cardClasses = 'bg-emerald-50/70 dark:bg-emerald-950/30 border-2 border-l-8 border-l-emerald-600 border-emerald-300 dark:border-emerald-700 shadow-sm';
                                                     } else {
-                                                        $cardClasses = 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700';
+                                                        $cardClasses = 'bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 shadow-xs hover:border-blue-500 dark:hover:border-blue-400';
                                                     }
                                                 @endphp
-                                                <div class="rounded-lg p-4 border shadow-2xs hover:shadow-xs transition duration-150 flex flex-col justify-between {{ $cardClasses }}">
+                                                <div class="rounded-xl p-4 transition duration-150 flex flex-col justify-between {{ $cardClasses }}">
                                                     <div>
                                                         {{-- Jam Pelajaran & Badge Cocok --}}
                                                         <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
-                                                            <span class="inline-flex items-center gap-1 font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900/60 px-2 py-0.5 rounded">
+                                                            <span class="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 7v5l3 3"/></svg>
                                                                 {{ substr($item->jam_mulai, 0, 5) }} - {{ substr($item->jam_selesai, 0, 5) }}
                                                             </span>
                                                             @if($isMatchFilter)
-                                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+                                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700">
                                                                     Sesuai filter
                                                                 </span>
                                                             @endif
@@ -236,9 +236,9 @@
                                                         </h5>
 
                                                         {{-- Guru Pengampu --}}
-                                                        <div class="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                                                        <div class="mt-2 pt-2 border-t-2 border-gray-100 dark:border-gray-700 flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/></svg>
-                                                            <span class="truncate font-medium text-gray-700 dark:text-gray-200" title="{{ $item->guru->user->name }}">
+                                                            <span class="truncate font-semibold text-gray-700 dark:text-gray-200" title="{{ $item->guru->user->name }}">
                                                                 {{ $item->guru->user->name }}
                                                             </span>
                                                         </div>

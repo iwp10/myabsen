@@ -6,14 +6,14 @@ $isError = $type === 'error' || $type === 'danger';
 $isWarning = $type === 'warning';
 
 $containerClasses = match ($type) {
-    'success' => 'bg-green-50 dark:bg-green-950/40 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
-    'error', 'danger' => 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
-    'warning' => 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200',
-    default => 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200',
+    'success' => 'bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200',
+    'error', 'danger' => 'bg-red-50 dark:bg-red-950/40 border-2 border-red-300 dark:border-red-800 text-red-900 dark:text-red-200',
+    'warning' => 'bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200',
+    default => 'bg-blue-50 dark:bg-blue-950/40 border-2 border-blue-300 dark:border-blue-800 text-blue-900 dark:text-blue-200',
 };
 
 $iconColor = match ($type) {
-    'success' => 'text-green-600 dark:text-green-400',
+    'success' => 'text-emerald-600 dark:text-emerald-400',
     'error', 'danger' => 'text-red-600 dark:text-red-400',
     'warning' => 'text-amber-600 dark:text-amber-400',
     default => 'text-blue-600 dark:text-blue-400',

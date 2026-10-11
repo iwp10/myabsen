@@ -37,6 +37,23 @@ Baca keduanya sebelum mengerjakan tugas apa pun. Jika kode bertentangan dengan P
 - Sesi absensi unik per (`jadwal_id`, `tanggal`).
 - Data siswa, guru, kelas, dan mapel yang sudah punya riwayat absensi tidak dihapus permanen (pakai soft delete).
 
+## Konvensi Tampilan dan UI
+- Gunakan komponen Blade `resources/views/components/ui/` (`card`, `stat-card`, `status-badge`, `table`, `filter-bar`, `empty-state`, `section-title`, `page-header`, `button`) dan helper presentasi murni `App\Support\Ui`.
+- DILARANG merangkai nama class Tailwind secara dinamis (misalnya `'text-' . $color . '-600'`) karena tidak akan terkompilasi oleh Tailwind CSS. Tulis nama class secara literal dan utuh.
+- Prinsip "Satu Warna Satu Arti" untuk status kehadiran:
+  | Status | Mode Terang | Mode Gelap | Ikon Tabler |
+  |---|---|---|---|
+  | **Hadir** | `bg-emerald-700 text-white` | `dark:bg-emerald-500 dark:text-gray-900` | check |
+  | **Izin** | `bg-blue-600 text-white` | `dark:bg-blue-400 dark:text-gray-900` | info |
+  | **Sakit** | `bg-amber-400 text-gray-900` | `dark:bg-amber-400 dark:text-gray-900` | plus |
+  | **Alpa** | `bg-red-600 text-white` | `dark:bg-red-400 dark:text-gray-900` | x |
+  | **Belum diabsen** | `bg-gray-200 text-gray-800 border-2 border-dashed border-gray-400` | `dark:bg-gray-700 dark:text-gray-100 dark:border-gray-500` | clock |
+- Rasio kontras teks minimal 4.5:1 (WCAG AA) pada mode terang dan gelap.
+- Ukuran target sentuh mobile minimal 44x44px dengan jarak minimal 8px.
+- Input form (`input`, `select`, `textarea`) wajib font 16px dan tinggi minimal 44px untuk mencegah zoom otomatis pada iOS.
+- Bingkai kartu dan tabel: `border-2 border-gray-300 dark:border-gray-600`.
+- Tabel daftar sederhana memakai class `responsive-stack-table` dengan atribut `data-label` di setiap sel data untuk berubah jadi tumpukan kartu di mobile tanpa duplikasi markup. Form absensi guru memakai tombol Simpan melekat (`sticky bottom-0`) dengan padding safe-area.
+
 ## Aturan kerja
 - Aturan "PRD dulu baru kode": Jika ingin mengubah fitur atau aturan bisnis, perbarui `docs/PRD.md` terlebih dahulu, baru kemudian menulis kode.
 - Kerjakan satu fase per tugas sesuai `docs/PROGRESS.md`. Jangan membuat fitur di luar MVP.

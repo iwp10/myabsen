@@ -99,6 +99,16 @@ Proyek ini dibangun menggunakan *stack* teknologi berikut (sesuai dengan aturan 
 
 ---
 
+## 🎨 Konvensi Tampilan
+
+Antarmuka MyAbsen mengikuti standar desain terpusat dan aksesibilitas:
+- **Satu Sumber Desain:** Menggunakan komponen Blade `components/ui` (`card`, `stat-card`, `status-badge`, `table`, `filter-bar`, `empty-state`, `section-title`, `page-header`, `button`) dan helper presentasi `App\Support\Ui`.
+- **Warna Status Baku:** Hadir (*emerald*), Izin (*blue*), Sakit (*amber*), Alpa (*red*), Belum diabsen (*gray border-dashed*) dengan ikon Tabler yang lolos uji kontras WCAG AA (minimal 4.5:1) di mode terang maupun gelap.
+- **Standar Mobile:** Target sentuh interaktif minimal 44x44px, teks dasar dan input form minimal 16px (mencegah zoom otomatis iOS), dan ramah layar hingga 360px.
+- **Tabel Transformatif:** Tabel daftar sederhana otomatis berubah menjadi susunan kartu bertumpuk pada layar mobile (< 768px) melalui kelas `responsive-stack-table` dan atribut `data-label` tanpa penggandaan markup DOM. Form absensi guru dilengkapi bilah Simpan melekat (*sticky bottom*) dengan *safe-area*.
+
+---
+
 ## 🚀 Panduan Instalasi Lokal
 
 Ikuti langkah-langkah di bawah ini untuk menjalankan proyek di komputer lokal bagi anggota tim pengembangan.

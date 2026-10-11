@@ -82,59 +82,59 @@
                 </div>
             @endif
 
-            <!-- Kartu Statistik Master Data (Grid 4 Kolom) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Kartu Statistik Master Data (Grid 2 Kolom di HP, 4 Kolom di Desktop) -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <!-- Total Siswa -->
-                <a href="{{ route('admin.siswa.index') }}" class="group bg-white dark:bg-gray-800 rounded-xl p-5 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700 flex items-center justify-between transition duration-150 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md">
-                    <div>
-                        <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Total Siswa</span>
-                        <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-                            {{ number_format($total_siswa, 0, ',', '.') }}
-                        </div>
-                    </div>
-                    <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-blue-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>
-                    </div>
-                </a>
+                <x-ui.stat-card
+                    label="Total Siswa"
+                    :value="number_format($total_siswa, 0, ',', '.')"
+                    color="blue"
+                    description="Siswa terdaftar aktif"
+                    :href="route('admin.siswa.index')"
+                >
+                    <x-slot:iconSlot>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>
+                    </x-slot:iconSlot>
+                </x-ui.stat-card>
 
                 <!-- Total Guru -->
-                <a href="{{ route('admin.guru.index') }}" class="group bg-white dark:bg-gray-800 rounded-xl p-5 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700 flex items-center justify-between transition duration-150 hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-md">
-                    <div>
-                        <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Total Guru</span>
-                        <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-                            {{ number_format($total_guru, 0, ',', '.') }}
-                        </div>
-                    </div>
-                    <div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-green-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 7m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" /><path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2" /><path d="M12 12l0 .01" /><path d="M3 13a20 20 0 0 0 18 0" /></svg>
-                    </div>
-                </a>
+                <x-ui.stat-card
+                    label="Total Guru"
+                    :value="number_format($total_guru, 0, ',', '.')"
+                    color="hadir"
+                    description="Guru pendidik aktif"
+                    :href="route('admin.guru.index')"
+                >
+                    <x-slot:iconSlot>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 7m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" /><path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2" /><path d="M12 12l0 .01" /><path d="M3 13a20 20 0 0 0 18 0" /></svg>
+                    </x-slot:iconSlot>
+                </x-ui.stat-card>
 
                 <!-- Total Kelas -->
-                <a href="{{ route('admin.kelas.index') }}" class="group bg-white dark:bg-gray-800 rounded-xl p-5 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700 flex items-center justify-between transition duration-150 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-md">
-                    <div>
-                        <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Total Kelas</span>
-                        <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-                            {{ number_format($total_kelas, 0, ',', '.') }}
-                        </div>
-                    </div>
-                    <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-yellow-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l18 0" /><path d="M9 8l1 0" /><path d="M9 12l1 0" /><path d="M9 16l1 0" /><path d="M14 8l1 0" /><path d="M14 12l1 0" /><path d="M14 16l1 0" /><path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16" /></svg>
-                    </div>
-                </a>
+                <x-ui.stat-card
+                    label="Total Kelas"
+                    :value="number_format($total_kelas, 0, ',', '.')"
+                    color="sakit"
+                    description="Rombel aktif"
+                    :href="route('admin.kelas.index')"
+                >
+                    <x-slot:iconSlot>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-amber-600 dark:text-amber-400" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l18 0" /><path d="M9 8l1 0" /><path d="M9 12l1 0" /><path d="M9 16l1 0" /><path d="M14 8l1 0" /><path d="M14 12l1 0" /><path d="M14 16l1 0" /><path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16" /></svg>
+                    </x-slot:iconSlot>
+                </x-ui.stat-card>
 
                 <!-- Total Mapel -->
-                <a href="{{ route('admin.mapel.index') }}" class="group bg-white dark:bg-gray-800 rounded-xl p-5 sm:p-6 shadow-sm border border-gray-200 dark:border-gray-700 flex items-center justify-between transition duration-150 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md">
-                    <div>
-                        <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Total Mapel</span>
-                        <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-                            {{ number_format($total_mapel, 0, ',', '.') }}
-                        </div>
-                    </div>
-                    <div class="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-purple-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path d="M3 6l0 13" /><path d="M12 6l0 13" /><path d="M21 6l0 13" /></svg>
-                    </div>
-                </a>
+                <x-ui.stat-card
+                    label="Total Mapel"
+                    :value="number_format($total_mapel, 0, ',', '.')"
+                    color="indigo"
+                    description="Mata pelajaran aktif"
+                    :href="route('admin.mapel.index')"
+                >
+                    <x-slot:iconSlot>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-600 dark:text-indigo-400" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path d="M3 6l0 13" /><path d="M12 6l0 13" /><path d="M21 6l0 13" /></svg>
+                    </x-slot:iconSlot>
+                </x-ui.stat-card>
             </div>
 
             <!-- Aksi Cepat (Quick Actions) -->

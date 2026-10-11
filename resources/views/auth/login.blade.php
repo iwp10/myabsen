@@ -61,7 +61,7 @@
 
                     <!-- Username / NIP / NIS -->
                     <div>
-                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label for="username" class="block text-sm font-semibold text-gray-800 mb-1.5">
                             Username / NIP / NIS
                         </label>
                         <input id="username"
@@ -73,7 +73,7 @@
                                autocomplete="username"
                                placeholder="Masukkan Username, NIP, atau NIS"
                                @class([
-                                   'w-full px-3.5 py-2.5 bg-white border rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 text-sm shadow-sm',
+                                   'w-full min-h-[44px] px-3.5 py-2.5 bg-white border-2 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/50 transition duration-150 text-base sm:text-sm shadow-xs',
                                    'border-red-500' => $errors->has('username'),
                                    'border-gray-300' => ! $errors->has('username'),
                                ])>
@@ -94,7 +94,7 @@
 
                     <!-- Password -->
                     <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label for="password" class="block text-sm font-semibold text-gray-800 mb-1.5">
                             Kata Sandi
                         </label>
                         <input id="password"
@@ -104,7 +104,7 @@
                                autocomplete="current-password"
                                placeholder="Masukkan kata sandi"
                                @class([
-                                   'w-full px-3.5 py-2.5 bg-white border rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 text-sm shadow-sm',
+                                   'w-full min-h-[44px] px-3.5 py-2.5 bg-white border-2 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/50 transition duration-150 text-base sm:text-sm shadow-xs',
                                    'border-red-500' => $errors->has('password'),
                                    'border-gray-300' => ! $errors->has('password'),
                                ])>
@@ -115,19 +115,19 @@
 
                     <!-- Remember Me -->
                     <div class="flex items-center justify-between">
-                        <label for="remember_me" class="inline-flex items-center cursor-pointer select-none">
+                        <label for="remember_me" class="inline-flex items-center cursor-pointer select-none min-h-[44px]">
                             <input id="remember_me"
                                    type="checkbox"
                                    name="remember"
-                                   class="w-4 h-4 rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
-                            <span class="ms-2 text-sm text-gray-600">Ingat saya</span>
+                                   class="w-5 h-5 rounded border-2 border-gray-300 text-blue-600 shadow-xs focus:ring-blue-500">
+                            <span class="ms-2 text-sm text-gray-700">Ingat saya</span>
                         </label>
                     </div>
 
                     <!-- Tombol Masuk -->
                     <div>
                         <button type="submit"
-                                class="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out cursor-pointer">
+                                class="w-full min-h-[44px] flex justify-center items-center py-2.5 px-4 rounded-xl shadow-xs text-base sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/50 transition duration-150 ease-in-out cursor-pointer">
                             Masuk
                         </button>
                     </div>

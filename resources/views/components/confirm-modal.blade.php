@@ -20,7 +20,7 @@
             <input type="hidden" name="_method" :value="method">
             
             <!-- Tombol X untuk close modal -->
-            <button type="button" x-on:click="$dispatch('close-modal', 'global-confirm-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none">
+            <button type="button" x-on:click="$dispatch('close-modal', 'global-confirm-modal')" class="absolute top-3 right-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/50" aria-label="Tutup Modal">
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
