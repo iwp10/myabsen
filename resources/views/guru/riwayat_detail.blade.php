@@ -93,13 +93,119 @@
                         <p class="text-xs text-slate-600 dark:text-slate-300 mt-1">Sesi absensi akan tampil setelah guru melakukan absensi kelas.</p>
                     </div>
                 @else
-                    {{-- Petunjuk Geser di Mobile --}}
-                    <div class="block sm:hidden px-4 py-2 bg-blue-100 dark:bg-blue-500/15 text-blue-900 dark:text-blue-300 text-xs font-semibold border-b-2 border-blue-400 dark:border-blue-500/50">
-                        &larr; Geser tabel ke samping untuk melihat seluruh pertemuan &rarr;
+                    {{-- 1. DAFTAR KARTU MOBILE (Hanya tampil di bawah breakpoint md: tanpa tabel dan tanpa scroll horizontal) --}}
+                    @php
+                        $batasRendah = (int) config('absensi.batas_kehadiran_rendah', 75);
+                        // Siapkan ringkasan per siswa
+                        $siswaProcessed = [];
+                        foreach ($siswaList as $no => $siswa) {
+                            $h = 0; $i = 0; $s = 0; $a = 0; $total = 0;
+                            foreach ($sesiList as $sItem) {
+                                $st = $detailMap[$sItem->id][$siswa->id] ?? null;
+                                if ($st) {
+                                    $total++;
+                                    if ($st === 'hadir') $h++;
+                                    elseif ($st === 'izin') $i++;
+                                    elseif ($st === 'sakit') $s++;
+                                    elseif ($st === 'alpa') $a++;
+                                }
+                            }
+                            $persen = app(\App\Services\AbsensiService::class)->hitungPersentaseKehadiran($h, $i, $s, $total);
+                            $isPerluPerhatian = ($total > 0 && $persen < $batasRendah);
+                            $siswaProcessed[] = [
+                                'no' => $no + 1,
+                                'siswa' => $siswa,
+                                'nama' => $siswa->user->name ?? $siswa->nama,
+                                'nis' => $siswa->nis,
+                                'is_nonaktif' => $siswa->is_nonaktif,
+                                'h' => $h,
+                                'i' => $i,
+                                's' => $s,
+                                'a' => $a,
+                                'total' => $total,
+                                'persen' => $persen,
+                                'is_perlu_perhatian' => $isPerluPerhatian,
+                            ];
+                        }
+                    @endphp
+
+                    <div class="md:hidden p-4 space-y-4">
+                        @forelse($siswaProcessed as $item)
+                            <div class="bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-xl p-4 shadow-xs dark:shadow-lg dark:shadow-black/40 dark:ring-1 dark:ring-white/5 space-y-3">
+                                {{-- Baris Atas: Nama, NIS, Nonaktif, Persentase, Perlu Perhatian --}}
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            <span class="font-bold text-base text-slate-900 dark:text-white leading-snug break-words">
+                                                {{ $item['nama'] }}
+                                            </span>
+                                            @if($item['is_nonaktif'])
+                                                <span class="text-xs text-slate-600 dark:text-slate-400 font-normal">(nonaktif)</span>
+                                            @endif
+                                        </div>
+                                        <p class="text-xs font-mono font-bold text-slate-600 dark:text-slate-300 mt-0.5">
+                                            NIS: {{ $item['nis'] }}
+                                        </p>
+                                    </div>
+                                    <div class="text-right flex-shrink-0">
+                                        <span class="text-base font-extrabold {{ \App\Support\Ui::persenWarna($item['persen']) }} tabular-nums block">
+                                            {{ $item['persen'] }}%
+                                        </span>
+                                        @if($item['is_perlu_perhatian'])
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-900 border border-red-400 dark:bg-red-500/20 dark:text-red-300 dark:border-red-500/50 shadow-xs mt-0.5">
+                                                Perlu perhatian
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                {{-- Ringkasan Jumlah H/I/S/A --}}
+                                <div class="flex items-center gap-1.5 flex-wrap text-xs font-bold pt-1">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-900 border border-emerald-400 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/50 tabular-nums">
+                                        H: {{ $item['h'] }}
+                                    </span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-100 text-blue-900 border border-blue-400 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/50 tabular-nums">
+                                        I: {{ $item['i'] }}
+                                    </span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-400 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/50 tabular-nums">
+                                        S: {{ $item['s'] }}
+                                    </span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-red-100 text-red-900 border border-red-400 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/50 tabular-nums">
+                                        A: {{ $item['a'] }}
+                                    </span>
+                                </div>
+
+                                {{-- Grid Kotak Pertemuan --}}
+                                <div class="pt-3 border-t-2 border-slate-200 dark:border-slate-700">
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-200 block mb-2">Riwayat Pertemuan:</span>
+                                    <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
+                                        @foreach($sesiList as $idx => $sesi)
+                                            @php
+                                                $st = $detailMap[$sesi->id][$item['siswa']->id] ?? null;
+                                                $tglCarbon = \Carbon\Carbon::parse($sesi->tanggal);
+                                            @endphp
+                                            <x-ui.pertemuan-chip
+                                                :p="$idx + 1"
+                                                :tanggal="$tglCarbon"
+                                                :status="$st"
+                                            />
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="px-6 py-8 text-center text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-xl">
+                                @if($search !== '')
+                                    Tidak ada siswa yang sesuai dengan pencarian "{{ $search }}".
+                                @else
+                                    Belum ada data siswa di kelas ini.
+                                @endif
+                            </div>
+                        @endforelse
                     </div>
 
-                    {{-- Tabel Absensi Horizontal --}}
-                    <div class="overflow-x-auto">
+                    {{-- 2. TABEL MATRIKS DESKTOP (Tampil di md ke atas: >= 768px) --}}
+                    <div class="hidden md:block overflow-x-auto">
                         <table class="border-collapse text-sm w-full" style="min-width: max-content">
                             <thead>
                                 {{-- Baris tanggal / nomor pertemuan --}}
@@ -123,48 +229,32 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y-2 divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-900">
-                                @php
-                                    $batasRendah = (int) config('absensi.batas_kehadiran_rendah', 75);
-                                @endphp
-                                @forelse($siswaList as $no => $siswa)
+                                @forelse($siswaProcessed as $item)
                                     @php
-                                        $h = 0; $i = 0; $s = 0; $a = 0; $total = 0;
-                                        foreach ($sesiList as $sItem) {
-                                             $st = $detailMap[$sItem->id][$siswa->id] ?? null;
-                                            if ($st) {
-                                                $total++;
-                                                if ($st === 'hadir') $h++;
-                                                elseif ($st === 'izin') $i++;
-                                                elseif ($st === 'sakit') $s++;
-                                                elseif ($st === 'alpa') $a++;
-                                            }
-                                        }
-                                        $persen = app(\App\Services\AbsensiService::class)->hitungPersentaseKehadiran($h, $i, $s, $total);
-                                        $isPerluPerhatian = ($total > 0 && $persen < $batasRendah);
-                                        $rowBg = $isPerluPerhatian 
+                                        $rowBg = $item['is_perlu_perhatian'] 
                                             ? 'bg-red-50/70 dark:bg-red-950/40 hover:bg-red-100/70 dark:hover:bg-red-950/60' 
                                             : 'hover:bg-slate-50 dark:hover:bg-slate-800/60';
-                                        $stickyBg = $isPerluPerhatian 
+                                        $stickyBg = $item['is_perlu_perhatian'] 
                                             ? 'bg-red-50 dark:bg-red-950' 
                                             : 'bg-white dark:bg-slate-900';
                                     @endphp
                                     <tr class="{{ $rowBg }} transition-colors">
-                                        <td class="sticky left-0 z-10 {{ $stickyBg }} px-3 py-3 text-center font-semibold text-slate-600 dark:text-slate-300 border-r-2 border-slate-200 dark:border-slate-700 w-12">{{ $no + 1 }}</td>
-                                        <td class="sticky left-12 z-10 {{ $stickyBg }} px-3 py-3 text-slate-700 dark:text-slate-200 border-r-2 border-slate-200 dark:border-slate-700 font-mono text-xs w-32 font-bold">{{ $siswa->nis }}</td>
+                                        <td class="sticky left-0 z-10 {{ $stickyBg }} px-3 py-3 text-center font-semibold text-slate-600 dark:text-slate-300 border-r-2 border-slate-200 dark:border-slate-700 w-12">{{ $item['no'] }}</td>
+                                        <td class="sticky left-12 z-10 {{ $stickyBg }} px-3 py-3 text-slate-700 dark:text-slate-200 border-r-2 border-slate-200 dark:border-slate-700 font-mono text-xs w-32 font-bold">{{ $item['nis'] }}</td>
                                         <td class="sticky left-[11rem] z-10 {{ $stickyBg }} px-4 py-3 font-bold text-slate-900 dark:text-slate-100 border-r-2 border-slate-300 dark:border-slate-600 w-60 shadow-[3px_0_5px_-2px_rgba(0,0,0,0.15)]">
                                             <div class="flex items-center gap-1.5 flex-wrap">
-                                                <span>{{ $siswa->user->name ?? $siswa->nama }}</span>
-                                                @if($siswa->is_nonaktif)
+                                                <span>{{ $item['nama'] }}</span>
+                                                @if($item['is_nonaktif'])
                                                     <span class="text-xs text-slate-600 dark:text-slate-400 font-normal">(nonaktif)</span>
                                                 @endif
-                                                @if($isPerluPerhatian)
+                                                @if($item['is_perlu_perhatian'])
                                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-900 border border-red-400 dark:bg-red-500/20 dark:text-red-300 dark:border-red-500/50 shadow-xs">Perlu perhatian</span>
                                                 @endif
                                             </div>
                                         </td>
                                         @foreach($sesiList as $sesi)
                                             @php
-                                                $status = $detailMap[$sesi->id][$siswa->id] ?? null;
+                                                $status = $detailMap[$sesi->id][$item['siswa']->id] ?? null;
                                                 [$kode, $bgKelas] = match($status) {
                                                     'hadir' => ['H', 'bg-emerald-100 text-emerald-900 border border-emerald-400 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/50'],
                                                     'izin'  => ['I', 'bg-blue-100 text-blue-900 border border-blue-400 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/50'],
@@ -178,12 +268,12 @@
                                             </td>
                                         @endforeach
                                         {{-- Ringkasan --}}
-                                        <td class="px-2 py-3 text-center font-extrabold text-emerald-900 dark:text-emerald-300 border-r-2 border-slate-200 dark:border-slate-700 w-12 bg-emerald-100/50 dark:bg-emerald-500/15">{{ $h }}</td>
-                                        <td class="px-2 py-3 text-center font-extrabold text-blue-900 dark:text-blue-300 border-r-2 border-slate-200 dark:border-slate-700 w-12 bg-blue-100/50 dark:bg-blue-500/15">{{ $i }}</td>
-                                        <td class="px-2 py-3 text-center font-extrabold text-amber-900 dark:text-amber-300 border-r-2 border-slate-200 dark:border-slate-700 w-12 bg-amber-100/50 dark:bg-amber-500/15">{{ $s }}</td>
-                                        <td class="px-2 py-3 text-center font-extrabold text-red-900 dark:text-red-300 border-r-2 border-slate-200 dark:border-slate-700 w-12 bg-red-100/50 dark:bg-red-500/15">{{ $a }}</td>
-                                        <td class="px-3 py-3 text-center text-xs font-bold w-20 {{ $isPerluPerhatian ? 'text-red-700 dark:text-red-400 font-extrabold' : ($persen >= $batasRendah ? 'text-emerald-700 dark:text-emerald-400 font-extrabold' : 'text-amber-700 dark:text-amber-400 font-bold') }}">
-                                            {{ $persen }}%
+                                        <td class="px-2 py-3 text-center font-extrabold text-emerald-900 dark:text-emerald-300 border-r-2 border-slate-200 dark:border-slate-700 w-12 bg-emerald-100/50 dark:bg-emerald-500/15">{{ $item['h'] }}</td>
+                                        <td class="px-2 py-3 text-center font-extrabold text-blue-900 dark:text-blue-300 border-r-2 border-slate-200 dark:border-slate-700 w-12 bg-blue-100/50 dark:bg-blue-500/15">{{ $item['i'] }}</td>
+                                        <td class="px-2 py-3 text-center font-extrabold text-amber-900 dark:text-amber-300 border-r-2 border-slate-200 dark:border-slate-700 w-12 bg-amber-100/50 dark:bg-amber-500/15">{{ $item['s'] }}</td>
+                                        <td class="px-2 py-3 text-center font-extrabold text-red-900 dark:text-red-300 border-r-2 border-slate-200 dark:border-slate-700 w-12 bg-red-100/50 dark:bg-red-500/15">{{ $item['a'] }}</td>
+                                        <td class="px-3 py-3 text-center text-xs font-bold w-20 {{ $item['is_perlu_perhatian'] ? 'text-red-700 dark:text-red-400 font-extrabold' : ($item['persen'] >= $batasRendah ? 'text-emerald-700 dark:text-emerald-400 font-extrabold' : 'text-amber-700 dark:text-amber-400 font-bold') }}">
+                                            {{ $item['persen'] }}%
                                         </td>
                                     </tr>
                                 @empty

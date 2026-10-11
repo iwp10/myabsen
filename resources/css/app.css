@@ -7,7 +7,9 @@
 }
 
 @layer base {
-    html, body {
+
+    html,
+    body {
         font-family: 'Inter', sans-serif !important;
         font-size: 16px;
     }
@@ -21,6 +23,7 @@
     }
 
     @screen sm {
+
         input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
         select,
         textarea {
@@ -32,6 +35,7 @@
 
 /* Tabel responsif bertumpuk menjadi kartu di mobile (layar < 768px) */
 @media (max-width: 767px) {
+
     .responsive-stack-table table,
     .responsive-stack-table thead,
     .responsive-stack-table tbody,
@@ -96,6 +100,7 @@
 
 /* Aksesibilitas Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
+
     *,
     ::before,
     ::after {

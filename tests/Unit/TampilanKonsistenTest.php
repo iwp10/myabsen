@@ -35,6 +35,10 @@ class TampilanKonsistenTest extends TestCase
             'resources/views/siswa/mapel.blade.php',
             'resources/views/siswa/riwayat.blade.php',
             'resources/views/siswa/riwayat_mapel.blade.php',
+            'resources/views/components/ui/pertemuan-chip.blade.php',
+            'resources/views/components/ui/file-input.blade.php',
+            'resources/views/components/ui/icon.blade.php',
+            'resources/views/components/ui/bulan-select.blade.php',
         ];
 
         return array_map(fn ($rel) => $base.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $rel), $relativePaths);
@@ -349,5 +353,154 @@ class TampilanKonsistenTest extends TestCase
         foreach ($tokens as $token) {
             $this->assertStringContainsString('dark:', $token);
         }
+    }
+
+    /**
+     * Uji helper Ui::pertemuanChip menghasilkan status unik, berpasangan dark:, dan border-2.
+     */
+    public function test_ui_pertemuan_chip_unik_dan_berpasangan_dark(): void
+    {
+        $statuses = ['hadir', 'izin', 'sakit', 'alpa', null];
+        $chips = array_map(fn ($s) => Ui::pertemuanChip($s), $statuses);
+
+        $this->assertCount(5, array_unique($chips));
+
+        foreach ($chips as $chip) {
+            $this->assertStringContainsString('dark:', $chip);
+            $this->assertStringContainsString('border-2', $chip);
+        }
+
+        $this->assertSame('H', Ui::statusHuruf('hadir'));
+        $this->assertSame('I', Ui::statusHuruf('izin'));
+        $this->assertSame('S', Ui::statusHuruf('sakit'));
+        $this->assertSame('A', Ui::statusHuruf('alpa'));
+        $this->assertSame('-', Ui::statusHuruf(null));
+        $this->assertSame('-', Ui::statusHuruf('belum'));
+    }
+
+    /**
+     * Uji komponen x-ui.file-input memuat file: dan dark:file: berpasangan.
+     */
+    public function test_x_ui_file_input_memuat_file_dan_dark_file_berpasangan(): void
+    {
+        $path = dirname(__DIR__, 2).DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'components'.DIRECTORY_SEPARATOR.'ui'.DIRECTORY_SEPARATOR.'file-input.blade.php';
+        $content = file_get_contents($path);
+
+        $this->assertStringContainsString('file:', $content);
+        $this->assertStringContainsString('dark:file:', $content);
+        $this->assertStringContainsString('min-h-[44px]', $content);
+    }
+
+    /**
+     * R5: Setiap tag <svg> di seluruh file Blade harus memiliki atribut width dan height,
+     * atau class w-* dan h-*, atau size-*, kecuali file yang berada di allowlist beralasan.
+     */
+    public function test_r5_setiap_tag_svg_memiliki_ukuran_eksplisit(): void
+    {
+        $viewsDir = dirname(__DIR__, 2).DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'views';
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($viewsDir));
+
+        $violations = [];
+        $allowlist = [];
+
+        foreach ($iterator as $fileInfo) {
+            if (! $fileInfo->isFile() || ! str_ends_with($fileInfo->getFilename(), '.blade.php')) {
+                continue;
+            }
+
+            $path = $fileInfo->getPathname();
+            $rel = str_replace(dirname(__DIR__, 2).DIRECTORY_SEPARATOR, '', $path);
+            $relForward = str_replace(DIRECTORY_SEPARATOR, '/', $rel);
+
+            if (isset($allowlist[$relForward])) {
+                continue;
+            }
+
+            $content = file_get_contents($path);
+            if (! str_contains($content, '<svg')) {
+                continue;
+            }
+
+            preg_match_all('/<svg\b([^>]*)>/i', $content, $matches);
+
+            foreach ($matches[1] as $attrs) {
+                // Jangan anggap stroke-width sebagai atribut width
+                $hasWidth = (bool) preg_match('/(?:^|\s)width\s*=/i', $attrs);
+                $hasHeight = (bool) preg_match('/(?:^|\s)height\s*=/i', $attrs);
+
+                $classStr = '';
+                if (preg_match('~\\bclass\\s*=\\s*["\']([^"\']*)["\']~i', $attrs, $classMatch)) {
+                    $classStr = $classMatch[1];
+                }
+
+                $hasW = (bool) preg_match('/\bw-\S+/', $classStr);
+                $hasH = (bool) preg_match('/\bh-\S+/', $classStr);
+                $hasSize = (bool) preg_match('/\bsize-\S+/', $classStr);
+                $hasInvalidSize = (bool) preg_match('/\bsize-4\.5\b/', $classStr);
+
+                $isSized = ($hasWidth && $hasHeight) || ($hasW && $hasH && ! $hasInvalidSize) || ($hasSize && ! $hasInvalidSize);
+
+                if (! $isSized) {
+                    $violations[] = "{$relForward} | class='{$classStr}' | <svg{$attrs}>";
+                }
+            }
+        }
+
+        $this->assertEmpty($violations, 'Pelanggaran R5 ditemukan (SVG tanpa ukuran eksplisit): '.PHP_EOL.implode(PHP_EOL, $violations));
+    }
+
+    /**
+     * Uji komponen x-ui.icon dan Ui::iconClass menghasilkan ukuran literal sm, md, lg.
+     */
+    public function test_x_ui_icon_dan_ui_icon_class_literal(): void
+    {
+        $this->assertSame('w-4 h-4 shrink-0', Ui::iconClass('sm'));
+        $this->assertSame('w-5 h-5 shrink-0', Ui::iconClass('md'));
+        $this->assertSame('w-6 h-6 shrink-0', Ui::iconClass('lg'));
+
+        $renderedSm = $this->blade('<x-ui.icon size="sm" name="arrow-right" />');
+        $this->assertStringContainsString('w-4 h-4 shrink-0', $renderedSm);
+        $this->assertStringContainsString('<svg', $renderedSm);
+
+        $renderedMd = $this->blade('<x-ui.icon size="md" name="arrow-right" />');
+        $this->assertStringContainsString('w-5 h-5 shrink-0', $renderedMd);
+
+        $renderedLg = $this->blade('<x-ui.icon size="lg" name="arrow-right" />');
+        $this->assertStringContainsString('w-6 h-6 shrink-0', $renderedLg);
+    }
+
+    /**
+     * Uji Ui::getDaftarBulanPeriode dan komponen x-ui.bulan-select.
+     */
+    public function test_x_ui_bulan_select_dan_ui_get_daftar_bulan_periode(): void
+    {
+        // Ganjil 2026/2027: Juli sampai Desember 2026
+        $ganjil = Ui::getDaftarBulanPeriode('2026/2027', 'Ganjil');
+        $this->assertCount(6, $ganjil);
+        $this->assertSame('2026-07', $ganjil[0]['value']);
+        $this->assertSame('Juli 2026', $ganjil[0]['label']);
+        $this->assertSame('2026-12', $ganjil[5]['value']);
+        $this->assertSame('Desember 2026', $ganjil[5]['label']);
+
+        // Genap 2026/2027: Januari sampai Juni 2027
+        $genap = Ui::getDaftarBulanPeriode('2026/2027', 'Genap');
+        $this->assertCount(6, $genap);
+        $this->assertSame('2027-01', $genap[0]['value']);
+        $this->assertSame('Januari 2027', $genap[0]['label']);
+        $this->assertSame('2027-06', $genap[5]['value']);
+        $this->assertSame('Juni 2027', $genap[5]['label']);
+
+        // Bulan di luar 6 bulan (mis. 2026-05 pada Ganjil) tetap disertakan
+        $extra = Ui::getDaftarBulanPeriode('2026/2027', 'Ganjil', '2026-05');
+        $this->assertCount(7, $extra);
+        $values = array_column($extra, 'value');
+        $this->assertContains('2026-05', $values);
+
+        // Komponen blade x-ui.bulan-select merender select dan menandai opsi terpilih
+        $rendered = $this->blade('<x-ui.bulan-select tahun-ajaran="2026/2027" semester="Ganjil" selected="2026-10" />');
+        $this->assertStringContainsString('<select', $rendered);
+        $this->assertStringContainsString('Semua bulan', $rendered);
+        $this->assertStringContainsString('value="2026-10"', $rendered);
+        $this->assertStringContainsString('selected', $rendered);
     }
 }

@@ -26,6 +26,10 @@ class RiwayatSiswaFilterRequest extends FormRequest
         if ($this->filled('status')) {
             $this->merge(['status' => strtolower((string) $this->input('status'))]);
         }
+
+        if ($this->has('bulan') && trim((string) $this->input('bulan')) === '') {
+            $this->merge(['bulan' => null]);
+        }
     }
 
     public function rules(): array

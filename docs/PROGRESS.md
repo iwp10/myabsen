@@ -149,7 +149,13 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] Tabel transformatif `responsive-stack-table` dengan atribut `data-label` bertumpuk di HP tanpa duplikasi markup; matriks P1..Pn bergeser horizontal dengan kolom identitas sticky opak berbayang.
 - [x] Form absensi guru: tombol Simpan melekat (`sticky bottom-0`) dengan padding safe-area, pilihan status berukuran besar, dan ringkasan H/I/S/A terlihat langsung.
 - [x] Penerapan menyeluruh pada layout app (sidebar, topbar), login, tiga dashboard (admin, guru, siswa), seluruh halaman guru dan siswa.
-- [x] Pengujian otomatis: `UiTest` (10 test) dan `TampilanKonsistenTest` (9 test penegak R1-R4 konsistensi token; seluruh test proyek PASS).
+- [x] Refaktor matriks presensi mobile (< md / 768px): bertransformasi menjadi daftar kartu vertikal responsif dengan chip pertemuan P{n} (label, tanggal, ikon + huruf status lewat `App\Support\Ui::pertemuanChip` dan `x-ui.pertemuan-chip`) pada riwayat guru dan siswa.
+- [x] Bilah filter mobile: 1 kolom penuh (`grid-cols-1`, `w-full min-w-0`), label di atas kontrol, tinggi minimal 44px, padding kanan pencegah bentrok chevron/teks pada layar 360px.
+- [x] Komponen `x-ui.file-input`: tombol `file:` bertema emerald (`file:bg-emerald-100`, `dark:file:bg-emerald-500/15`) dengan tinggi minimal 44px dan teks bantu format/ukuran.
+- [x] Navigasi tab pergantian periode: bilah scroll-snap horizontal, Alpine `$nextTick` auto-scroll ke panel dengan offset topbar `scroll-mt-24`, sinkronisasi URL hash (`#salin`, `#pindah`, `#lulus`, `#panduan`), fokus judul panel `tabindex="-1"`, dan tautan "Kembali ke daftar langkah".
+- [x] Pengujian otomatis: `UiTest` (10 test), `TampilanKonsistenTest` (14 test penegak R1-R5 konsistensi token, SVG ukuran eksplisit & komponen baru), dan `MobileLayoutInteraksiTest` (7 feature test komprehensif); seluruh test proyek PASS.
+- [x] Standarisasi ukuran eksplisit seluruh ikon (`x-ui.icon`) sm/md/lg dan penegakan aturan R5 (seluruh SVG di view Blade memiliki class `w-*` & `h-*` atau atribut `width`/`height`).
+- [x] Penggantian input `type="month"` pada riwayat siswa menjadi komponen `<x-ui.bulan-select>` berdasarkan periode semester dengan 6 opsi berlabel Indonesia dan pencegahan validasi error pada nilai kosong.
 
 ## Catatan dan hambatan
 Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
@@ -189,6 +195,8 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-11 | 3,7,8,9 | feat: implementasi aksi massal admin (AB-14) pada Kelola Siswa (reset password massal, hapus massal dengan pemisahan status nonaktif vs permanen via withExists) dan Data Terhapus (pemulihan massal Guru, Siswa, Kelas, Mapel), seleksi per halaman dengan status indeterminate, floating action bar responsif, modal konfirmasi dengan rincian aman, transaksi mandiri per baris, audit log bebas data sensitif, dan 8 feature test komprehensif (113 assertions).
 2026-10-11 | 12 | feat: pembaruan tampilan frontend tahap 1 (App\Support\Ui, 9 komponen Blade x-ui.*, standardisasi warna status WCAG AA >= 4.5:1, aturan mobile teks 16px dan target sentuh 44px, tabel daftar bertumpuk via data-label, form absensi sticky bar, peremajaan dashboard, halaman guru & siswa; seluruh 330 test PASS).
 2026-10-11 | 12 | feat: perbaikan desain tahap 1 (koreksi mode gelap bar tanggal/hari ke dark:bg-slate-800, penguatan kontras teks sekunder/meta, elevasi kartu jadwal berbayang dan ber-ring, peremajaan strip rekap H/I/S/A beraksen tinted tanpa latar kusam, sticky kolom matriks opak berbayang, single source docs/DESAIN.md, penegakan aturan R1-R4 via TampilanKonsistenTest; seluruh 331 test PASS).
+2026-10-11 | 12 | feat: perbaikan tampilan dan interaksi mobile (matriks presensi kartu/chip < md di guru & siswa, filter bar 1 kolom bebas tumpang tindih di 360px, standarisasi x-ui.file-input token emerald 44px, navigasi tab pergantian periode auto-scroll & sinkronisasi URL hash; seluruh pengujian otomatis lulus).
+2026-10-11 | 12 | feat: perbaikan ukuran ikon eksplisit seluruh aplikasi (x-ui.icon, penegakan R5) dan standarisasi filter bulan siswa via x-ui.bulan-select berbasis periode (seluruh 348 test PASS).
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:

@@ -153,31 +153,32 @@
                         </form>
                     </div>
                     
-                    <div class="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-700/50">
-                        <h4 class="font-bold mb-2">Impor Data Siswa</h4>
-                        <form action="{{ route('admin.siswa.import') }}" method="POST" enctype="multipart/form-data" class="flex flex-col sm:flex-row sm:items-end gap-4">
+                    <div class="mb-6 p-4 sm:p-5 border-2 border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-900 shadow-xs">
+                        <h4 class="font-bold text-base text-slate-900 dark:text-white mb-3">Impor Data Siswa</h4>
+                        <form action="{{ route('admin.siswa.import') }}" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
                             @csrf
-                            <div class="w-full sm:w-auto">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kelas</label>
-                                <select name="kelas_id" required class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 rounded-md shadow-sm">
+                            <div class="sm:col-span-4 min-w-0">
+                                <label for="import_kelas_id" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Kelas</label>
+                                <select id="import_kelas_id" name="kelas_id" required class="w-full min-w-0 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-sm min-h-[44px] py-2 pl-3 pr-8 font-medium">
                                     <option value="">Pilih Kelas</option>
                                     @foreach($kelas as $k)
                                         <option value="{{ $k->id }}">{{ $k->nama }}</option>
                                     @endforeach
                                 </select>
+                                @error('kelas_id') <span class="text-red-700 dark:text-red-400 text-xs mt-1 block">{{ $message }}</span> @enderror
                             </div>
-                            <div class="w-full sm:flex-1">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">File Excel/CSV</label>
-                                <input type="file" name="file" accept=".xlsx,.xls,.csv" required class="block w-full text-sm text-gray-900 dark:text-gray-300 border border-gray-300 rounded-md cursor-pointer bg-white focus:outline-none dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400">
+                            <div class="sm:col-span-6 min-w-0">
+                                <label for="import_file" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">File Excel/CSV</label>
+                                <x-ui.file-input id="import_file" name="file" accept=".xlsx,.xls,.csv" required help="Format .xlsx, .xls, atau .csv. Maksimal sesuai batas server." />
+                                @error('file') <span class="text-red-700 dark:text-red-400 text-xs mt-1 block">{{ $message }}</span> @enderror
                             </div>
-                            <div>
-                                <button type="submit" class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition">
+                            <div class="sm:col-span-2 min-w-0">
+                                <span class="hidden sm:block text-xs font-semibold mb-1 invisible" aria-hidden="true">&nbsp;</span>
+                                <button type="submit" class="w-full min-h-[44px] inline-flex items-center justify-center bg-emerald-700 hover:bg-emerald-800 text-white dark:bg-emerald-600 dark:hover:bg-emerald-500 font-bold py-2.5 px-4 rounded-lg text-sm transition shadow-xs">
                                     Impor
                                 </button>
                             </div>
                         </form>
-                        @error('file') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                        @error('kelas_id') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="overflow-x-auto">

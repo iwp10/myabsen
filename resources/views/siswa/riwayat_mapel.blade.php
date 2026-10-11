@@ -132,12 +132,70 @@
                     </p>
                 </div>
 
-                {{-- Petunjuk Geser di Mobile --}}
-                <div class="block sm:hidden px-4 py-2 bg-blue-100 dark:bg-blue-500/15 text-blue-900 dark:text-blue-300 text-xs font-semibold border-b-2 border-blue-400 dark:border-blue-500/50">
-                    &larr; Geser tabel ke samping untuk melihat seluruh pertemuan &rarr;
+                {{-- 1. KARTU RINGKASAN & PERTEMUAN MOBILE (Hanya tampil di bawah breakpoint md: tanpa tabel dan tanpa geser horizontal) --}}
+                <div class="md:hidden p-4 space-y-4">
+                    <div class="bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-xl p-4 shadow-xs dark:shadow-lg dark:shadow-black/40 dark:ring-1 dark:ring-white/5 space-y-3">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0 flex-1">
+                                <h4 class="font-bold text-base text-slate-900 dark:text-white leading-snug break-words">
+                                    {{ $mapel->nama }}
+                                </h4>
+                                <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                                    Guru: <strong class="text-slate-900 dark:text-slate-100">{{ $guru }}</strong>
+                                </p>
+                            </div>
+                            <div class="text-right flex-shrink-0">
+                                <span class="text-base font-extrabold {{ \App\Support\Ui::persenWarna($ringkasan['persentase']) }} tabular-nums block">
+                                    {{ $ringkasan['persentase'] }}%
+                                </span>
+                                <span class="text-xs font-bold {{ $isMemenuhi ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400' }}">
+                                    {{ $isMemenuhi ? 'Memenuhi' : 'Di Bawah Target' }}
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Ringkasan Jumlah H/I/S/A --}}
+                        <div class="flex items-center gap-1.5 flex-wrap text-xs font-bold pt-1">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-900 border border-emerald-400 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/50 tabular-nums">
+                                H: {{ $ringkasan['total_hadir'] }}
+                            </span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-100 text-blue-900 border border-blue-400 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/50 tabular-nums">
+                                I: {{ $ringkasan['total_izin'] }}
+                            </span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-400 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/50 tabular-nums">
+                                S: {{ $ringkasan['total_sakit'] }}
+                            </span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-red-100 text-red-900 border border-red-400 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/50 tabular-nums">
+                                A: {{ $ringkasan['total_alpa'] }}
+                            </span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-400 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600 tabular-nums">
+                                Total: {{ $ringkasan['total_sesi'] }} Sesi
+                            </span>
+                        </div>
+
+                        {{-- Grid Kotak Pertemuan --}}
+                        <div class="pt-3 border-t-2 border-slate-200 dark:border-slate-700">
+                            <span class="text-xs font-bold text-slate-700 dark:text-slate-200 block mb-2">Riwayat Pertemuan:</span>
+                            <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
+                                @foreach($pertemuanList as $idx => $detail)
+                                    @php
+                                        $statusStr = $detail->status instanceof \App\Enums\StatusKehadiran ? $detail->status->value : (string) $detail->status;
+                                        $tglCarbon = \Carbon\Carbon::parse($detail->sesiAbsensi->tanggal);
+                                    @endphp
+                                    <x-ui.pertemuan-chip
+                                        :p="$idx + 1"
+                                        :tanggal="$tglCarbon"
+                                        :status="$statusStr"
+                                        :keterangan="$detail->keterangan"
+                                    />
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="overflow-x-auto">
+                {{-- 2. TABEL MATRIKS DESKTOP (Tampil di md ke atas: >= 768px) --}}
+                <div class="hidden md:block overflow-x-auto">
                     <table class="border-collapse text-sm w-full" style="min-width: max-content">
                         <thead>
                             <tr class="bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-400 dark:border-slate-500">
