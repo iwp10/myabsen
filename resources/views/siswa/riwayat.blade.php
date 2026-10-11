@@ -163,11 +163,11 @@
                     <div class="p-5 sm:p-6 text-slate-900 dark:text-white">
                         <h3 class="text-lg font-bold mb-4">Riwayat Kehadiran</h3>
                         
-                        <form method="GET" action="{{ route('siswa.riwayat') }}" class="mb-6 flex flex-col md:flex-row flex-wrap gap-4 items-end">
+                        <form method="GET" action="{{ route('siswa.riwayat') }}" class="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
                             <input type="hidden" name="tab" value="semua">
-                            <div class="w-full sm:w-auto">
+                            <div class="w-full min-w-0">
                                 <x-input-label for="periode" value="Periode" class="text-slate-800 dark:text-slate-200 font-semibold" />
-                                <select id="periode" name="periode" class="mt-1 block w-full sm:w-52 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium">
+                                <select id="periode" name="periode" class="mt-1 block w-full border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium">
                                     <option value="semua" {{ $filterPeriodeValue === 'semua' ? 'selected' : '' }}>Semua Periode</option>
                                     @foreach($daftarPeriode as $item)
                                         <option value="{{ $item['value'] }}" {{ $filterPeriodeValue === $item['value'] ? 'selected' : '' }}>
@@ -176,28 +176,34 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="w-full sm:w-auto">
+                            <div class="w-full min-w-0">
                                 <x-input-label for="bulan" value="Bulan" class="text-slate-800 dark:text-slate-200 font-semibold" />
-                                <input id="bulan" name="bulan" type="month" class="mt-1 block w-full sm:w-36 text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium rounded-lg border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20" value="{{ request('bulan') }}" />
+                                <x-ui.bulan-select
+                                    id="bulan"
+                                    name="bulan"
+                                    :tahun-ajaran="$selectedPeriode['tahun_ajaran'] ?? ($activePeriode['tahun_ajaran'] ?? null)"
+                                    :semester="$selectedPeriode['semester'] ?? ($activePeriode['semester'] ?? null)"
+                                    :selected="request('bulan')"
+                                />
                             </div>
-                            <div class="w-full sm:w-auto">
+                            <div class="w-full min-w-0">
                                 <x-input-label for="tanggal" value="Tanggal" class="text-slate-800 dark:text-slate-200 font-semibold" />
-                                <input id="tanggal" name="tanggal" type="date" class="mt-1 block w-full sm:w-40 text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium rounded-lg border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20" value="{{ request('tanggal') }}" />
+                                <input id="tanggal" name="tanggal" type="date" class="mt-1 block w-full text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium rounded-lg border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20" value="{{ request('tanggal') }}" />
                             </div>
-                            <div class="w-full sm:w-auto">
+                            <div class="w-full min-w-0">
                                 <x-input-label for="mapel_id" value="Mata Pelajaran" class="text-slate-800 dark:text-slate-200 font-semibold" />
-                                <select id="mapel_id" name="mapel_id" class="mt-1 block w-full sm:w-48 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium">
+                                <select id="mapel_id" name="mapel_id" class="mt-1 block w-full border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium">
                                     <option value="">Semua Mapel</option>
                                     @foreach($mapels as $mapel)
-                                        <option value="{{ $mapel->id }}" {{ request('mapel_id') == $mapel->id ? 'selected' : '' }}>
+                                        <option value="{{ $mapel->id }}" {{ (string) request('mapel_id') === (string) $mapel->id ? 'selected' : '' }}>
                                             {{ $mapel->nama }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="w-full sm:w-auto">
+                            <div class="w-full min-w-0">
                                 <x-input-label for="status" value="Status" class="text-slate-800 dark:text-slate-200 font-semibold" />
-                                <select id="status" name="status" class="mt-1 block w-full sm:w-36 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium">
+                                <select id="status" name="status" class="mt-1 block w-full border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium">
                                     <option value="">Semua Status</option>
                                     @foreach(['hadir' => 'Hadir', 'izin' => 'Izin', 'sakit' => 'Sakit', 'alpa' => 'Alpa'] as $sVal => $sLbl)
                                         <option value="{{ $sVal }}" {{ request('status') === $sVal ? 'selected' : '' }}>
@@ -206,12 +212,12 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="flex items-center gap-2 w-full sm:w-auto">
-                                <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-slate-950 font-bold py-2.5 px-5 rounded-lg text-xs uppercase tracking-wider min-h-[44px] transition shadow-xs">
+                            <div class="flex items-center gap-2 w-full min-w-0">
+                                <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-slate-950 font-bold py-2.5 px-4 rounded-lg text-xs uppercase tracking-wider min-h-[44px] transition shadow-xs flex items-center justify-center">
                                     Filter
                                 </button>
                                 @if(request('tanggal') || request('bulan') || request('mapel_id') || request('status') || request('periode') || request('tahun_ajaran') || request('semester'))
-                                    <a href="{{ route('siswa.riwayat', ['tab' => 'semua']) }}" class="border-2 border-slate-400 dark:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold py-2.5 px-4 rounded-lg text-xs uppercase tracking-wider min-h-[44px] flex items-center justify-center transition shadow-xs">
+                                    <a href="{{ route('siswa.riwayat', ['tab' => 'semua']) }}" class="w-full border-2 border-slate-400 dark:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold py-2.5 px-3 rounded-lg text-xs uppercase tracking-wider min-h-[44px] flex items-center justify-center transition shadow-xs">
                                         Reset
                                     </a>
                                 @endif

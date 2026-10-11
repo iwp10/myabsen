@@ -240,6 +240,136 @@ class Ui
     }
 
     /**
+     * Kelas token literal untuk kotak/chip pertemuan absensi (tinted per status dan berpasangan dark:).
+     */
+    public static function pertemuanChip(StatusKehadiran|string|null $status): string
+    {
+        $val = self::normalizeStatus($status);
+
+        return match ($val) {
+            'hadir' => 'bg-emerald-100 text-emerald-900 border-2 border-emerald-400 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/50',
+            'izin' => 'bg-blue-100 text-blue-900 border-2 border-blue-400 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/50',
+            'sakit' => 'bg-amber-100 text-amber-900 border-2 border-amber-400 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/50',
+            'alpa' => 'bg-red-100 text-red-900 border-2 border-red-400 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/50',
+            default => 'bg-slate-100 text-slate-800 border-2 border-dashed border-slate-400 dark:bg-slate-700/50 dark:text-slate-200 dark:border-slate-400',
+        };
+    }
+
+    /**
+     * Mengembalikan huruf inisial status kehadiran (H, I, S, A, atau -).
+     */
+    public static function statusHuruf(StatusKehadiran|string|null $status): string
+    {
+        $val = self::normalizeStatus($status);
+
+        return match ($val) {
+            'hadir' => 'H',
+            'izin' => 'I',
+            'sakit' => 'S',
+            'alpa' => 'A',
+            default => '-',
+        };
+    }
+
+    /**
+     * Kelas Tailwind literal untuk ukuran ikon eksplisit (sm=w-4 h-4, md=w-5 h-5, lg=w-6 h-6).
+     */
+    public static function iconClass(string $size = 'md'): string
+    {
+        return match (strtolower(trim($size))) {
+            'sm' => 'w-4 h-4 shrink-0',
+            'lg' => 'w-6 h-6 shrink-0',
+            default => 'w-5 h-5 shrink-0',
+        };
+    }
+
+    /**
+     * Mengembalikan nama bulan Indonesia untuk angka 1..12.
+     */
+    public static function namaBulanIndo(int $bulan): string
+    {
+        $nama = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
+
+        return $nama[$bulan] ?? '';
+    }
+
+    /**
+     * Membentuk daftar 6 bulan pada periode terpilih (Ganjil: Juli-Desember tahun pertama,
+     * Genap: Januari-Juni tahun kedua) secara murni tanpa query database.
+     * Jika ada bulan terpilih valid di luar 6 bulan itu, tambahkan agar opsi tidak hilang.
+     *
+     * @return array<int, array{value: string, label: string}>
+     */
+    public static function getDaftarBulanPeriode(?string $tahunAjaran, ?string $semester, ?string $selected = null): array
+    {
+        $ta = trim((string) $tahunAjaran);
+        $sm = strtolower(trim((string) $semester));
+
+        // Default tahun ajaran jika kosong/tidak valid
+        if (preg_match('/^(\d{4})\/(\d{4})$/', $ta, $m)) {
+            $thn1 = (int) $m[1];
+            $thn2 = (int) $m[2];
+        } else {
+            $thnNow = (int) date('Y');
+            $thn1 = $thnNow;
+            $thn2 = $thnNow + 1;
+        }
+
+        $daftar = [];
+
+        if ($sm === 'genap') {
+            // Genap = Januari s.d. Juni tahun kedua
+            for ($b = 1; $b <= 6; $b++) {
+                $val = sprintf('%04d-%02d', $thn2, $b);
+                $daftar[] = [
+                    'value' => $val,
+                    'label' => self::namaBulanIndo($b).' '.$thn2,
+                ];
+            }
+        } else {
+            // Ganjil = Juli s.d. Desember tahun pertama
+            for ($b = 7; $b <= 12; $b++) {
+                $val = sprintf('%04d-%02d', $thn1, $b);
+                $daftar[] = [
+                    'value' => $val,
+                    'label' => self::namaBulanIndo($b).' '.$thn1,
+                ];
+            }
+        }
+
+        // Jika request membawa bulan valid di luar enam bulan itu, tambahkan sebagai opsi terpilih
+        if (! empty($selected) && preg_match('/^(\d{4})-(\d{2})$/', $selected, $selMatches)) {
+            $selThn = (int) $selMatches[1];
+            $selBln = (int) $selMatches[2];
+
+            if ($selBln >= 1 && $selBln <= 12) {
+                $existingValues = array_column($daftar, 'value');
+                if (! in_array($selected, $existingValues, true)) {
+                    $daftar[] = [
+                        'value' => $selected,
+                        'label' => self::namaBulanIndo($selBln).' '.$selThn,
+                    ];
+                }
+            }
+        }
+
+        return $daftar;
+    }
+
+    /**
      * Normalisasi string atau enum StatusKehadiran.
      */
     private static function normalizeStatus(StatusKehadiran|string|null $status): string

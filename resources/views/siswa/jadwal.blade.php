@@ -56,7 +56,7 @@
 
             <!-- Kontainer Jadwal & Filter -->
             <div class="bg-white dark:bg-slate-900 rounded-xl shadow-xs border-2 border-slate-300 dark:border-slate-600 overflow-hidden">
-                <div class="p-5 border-b-2 border-slate-300 dark:border-slate-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="p-5 border-b-2 border-slate-300 dark:border-slate-600 space-y-4">
                     <div>
                         <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/><path d="M11 15h1"/><path d="M12 15v3"/></svg>
@@ -68,32 +68,38 @@
                     </div>
 
                     {{-- Filter Hari & Mapel --}}
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                        <form method="GET" action="{{ route('siswa.jadwal') }}" class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
-                            <label for="filter-hari" class="text-xs font-medium text-slate-600 dark:text-slate-300 sr-only">Filter Hari</label>
-                            <select id="filter-hari" name="hari" onchange="this.form.submit()" class="border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 sm:py-1.5 px-3 font-medium">
-                                <option value="">Semua Hari</option>
-                                @foreach(['senin' => 'Senin', 'selasa' => 'Selasa', 'rabu' => 'Rabu', 'kamis' => 'Kamis', 'jumat' => 'Jumat', 'sabtu' => 'Sabtu'] as $val => $lbl)
-                                    <option value="{{ $val }}" {{ strtolower((string)$filterHari) === $val ? 'selected' : '' }}>
-                                        {{ $lbl }} {{ strtolower($hariIni) === $val ? '(Hari Ini)' : '' }}
-                                    </option>
-                                @endforeach
-                            </select>
+                    <div class="w-full">
+                        <form method="GET" action="{{ route('siswa.jadwal') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 w-full items-end">
+                            <div class="w-full min-w-0">
+                                <label for="filter-hari" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Hari</label>
+                                <select id="filter-hari" name="hari" onchange="this.form.submit()" class="w-full min-w-0 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 pl-3 pr-8 font-medium">
+                                    <option value="">Semua Hari</option>
+                                    @foreach(['senin' => 'Senin', 'selasa' => 'Selasa', 'rabu' => 'Rabu', 'kamis' => 'Kamis', 'jumat' => 'Jumat', 'sabtu' => 'Sabtu'] as $val => $lbl)
+                                        <option value="{{ $val }}" {{ strtolower((string)$filterHari) === $val ? 'selected' : '' }}>
+                                            {{ $lbl }} {{ strtolower($hariIni) === $val ? '(Hari Ini)' : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                            <label for="filter-mapel" class="text-xs font-medium text-slate-600 dark:text-slate-300 sr-only">Filter Mata Pelajaran</label>
-                            <select id="filter-mapel" name="mapel_id" onchange="this.form.submit()" class="border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 sm:py-1.5 px-3 font-medium">
-                                <option value="">Semua Mapel</option>
-                                @foreach($daftarMapel as $m)
-                                    <option value="{{ $m->id }}" {{ $filterMapelId == $m->id ? 'selected' : '' }}>
-                                        {{ $m->nama }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="w-full min-w-0">
+                                <label for="filter-mapel" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mata Pelajaran</label>
+                                <select id="filter-mapel" name="mapel_id" onchange="this.form.submit()" class="w-full min-w-0 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-lg text-base sm:text-xs min-h-[44px] py-2 pl-3 pr-8 font-medium">
+                                    <option value="">Semua Mapel</option>
+                                    @foreach($daftarMapel as $m)
+                                        <option value="{{ $m->id }}" {{ $filterMapelId == $m->id ? 'selected' : '' }}>
+                                            {{ $m->nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
                             @if(!empty($filterHari) || !empty($filterMapelId))
-                                <a href="{{ route('siswa.jadwal') }}" class="inline-flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 px-3 py-2 sm:py-1.5 border-2 border-slate-400 dark:border-slate-500 rounded-lg min-h-[44px] transition shadow-xs">
-                                    Reset
-                                </a>
+                                <div class="w-full min-w-0 sm:col-span-2 md:col-span-1">
+                                    <a href="{{ route('siswa.jadwal') }}" class="w-full inline-flex items-center justify-center text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 px-4 py-2 border-2 border-slate-400 dark:border-slate-500 rounded-lg min-h-[44px] transition shadow-xs">
+                                        Reset Filter
+                                    </a>
+                                </div>
                             @endif
                         </form>
                     </div>

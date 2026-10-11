@@ -140,3 +140,38 @@ Perhitungan menggunakan rumus luminansi relatif W3C WCAG 2.1 dengan **alpha comp
 | Sidebar | Aktif Gelap | `dark:bg-emerald-500/15 / dark:text-emerald-200` | `#0f2f37` | `#a7f3d0` | **11.05:1** | 4.5:1 | LULUS |
 
 Semua pasangan warna teks dan elemen UI di atas **100% LULUS** standar WCAG AA (rasio $\ge$ 4.5:1 untuk teks normal, $\ge$ 3.0:1 untuk teks besar).
+
+---
+
+## 4. Aturan Tata Letak & Interaksi Mobile
+
+1. **Matriks Pertemuan Berubah Menjadi Kartu di Bawah Breakpoint md (<768px)**:
+   - Di bawah breakpoint `md`, tabel matriks dengan geser horizontal ditiadakan. Tampilan beralih ke daftar kartu (`md:hidden`) per siswa (guru `riwayat_detail`) atau kartu ringkasan tunggal (siswa `riwayat_mapel`).
+   - Kartu memuat nama siswa (font-bold, wrap rapi), NIS, status nonaktif `(nonaktif)`, persentase kehadiran dengan warna `Ui::persenWarna`, indikator `Perlu perhatian`, ringkasan jumlah H/I/S/A, serta grid kotak pertemuan (4 kolom di 360px, naik ke 5-6 di layar lebih lebar) menggunakan komponen `x-ui.pertemuan-chip` (`Ui::pertemuanChip`).
+   - Pada `md:` ke atas, tabel matriks sticky desktop (`hidden md:block`) dipertahankan dengan kolom sticky latar opak dan bayangan tepi.
+2. **Pola Filter Satu Kolom di Mobile**:
+   - Blok filter pada layar HP menggunakan `grid grid-cols-1` di mana setiap kontrol memenuhi lebar (`w-full min-w-0`).
+   - Label diletakkan secara eksplisit DI ATAS input/select (bukan `sr-only` atau melayang/absolut).
+   - Tinggi seragam `min-h-[44px]`, padding kanan dropdown `pr-8` agar teks panjang tidak menimpa chevron.
+   - Tombol aksi (Terapkan/Reset) membentang penuh lebar pada mobile (`w-full`).
+3. **Gaya Input File Proyek (`x-ui.file-input`)**:
+   - Kontainer input file: `border-2 border-slate-400 dark:border-slate-500 rounded-lg bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-sm w-full min-w-0 cursor-pointer min-h-[44px] focus-visible:ring-4 ring-emerald-500 dark:[color-scheme:dark]`.
+   - Varian Tailwind `file:` memakai token proyek bertema emerald:
+     `file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:font-semibold file:text-sm file:bg-emerald-100 file:text-emerald-900 hover:file:bg-emerald-200 dark:file:bg-emerald-500/15 dark:file:text-emerald-300 dark:hover:file:bg-emerald-500/25`.
+   - Teks petunjuk bantuan diletakkan di bawah input dengan teks sekunder berkontras tinggi (`text-slate-600 dark:text-slate-300`).
+4. **Pola Tab dengan Gulir Otomatis & Penanda Alamat (Pergantian Periode)**:
+   - Bar tab mobile: kontainer `overflow-x-auto` dengan scroll-snap (`snap-x snap-mandatory`), tiap tab `min-h-[44px] min-w-[44px]` dengan ikon + teks.
+   - Tab aktif ditandai jelas dengan `border-b-4` dan latar tint lembut.
+   - Pengaktifan tab atau klik langkah di kartu panduan memicu `$nextTick` gulir halus (`scrollIntoView({ behavior: 'smooth', block: 'start' })`) dengan `scroll-mt-24` agar judul panel tidak tertutup topbar mobile, dan memindahkan fokus (`tabindex="-1"`).
+   - Menghormati preferensi pengguna `prefers-reduced-motion` (gulir instan `auto` bila reduced motion aktif).
+   - Sinkronisasi penanda alamat URL (`#salin`, `#pindah`, `#lulus`, `#panduan`) dan tombol navigasi Back/Forward (`hashchange`).
+   - Tautan "Kembali ke daftar langkah" di akhir tiap panel untuk memudahkan kembali ke bar tab.
+5. **Standarisasi Ikon Eksplisit (`x-ui.icon`)**:
+   - Seluruh tag `<svg>` di antarmuka WAJIB memiliki dimensi ukuran eksplisit (atribut `width` dan `height`, atau class Tailwind `w-*` dan `h-*`, atau `size-*`).
+   - Komponen terpusat `x-ui.icon` (`Ui::iconClass`) menyediakan tiga skala ukuran standar dengan class literal: `sm` (`w-4 h-4 shrink-0`), `md` (`w-5 h-5 shrink-0`), dan `lg` (`w-6 h-6 shrink-0`).
+   - Dilarang keras menggunakan class ukuran tidak valid (seperti `size-4.5` yang tidak ada di skala bawaan Tailwind) atau mengandalkan selector turunan tanpa ukuran eksplisit pada elemen SVG itu sendiri.
+6. **Filter Bulan Berdasarkan Periode (`x-ui.bulan-select`)**:
+   - Filter bulan di antarmuka siswa tidak mengandalkan `<input type="month">` yang rawan jatuh kembali (*fallback*) menjadi teks bebas di berbagai browser seluler.
+   - Menggunakan komponen dropdown terstandarisasi `<x-ui.bulan-select>` yang otomatis menampilkan opsi "Semua bulan" dan 6 bulan resmi dalam semester terkait (Ganjil: Juli-Desember; Genap: Januari-Juni) dengan label bahasa Indonesia ramah pengguna.
+   - Bilah filter disusun sejajar rapi (`items-end`) dengan tinggi seragam `min-h-[44px]` dan membentang penuh 1-kolom di HP.
+

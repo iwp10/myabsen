@@ -44,24 +44,30 @@
 
             <!-- Tabel / Grid Jadwal Mengajar -->
             <div class="bg-white dark:bg-slate-900 rounded-xl shadow-xs border-2 border-slate-300 dark:border-slate-600 overflow-hidden">
-                <div class="p-5 border-b-2 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <div>
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <svg class="w-5 h-5 text-emerald-700 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            Seluruh Jadwal Mengajar Seminggu
-                        </h3>
-                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-                            Daftar terurut berdasarkan hari pelaksanaan dan jam mulai pelajaran
-                        </p>
+                <div class="p-5 border-b-2 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <svg class="w-5 h-5 text-emerald-700 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                Seluruh Jadwal Mengajar Seminggu
+                            </h3>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                                Daftar terurut berdasarkan hari pelaksanaan dan jam mulai pelajaran
+                            </p>
+                        </div>
+                        <a href="{{ route('guru.dashboard') }}" class="inline-flex items-center text-xs font-bold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 gap-1 min-h-[44px]">
+                            &larr; Dashboard
+                        </a>
                     </div>
                     
-                    {{-- Filter Hari, Kelas, Mapel & Tombol Navigasi --}}
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:w-auto">
-                        <form method="GET" action="{{ route('guru.jadwal') }}" class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
-                            {{-- Dropdown Hari --}}
-                            <select name="hari" onchange="this.form.submit()" class="border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:outline-none focus:ring-4 focus:ring-emerald-500 rounded-xl text-base sm:text-xs min-h-[44px] py-2 sm:py-1.5 px-3">
+                    {{-- Filter Hari, Kelas, Mapel & Reset --}}
+                    <form method="GET" action="{{ route('guru.jadwal') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full items-end">
+                        {{-- Dropdown Hari --}}
+                        <div class="w-full min-w-0">
+                            <label for="filter-guru-hari" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Hari</label>
+                            <select id="filter-guru-hari" name="hari" onchange="this.form.submit()" class="w-full min-w-0 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:outline-none focus:ring-4 focus:ring-emerald-500 rounded-xl text-base sm:text-xs min-h-[44px] py-2 pl-3 pr-8">
                                 <option value="">Semua Hari</option>
                                 @foreach(['senin' => 'Senin', 'selasa' => 'Selasa', 'rabu' => 'Rabu', 'kamis' => 'Kamis', 'jumat' => 'Jumat', 'sabtu' => 'Sabtu'] as $v => $l)
                                     <option value="{{ $v }}" {{ strtolower((string)$filterHari) === $v ? 'selected' : '' }}>
@@ -69,9 +75,12 @@
                                     </option>
                                 @endforeach
                             </select>
+                        </div>
 
-                            {{-- Dropdown Kelas --}}
-                            <select name="kelas_id" onchange="this.form.submit()" class="border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:outline-none focus:ring-4 focus:ring-emerald-500 rounded-xl text-base sm:text-xs min-h-[44px] py-2 sm:py-1.5 px-3">
+                        {{-- Dropdown Kelas --}}
+                        <div class="w-full min-w-0">
+                            <label for="filter-guru-kelas" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kelas</label>
+                            <select id="filter-guru-kelas" name="kelas_id" onchange="this.form.submit()" class="w-full min-w-0 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:outline-none focus:ring-4 focus:ring-emerald-500 rounded-xl text-base sm:text-xs min-h-[44px] py-2 pl-3 pr-8">
                                 <option value="">Semua Kelas</option>
                                 @foreach($daftarKelas as $k)
                                     <option value="{{ $k['id'] }}" {{ $filterKelasId == $k['id'] ? 'selected' : '' }}>
@@ -79,9 +88,12 @@
                                     </option>
                                 @endforeach
                             </select>
+                        </div>
 
-                            {{-- Dropdown Mata Pelajaran --}}
-                            <select name="mapel_id" onchange="this.form.submit()" class="border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:outline-none focus:ring-4 focus:ring-emerald-500 rounded-xl text-base sm:text-xs min-h-[44px] py-2 sm:py-1.5 px-3">
+                        {{-- Dropdown Mata Pelajaran --}}
+                        <div class="w-full min-w-0">
+                            <label for="filter-guru-mapel" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mata Pelajaran</label>
+                            <select id="filter-guru-mapel" name="mapel_id" onchange="this.form.submit()" class="w-full min-w-0 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:outline-none focus:ring-4 focus:ring-emerald-500 rounded-xl text-base sm:text-xs min-h-[44px] py-2 pl-3 pr-8">
                                 <option value="">Semua Mapel</option>
                                 @foreach($daftarMapel as $m)
                                     <option value="{{ $m['id'] }}" {{ $filterMapelId == $m['id'] ? 'selected' : '' }}>
@@ -89,17 +101,16 @@
                                     </option>
                                 @endforeach
                             </select>
+                        </div>
 
-                            @if(!empty($filterHari) || !empty($filterKelasId) || !empty($filterMapelId))
-                                <a href="{{ route('guru.jadwal') }}" class="inline-flex items-center justify-center text-xs font-semibold text-slate-700 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white px-3 py-2 sm:py-1.5 border-2 border-slate-400 dark:border-slate-500 rounded-xl min-h-[44px] hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-                                    Reset
+                        @if(!empty($filterHari) || !empty($filterKelasId) || !empty($filterMapelId))
+                            <div class="w-full min-w-0 sm:col-span-2 lg:col-span-1">
+                                <a href="{{ route('guru.jadwal') }}" class="w-full inline-flex items-center justify-center text-xs font-semibold text-slate-700 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white px-4 py-2 border-2 border-slate-400 dark:border-slate-500 rounded-xl min-h-[44px] hover:bg-slate-100 dark:hover:bg-slate-700 transition shadow-xs">
+                                    Reset Filter
                                 </a>
-                            @endif
-                        </form>
-                        <a href="{{ route('guru.dashboard') }}" class="inline-flex items-center justify-center text-xs font-bold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 gap-1 min-h-[44px] px-2">
-                            &larr; Dashboard
-                        </a>
-                    </div>
+                            </div>
+                        @endif
+                    </form>
                 </div>
 
                 {{-- Banner Filter Aktif --}}

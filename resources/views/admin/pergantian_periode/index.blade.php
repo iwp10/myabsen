@@ -5,7 +5,65 @@
         </h2>
     </x-slot>
 
-    <div class="py-6 sm:py-8" x-data="{ activeTab: '{{ in_array($tab, ['panduan', 'salin', 'pindah', 'lulus']) ? $tab : 'salin' }}' }">
+    <div class="py-6 sm:py-8" x-data="{
+        activeTab: '{{ in_array($tab, ['panduan', 'salin', 'pindah', 'lulus']) ? $tab : 'salin' }}',
+        init() {
+            // Penanda alamat URL hash: #salin, #pindah, #lulus, #panduan
+            const allowedTabs = ['#salin', '#pindah', '#lulus', '#panduan'];
+            const hash = window.location.hash.toLowerCase();
+            if (allowedTabs.includes(hash)) {
+                const target = hash.replace('#', '');
+                this.activeTab = target;
+                this.$nextTick(() => {
+                    this.scrollToTab(target, false);
+                });
+            }
+            window.addEventListener('hashchange', () => {
+                const currentHash = window.location.hash.toLowerCase();
+                if (allowedTabs.includes(currentHash)) {
+                    const target = currentHash.replace('#', '');
+                    this.activeTab = target;
+                    this.scrollToTab(target, false);
+                }
+            });
+        },
+        switchTab(tab, shouldScroll = true) {
+            this.activeTab = tab;
+            if (window.location.hash !== '#' + tab) {
+                history.pushState(null, '', '#' + tab);
+            }
+            if (shouldScroll) {
+                this.$nextTick(() => {
+                    this.scrollToTab(tab, true);
+                });
+            }
+        },
+        scrollToTab(tab, focusTitle = true) {
+            const targetRef = this.$refs[tab + 'Panel'];
+            if (targetRef) {
+                const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                targetRef.scrollIntoView({
+                    behavior: prefersReduced ? 'auto' : 'smooth',
+                    block: 'start'
+                });
+                if (focusTitle) {
+                    const heading = targetRef.querySelector('h3, h1') || targetRef;
+                    if (heading && heading.focus) {
+                        heading.focus();
+                    }
+                }
+            }
+        },
+        scrollToTabs() {
+            if (this.$refs.tabBar) {
+                const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                this.$refs.tabBar.scrollIntoView({
+                    behavior: prefersReduced ? 'auto' : 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+    }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
             <!-- Banner Notifikasi / Flash Messages -->
@@ -32,7 +90,7 @@
             @endif
 
             <!-- 0. KARTU PANDUAN KERJA & STATUS PERIODE AKTIF -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div x-ref="panduanPanel" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 scroll-mt-24">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
                     <div>
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 mb-2">
@@ -43,7 +101,7 @@
                             </svg>
                             <span>Panduan Alur Administrasi</span>
                         </div>
-                        <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
+                        <h1 tabindex="-1" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 outline-hidden">
                             Pusat Pergantian Periode & Tahun Ajaran
                         </h1>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -82,7 +140,7 @@
                                 <h4 class="font-semibold text-sm text-gray-900 dark:text-gray-100">Salin Kelas</h4>
                                 <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Salin struktur kelas ke semester atau tahun ajaran baru.</p>
                             </div>
-                            <button type="button" @click="activeTab = 'salin'" class="mt-3 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline text-left">
+                            <button type="button" @click="switchTab('salin')" class="mt-3 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline text-left">
                                 Buka Tab Salin &rarr;
                             </button>
                         </div>
@@ -95,7 +153,7 @@
                             </div>
                             <a href="{{ route('admin.jadwal.index') }}" class="mt-3 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1">
                                 <span>Menu Jadwal</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 7h6l-4 -4m4 4l-4 4"/></svg>
+                                <x-ui.icon name="arrow-right" size="sm" class="text-blue-600 dark:text-blue-400" />
                             </a>
                         </div>
 
@@ -105,7 +163,7 @@
                                 <h4 class="font-semibold text-sm text-gray-900 dark:text-gray-100">Pindahkan Siswa</h4>
                                 <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Naikkan atau mutasikan siswa dari kelas lama ke kelas baru.</p>
                             </div>
-                            <button type="button" @click="activeTab = 'pindah'" class="mt-3 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline text-left">
+                            <button type="button" @click="switchTab('pindah')" class="mt-3 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline text-left">
                                 Buka Tab Pindah &rarr;
                             </button>
                         </div>
@@ -116,7 +174,7 @@
                                 <h4 class="font-semibold text-sm text-gray-900 dark:text-gray-100">Luluskan Siswa</h4>
                                 <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Luluskan (nonaktifkan) siswa kelas akhir yang telah tamat.</p>
                             </div>
-                            <button type="button" @click="activeTab = 'lulus'" class="mt-3 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline text-left">
+                            <button type="button" @click="switchTab('lulus')" class="mt-3 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline text-left">
                                 Buka Tab Luluskan &rarr;
                             </button>
                         </div>
@@ -129,7 +187,7 @@
                             </div>
                             <a href="{{ route('admin.pengaturan-periode.index') }}" class="mt-3 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1">
                                 <span>Pengaturan Periode</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 7h6l-4 -4m4 4l-4 4"/></svg>
+                                <x-ui.icon name="arrow-right" size="sm" class="text-blue-600 dark:text-blue-400" />
                             </a>
                         </div>
                     </div>
@@ -137,13 +195,13 @@
             </div>
 
             <!-- NAVIGASI TAB UTAMA -->
-            <div class="border-b border-gray-200 dark:border-gray-700">
-                <nav class="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
+            <div x-ref="tabBar" class="border-b border-gray-200 dark:border-gray-700 scroll-mt-20">
+                <nav class="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto snap-x snap-mandatory py-1" aria-label="Tabs">
                     <button type="button"
-                            @click="activeTab = 'salin'"
-                            :class="activeTab === 'salin' ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
-                            class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            @click="switchTab('salin')"
+                            :class="activeTab === 'salin' ? 'border-blue-600 text-blue-600 bg-blue-50/60 dark:bg-blue-950/40 dark:border-blue-400 dark:text-blue-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 font-medium'"
+                            class="whitespace-nowrap px-3 sm:px-4 py-3 border-b-4 text-sm flex items-center gap-2 min-h-[44px] min-w-[44px] rounded-t-lg transition snap-start flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="8" y="8" width="12" height="12" rx="2" />
                             <path d="M16 8v-2a2 2 0 0 0 -2 -2h-8a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h2" />
                         </svg>
@@ -151,10 +209,10 @@
                     </button>
 
                     <button type="button"
-                            @click="activeTab = 'pindah'"
-                            :class="activeTab === 'pindah' ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
-                            class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            @click="switchTab('pindah')"
+                            :class="activeTab === 'pindah' ? 'border-blue-600 text-blue-600 bg-blue-50/60 dark:bg-blue-950/40 dark:border-blue-400 dark:text-blue-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 font-medium'"
+                            class="whitespace-nowrap px-3 sm:px-4 py-3 border-b-4 text-sm flex items-center gap-2 min-h-[44px] min-w-[44px] rounded-t-lg transition snap-start flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                             <circle cx="9" cy="7" r="4" />
                             <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
@@ -164,10 +222,10 @@
                     </button>
 
                     <button type="button"
-                            @click="activeTab = 'lulus'"
-                            :class="activeTab === 'lulus' ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
-                            class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            @click="switchTab('lulus')"
+                            :class="activeTab === 'lulus' ? 'border-blue-600 text-blue-600 bg-blue-50/60 dark:bg-blue-950/40 dark:border-blue-400 dark:text-blue-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 font-medium'"
+                            class="whitespace-nowrap px-3 sm:px-4 py-3 border-b-4 text-sm flex items-center gap-2 min-h-[44px] min-w-[44px] rounded-t-lg transition snap-start flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                             <path d="M22 9l-10 -4l-10 4l10 4l10 -4v6" />
                             <path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4" />
@@ -180,10 +238,10 @@
             <!-- ========================================== -->
             <!-- TAB 1: SALIN KELAS                        -->
             <!-- ========================================== -->
-            <div x-show="activeTab === 'salin'" class="space-y-6" x-cloak>
+            <div x-show="activeTab === 'salin'" x-ref="salinPanel" class="space-y-6 scroll-mt-24" x-cloak>
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <div class="mb-5">
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">Salin Struktur Kelas ke Periode Baru</h3>
+                        <h3 tabindex="-1" class="text-lg font-bold text-gray-900 dark:text-gray-100 outline-hidden">Salin Struktur Kelas ke Periode Baru</h3>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                             Salin nama, tingkat, dan jurusan kelas ke periode tujuan. Kelas yang sudah ada di periode tujuan akan otomatis dilewati. Jadwal dan siswa tidak ikut disalin.
                         </p>
@@ -348,16 +406,23 @@
                             Tidak ada kelas aktif pada periode asal yang dipilih.
                         </div>
                     @endif
+
+                    <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                        <button type="button" @click="scrollToTabs()" class="inline-flex items-center gap-1.5 text-xs font-bold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+                            <span>Kembali ke daftar langkah</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- ========================================== -->
             <!-- TAB 2: PINDAHKAN SISWA                    -->
             <!-- ========================================== -->
-            <div x-show="activeTab === 'pindah'" class="space-y-6" x-cloak>
+            <div x-show="activeTab === 'pindah'" x-ref="pindahPanel" class="space-y-6 scroll-mt-24" x-cloak>
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <div class="mb-5">
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">Pindahkan Siswa ke Kelas Baru</h3>
+                        <h3 tabindex="-1" class="text-lg font-bold text-gray-900 dark:text-gray-100 outline-hidden">Pindahkan Siswa ke Kelas Baru</h3>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                             Pindahkan siswa aktif dari kelas asal ke kelas tujuan (misal kenaikan tingkat atau mutasi rombel). Riwayat absensi sesi lama tetap aman tersimpan di kelas asalnya.
                         </p>
@@ -566,16 +631,23 @@
                             Silakan pilih Kelas Asal pada dropdown di atas untuk memuat daftar siswa.
                         </div>
                     @endif
+
+                    <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                        <button type="button" @click="scrollToTabs()" class="inline-flex items-center gap-1.5 text-xs font-bold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+                            <span>Kembali ke daftar langkah</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- ========================================== -->
             <!-- TAB 3: LULUSKAN SISWA                     -->
             <!-- ========================================== -->
-            <div x-show="activeTab === 'lulus'" class="space-y-6" x-cloak>
+            <div x-show="activeTab === 'lulus'" x-ref="lulusPanel" class="space-y-6 scroll-mt-24" x-cloak>
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <div class="mb-5">
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">Luluskan Siswa Kelas Akhir</h3>
+                        <h3 tabindex="-1" class="text-lg font-bold text-gray-900 dark:text-gray-100 outline-hidden">Luluskan Siswa Kelas Akhir</h3>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                             Luluskan siswa yang telah tamat belajar. Siswa akan di-nonaktifkan dengan aman (soft delete); data historis absensi tetap utuh dan siswa dapat dipulihkan sewaktu-waktu melalui menu Data Terhapus.
                         </p>
@@ -737,6 +809,13 @@
                             Silakan pilih Kelas pada dropdown di atas untuk memuat daftar siswa yang akan diluluskan.
                         </div>
                     @endif
+
+                    <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                        <button type="button" @click="scrollToTabs()" class="inline-flex items-center gap-1.5 text-xs font-bold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+                            <span>Kembali ke daftar langkah</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 

@@ -82,7 +82,8 @@
                         
                         <div>
                             <x-input-label for="bulan" :value="__('Bulan')" />
-                            <input type="month" id="bulan" name="bulan" value="{{ old('bulan', request('bulan')) }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                            <input type="month" id="bulan" name="bulan" pattern="\d{4}-\d{2}" placeholder="2026-10" value="{{ old('bulan', request('bulan')) }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Format: 2026-10 (Opsional)</p>
                         </div>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
