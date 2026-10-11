@@ -26,18 +26,18 @@
             }
         </script>
     </head>
-    <body class="font-sans antialiased text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-900">
-        <div class="flex h-screen bg-gray-100 dark:bg-gray-900 overflow-hidden">
+    <body class="font-sans antialiased text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-950">
+        <div class="flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden">
             <!-- Sidebar Navigasi -->
             @include('layouts.navigation')
 
             <!-- Area Konten Utama -->
             <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
                 <!-- Topbar Header -->
-                <header class="sticky top-0 z-30 flex-shrink-0 flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-xs">
+                <header class="sticky top-0 z-30 flex-shrink-0 flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-900 border-b-2 border-slate-300 dark:border-slate-700 shadow-xs">
                     <div class="flex items-center gap-3 min-w-0">
                         <!-- Tombol Hamburger Mobile -->
-                        <button @click="sidebarOpen = true" type="button" class="lg:hidden p-2 -ml-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Buka Menu">
+                        <button @click="sidebarOpen = true" type="button" class="lg:hidden p-2 -ml-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500/50" aria-label="Buka Menu">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                                 <path d="M4 6l16 0" />
@@ -52,7 +52,7 @@
                                 {{ $header }}
                             </div>
                         @else
-                            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight truncate">
+                            <h2 class="font-semibold text-xl text-slate-900 dark:text-white leading-tight truncate">
                                 MyAbsen
                             </h2>
                         @endisset
@@ -61,7 +61,7 @@
                     <!-- Topbar Kanan: Dark Mode & User Dropdown -->
                     <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                         <!-- Dark Mode Toggle -->
-                        <button @click="darkMode = !darkMode" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2 transition" title="Ganti Tema">
+                        <button @click="darkMode = !darkMode" type="button" class="text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500/50 rounded-lg text-sm p-2 min-h-[44px] min-w-[44px] flex items-center justify-center transition" title="Ganti Tema">
                             <svg x-show="!darkMode" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                                 <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
@@ -76,7 +76,7 @@
                         <!-- User Profile Dropdown -->
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
-                                <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700/60 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition">
+                                <button class="inline-flex items-center min-h-[44px] px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-lg text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500/50 transition">
                                     <span class="max-w-[120px] sm:max-w-none truncate">{{ Auth::user()->name }}</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ms-1.5 h-4 w-4">
                                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>

@@ -37,6 +37,26 @@ Baca keduanya sebelum mengerjakan tugas apa pun. Jika kode bertentangan dengan P
 - Sesi absensi unik per (`jadwal_id`, `tanggal`).
 - Data siswa, guru, kelas, dan mapel yang sudah punya riwayat absensi tidak dihapus permanen (pakai soft delete).
 
+## Konvensi Tampilan dan UI
+- Wajib merujuk [docs/DESAIN.md](docs/DESAIN.md) sebagai satu-satunya sumber kebenaran token desain dan komponen antarmuka.
+- Gunakan komponen Blade `resources/views/components/ui/` (`card`, `stat-card`, `status-badge`, `table`, `filter-bar`, `empty-state`, `section-title`, `page-header`, `button`) dan helper presentasi murni `App\Support\Ui`. Dilarang menuliskan utilitas warna mentah tanpa pasangan `dark:` pada atribut class yang sama.
+- DILARANG merangkai nama class Tailwind secara dinamis (misalnya `'text-' . $color . '-600'` atau `bg-{$color}`) karena tidak akan terkompilasi oleh Tailwind CSS. Tulis nama class secara literal dan utuh.
+- Dilarang menggunakan teks redup terlarang: `text-(gray|slate|zinc)-(300|400|500)` di mode terang (kecuali placeholder/disabled) dan `dark:text-(gray|slate|zinc)-(500|600|700|800|900)` di mode gelap.
+- Prinsip "Satu Warna Satu Arti" untuk status kehadiran (gaya tinted aksen dengan ikon + teks):
+  | Status | Mode Terang | Mode Gelap | Ikon Tabler |
+  |---|---|---|---|
+  | **Hadir** | `bg-emerald-100 text-emerald-900 border-emerald-400` | `dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/50` | check |
+  | **Izin** | `bg-blue-100 text-blue-900 border-blue-400` | `dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/50` | info |
+  | **Sakit** | `bg-amber-100 text-amber-900 border-amber-400` | `dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/50` | plus |
+  | **Alpa** | `bg-red-100 text-red-900 border-red-400` | `dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/50` | x |
+  | **Belum diabsen** | `bg-slate-100 text-slate-800 border-slate-400 border-dashed` | `dark:bg-slate-700/50 dark:text-slate-200 dark:border-slate-400 border-dashed` | clock |
+- Rasio kontras teks minimal 4.5:1 (WCAG AA) pada mode terang dan gelap (3:1 untuk teks besar $\ge$24px atau $\ge$18.66px bold, serta ikon/batas bermakna).
+- Ukuran target sentuh mobile minimal 44x44px dengan jarak minimal 8px.
+- Input form (`input`, `select`, `textarea`) wajib font 16px dan tinggi minimal 44px untuk mencegah zoom otomatis pada iOS.
+- Bingkai kartu dan tabel: `border-2 border-slate-300 dark:border-slate-600`.
+- Permukaan elevated (header grup hari/tanggal, panel, input, item jadwal): terang `bg-slate-100` (atau `bg-white`), gelap `dark:bg-slate-800 dark:shadow-lg dark:shadow-black/40 dark:ring-1 dark:ring-white/5`. Tidak boleh ada latar terang yang silau di mode gelap.
+- Tabel daftar sederhana memakai class `responsive-stack-table` dengan atribut `data-label` di setiap sel data untuk berubah jadi tumpukan kartu di mobile tanpa duplikasi markup. Form absensi guru memakai tombol Simpan melekat (`sticky bottom-0`) dengan padding safe-area.
+
 ## Aturan kerja
 - Aturan "PRD dulu baru kode": Jika ingin mengubah fitur atau aturan bisnis, perbarui `docs/PRD.md` terlebih dahulu, baru kemudian menulis kode.
 - Kerjakan satu fase per tugas sesuai `docs/PROGRESS.md`. Jangan membuat fitur di luar MVP.

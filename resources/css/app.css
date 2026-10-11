@@ -7,7 +7,104 @@
 }
 
 @layer base {
-  html, body {
-    font-family: 'Inter', sans-serif !important;
-  }
+    html, body {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 16px;
+    }
+
+    /* Standarisasi input mobile: tinggi minimal 44px dan font 16px mencegah auto-zoom di iOS */
+    input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+    select,
+    textarea {
+        font-size: 1rem !important;
+        min-height: 44px;
+    }
+
+    @screen sm {
+        input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+        select,
+        textarea {
+            font-size: 0.875rem !important;
+            min-height: 38px;
+        }
+    }
+}
+
+/* Tabel responsif bertumpuk menjadi kartu di mobile (layar < 768px) */
+@media (max-width: 767px) {
+    .responsive-stack-table table,
+    .responsive-stack-table thead,
+    .responsive-stack-table tbody,
+    .responsive-stack-table th,
+    .responsive-stack-table td,
+    .responsive-stack-table tr {
+        display: block;
+    }
+
+    .responsive-stack-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+    }
+
+    .responsive-stack-table tbody tr {
+        border-bottom: 2px solid #e2e8f0;
+        padding: 1rem;
+        background-color: #ffffff;
+    }
+
+    .dark .responsive-stack-table tbody tr {
+        border-bottom: 2px solid #334155;
+        background-color: #0f172a;
+    }
+
+    .responsive-stack-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .responsive-stack-table td {
+        border: none;
+        position: relative;
+        padding: 0.5rem 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right;
+    }
+
+    .responsive-stack-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.875rem;
+        color: #475569;
+        text-align: left;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .dark .responsive-stack-table td::before {
+        color: #cbd5e1;
+    }
+
+    .responsive-stack-table td:empty {
+        display: none;
+    }
+}
+
+/* Aksesibilitas Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+        animation-delay: -1ms !important;
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        background-attachment: initial !important;
+        scroll-behavior: auto !important;
+        transition-delay: 0s !important;
+        transition-duration: 0s !important;
+    }
 }

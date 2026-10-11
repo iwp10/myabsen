@@ -107,7 +107,7 @@ test('jadwal mengajar: item yang cocok bertanda sorotan hijau dan label filter a
 
     // Mengandung kelas sorotan hijau
     $response->assertSee('border-l-emerald-600');
-    $response->assertSee('bg-emerald-50/70');
+    $response->assertSee('bg-emerald-50');
 });
 
 test('jadwal mengajar: kelas_id dan mapel_id milik guru lain ditolak dengan error validasi', function () {

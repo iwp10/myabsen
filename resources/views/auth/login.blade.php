@@ -26,18 +26,18 @@
         }
     </script>
 </head>
-<body class="font-sans antialiased text-gray-900">
+<body class="font-sans antialiased text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-950">
     <div class="relative min-h-screen flex items-center justify-center p-4 bg-cover bg-center bg-no-repeat"
          style="background-image: url('{{ asset('images/bg-school.jpg') }}');">
         <!-- Overlay gelap -->
-        <div class="absolute inset-0 bg-black/50"></div>
+        <div class="absolute inset-0 bg-slate-950/70 dark:bg-slate-950/80"></div>
 
         <!-- Card Form Login -->
-        <div class="relative z-10 w-full max-w-md bg-white rounded-lg shadow-xl overflow-hidden">
+        <div class="relative z-10 w-full max-w-md bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-2xl shadow-xl dark:shadow-black/60 dark:ring-1 dark:ring-white/5 overflow-hidden">
             <!-- Header Card -->
-            <div class="bg-blue-600 px-6 py-6 text-center text-white">
-                <h1 class="text-2xl font-bold tracking-tight">Login MyAbsen</h1>
-                <p class="text-sm text-blue-100 mt-1">Silakan masukkan Username, NIP, atau NIS</p>
+            <div class="bg-emerald-700 dark:bg-emerald-800 px-6 py-6 text-center text-white border-b-2 border-emerald-800 dark:border-emerald-700">
+                <h1 class="text-2xl font-bold tracking-tight text-white">Login MyAbsen</h1>
+                <p class="text-sm text-emerald-100 dark:text-emerald-200 mt-1">Silakan masukkan Username, NIP, atau NIS</p>
             </div>
 
             <!-- Body Card -->
@@ -61,7 +61,7 @@
 
                     <!-- Username / NIP / NIS -->
                     <div>
-                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label for="username" class="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
                             Username / NIP / NIS
                         </label>
                         <input id="username"
@@ -73,13 +73,13 @@
                                autocomplete="username"
                                placeholder="Masukkan Username, NIP, atau NIS"
                                @class([
-                                   'w-full px-3.5 py-2.5 bg-white border rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 text-sm shadow-sm',
-                                   'border-red-500' => $errors->has('username'),
-                                   'border-gray-300' => ! $errors->has('username'),
+                                   'w-full min-h-[44px] px-3.5 py-2.5 bg-white dark:bg-slate-950 border-2 rounded-xl text-slate-900 dark:text-slate-50 placeholder:text-slate-500 dark:placeholder:text-slate-400 dark:[color-scheme:dark] focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500 transition duration-150 text-base sm:text-sm shadow-xs',
+                                   'border-red-500 dark:border-red-400' => $errors->has('username'),
+                                   'border-slate-400 dark:border-slate-500' => ! $errors->has('username'),
                                ])>
                         @error('username')
                             @if (!$errors->has('seconds_left'))
-                                <p class="mt-1.5 text-xs text-red-600 font-medium">{{ $message }}</p>
+                                <p class="mt-1.5 text-xs text-red-600 dark:text-red-400 font-medium">{{ $message }}</p>
                             @endif
                         @enderror
 
@@ -87,14 +87,14 @@
                              x-init="if(seconds > 0) setInterval(() => seconds--, 1000)"
                              x-show="seconds > 0"
                              style="{{ $errors->has('seconds_left') ? '' : 'display: none;' }}"
-                             class="mt-1.5 text-xs text-red-600 font-medium">
+                             class="mt-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
                             Terlalu banyak percobaan. Silakan coba lagi dalam <span x-text='seconds'></span> detik.
                         </div>
                     </div>
 
                     <!-- Password -->
                     <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label for="password" class="block text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
                             Kata Sandi
                         </label>
                         <input id="password"
@@ -104,36 +104,36 @@
                                autocomplete="current-password"
                                placeholder="Masukkan kata sandi"
                                @class([
-                                   'w-full px-3.5 py-2.5 bg-white border rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 text-sm shadow-sm',
-                                   'border-red-500' => $errors->has('password'),
-                                   'border-gray-300' => ! $errors->has('password'),
+                                   'w-full min-h-[44px] px-3.5 py-2.5 bg-white dark:bg-slate-950 border-2 rounded-xl text-slate-900 dark:text-slate-50 placeholder:text-slate-500 dark:placeholder:text-slate-400 dark:[color-scheme:dark] focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500 transition duration-150 text-base sm:text-sm shadow-xs',
+                                   'border-red-500 dark:border-red-400' => $errors->has('password'),
+                                   'border-slate-400 dark:border-slate-500' => ! $errors->has('password'),
                                ])>
                         @error('password')
-                            <p class="mt-1.5 text-xs text-red-600 font-medium">{{ $message }}</p>
+                            <p class="mt-1.5 text-xs text-red-600 dark:text-red-400 font-medium">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <!-- Remember Me -->
                     <div class="flex items-center justify-between">
-                        <label for="remember_me" class="inline-flex items-center cursor-pointer select-none">
+                        <label for="remember_me" class="inline-flex items-center cursor-pointer select-none min-h-[44px]">
                             <input id="remember_me"
                                    type="checkbox"
                                    name="remember"
-                                   class="w-4 h-4 rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
-                            <span class="ms-2 text-sm text-gray-600">Ingat saya</span>
+                                   class="w-5 h-5 rounded border-2 border-slate-400 dark:border-slate-500 text-emerald-600 dark:text-emerald-400 bg-white dark:bg-slate-950 shadow-xs focus:ring-emerald-500">
+                            <span class="ms-2 text-sm text-slate-700 dark:text-slate-200">Ingat saya</span>
                         </label>
                     </div>
 
                     <!-- Tombol Masuk -->
                     <div>
                         <button type="submit"
-                                class="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out cursor-pointer">
+                                class="w-full min-h-[44px] flex justify-center items-center py-2.5 px-4 rounded-xl shadow-xs text-base sm:text-sm font-bold text-white dark:text-slate-950 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 dark:bg-emerald-400 dark:hover:bg-emerald-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500 transition duration-150 ease-in-out cursor-pointer">
                             Masuk
                         </button>
                     </div>
                 </form>
 
-                <div class="mt-6 text-center text-xs text-gray-400">
+                <div class="mt-6 text-center text-xs text-slate-600 dark:text-slate-400">
                     &copy; {{ date('Y') }} MyAbsen. Presensi Digital Sekolah.
                 </div>
             </div>

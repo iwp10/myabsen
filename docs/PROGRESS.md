@@ -23,6 +23,7 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 | 8 | Siap produksi dan deploy | Agent | feat/siap-produksi-akun | dikerjakan |
 | 9 | Tambahan | Agent | main | selesai |
 | 11 | Improvement & Dokumentasi | Agent | main | selesai |
+| 12 | Pembaruan Tampilan Frontend (Tahap 1) | Agent | feat/desain-mobile-konsisten | selesai |
 
 ## Checklist per fase
 
@@ -140,6 +141,16 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] Menambahkan aset dokumentasi visual dan memperbarui README.md untuk presentasi GitHub.
 - [x] Pembersihan File dan Dead Code Tak Terpakai: Pelepasan dump SQL (database/*.sql) dari git tracking, penghapusan view Blade dan komponen sisa Breeze yang tidak dirujuk (welcome, dashboard, guest layout, application-logo, auth-session-status, nav-link, responsive-nav-link), penghapusan ProfileUpdateRequest dan GuestLayout, serta eliminasi duplikasi rute password.update di routes/auth.php.
 
+### Tahap Pembaruan Tampilan Frontend (Tahap 1 / Fase 12)
+- [x] Sumber desain tunggal: panduan token dan WCAG di `docs/DESAIN.md`, helper `App\Support\Ui` dengan nama class literal utuh, dan 9 komponen Blade UI (`resources/views/components/ui/`: `card`, `stat-card`, `status-badge`, `table`, `filter-bar`, `empty-state`, `section-title`, `page-header`, `button`).
+- [x] Standardisasi warna status ("Satu Warna Satu Arti") pola tinted berikon Tabler & teks (Hadir emerald, Izin blue, Sakit amber, Alpa red, Belum diabsen slate border-dashed) yang lolos uji kontras WCAG AA (>= 4.5:1).
+- [x] Perbaikan mode gelap: bar tanggal/hari berlatar elevated `dark:bg-slate-800` (bebas latar silau), teks sekunder/meta tegas (`dark:text-slate-300` / `dark:text-slate-400`), kartu jadwal berelevasi `dark:shadow-lg dark:shadow-black/40 dark:ring-1 dark:ring-white/5`, dan strip rekap H/I/S/A beraksen tinted cerah.
+- [x] Aturan mobile responsif: teks dasar & input minimal 16px (cegah zoom otomatis iOS), target sentuh >= 44x44px dengan jarak 8px, ramah layar hingga 360px.
+- [x] Tabel transformatif `responsive-stack-table` dengan atribut `data-label` bertumpuk di HP tanpa duplikasi markup; matriks P1..Pn bergeser horizontal dengan kolom identitas sticky opak berbayang.
+- [x] Form absensi guru: tombol Simpan melekat (`sticky bottom-0`) dengan padding safe-area, pilihan status berukuran besar, dan ringkasan H/I/S/A terlihat langsung.
+- [x] Penerapan menyeluruh pada layout app (sidebar, topbar), login, tiga dashboard (admin, guru, siswa), seluruh halaman guru dan siswa.
+- [x] Pengujian otomatis: `UiTest` (10 test) dan `TampilanKonsistenTest` (9 test penegak R1-R4 konsistensi token; seluruh test proyek PASS).
+
 ## Catatan dan hambatan
 Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-09-21 | 3,6,7,8 | Fase 3, 6, 7, 8 ditunda untuk fokus MVP/BETA (Fase 1, 2, 4, 5). Master data digenerate via Seeder.
@@ -171,14 +182,17 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-08 | 7 | chore: pembersihan file tidak terpakai (dump SQL dilepas dari git tracking, hapus view/component/request/layout sisa default Breeze, eliminasi duplikasi route password.update di routes/auth.php, seluruh 195 test PASS).
 2026-10-08 | 8 | feat: perbaikan notifikasi ganti password (banner hijau sukses dengan auto-dismiss, banner merah gagal dengan highlight kolom), pengalihan pengguna must_change_password ke dashboard role-nya, penguatan keamanan logout & back history dengan header no-store, logout idempotent untuk tamu tanpa 419/500, penanganan global TokenMismatchException (419) dengan pesan ramah, view error 419 terpadu, serta penambahan 18 feature test (seluruh 213 test PASS).
 2026-10-08 | 3,4,5,6,9,11 | feat: implementasi dropdown pilihan periode di riwayat guru (kartu dan detail matriks) serta riwayat siswa (AB-11), pencarian kelas/mapel & siswa (AB-08), ekspor Excel guru membawa periode terpilih, serta validasi penolakan ubah periode kelas berjadwal (AB-06).
-167: 2026-10-08 | 3,7,9,11 | feat: implementasi fitur Pergantian Periode admin (salin kelas, pindahkan siswa, luluskan siswa massal via soft delete), perbaikan proteksi hapus kelas aktif, serta keutuhan riwayat kelas lama tanpa tabel baru (AB-13, 231 test PASS).
+2026-10-08 | 3,7,9,11 | feat: implementasi fitur Pergantian Periode admin (salin kelas, pindahkan siswa, luluskan siswa massal via soft delete), perbaikan proteksi hapus kelas aktif, serta keutuhan riwayat kelas lama tanpa tabel baru (AB-13, 231 test PASS).
 2026-10-10 | 3,4,5,9 | feat: implementasi empat penambahan ringan antarmuka & penyaringan tanpa migrasi baru: (1) filter jadwal admin (hari, kelas, guru, mapel, rentang jam) dan filter hari jadwal guru dengan sorotan hari ini; (2) menu & route Jadwal Pelajaran siswa (siswa.jadwal); (3) kartu pengingat jadwal belum diabsen 7 hari terakhir di dashboard guru; (4) penanda kehadiran rendah di riwayat guru (config absensi.batas_kehadiran_rendah) dan filter status riwayat siswa.
 2026-10-10 | 4,5,9 | feat: interaksi navigasi guru dan siswa: kartu dashboard interaktif dengan modal Alpine untuk guru, filter kelas & mapel jadwal mengajar guru dengan sorotan hijau, menu Mata Pelajaran siswa di sidebar (siswa.mapel), filter mapel jadwal pelajaran siswa, navigasi kartu dashboard siswa ke Semua Riwayat dengan status dan periode=semua yang sama, filter bulan (Y-m), dan header ringkas catatan kehadiran.
 2026-10-11 | 3,9 | feat: tiga penambahan tampilan admin: (1) filter kelas optgroup per periode dan pengurutan nama A-Z/Z-A/NIS pada daftar siswa (SiswaFilterRequest) dengan kolom nomor urut dan header ringkas; (2) filter tingkat pada daftar kelas (KelasFilterRequest) bersama pencarian & periode dengan urutan bawaan periode terbaru, tingkat, nama; (3) pewarnaan per kolom di tabel Kelola Jadwal (badge semester biru/ungu, badge hari 6 warna berbeda, jam monospasi teal, badge kelas indigo, teks mapel emerald, teks guru amber).
 2026-10-11 | 3,7,8,9 | feat: implementasi aksi massal admin (AB-14) pada Kelola Siswa (reset password massal, hapus massal dengan pemisahan status nonaktif vs permanen via withExists) dan Data Terhapus (pemulihan massal Guru, Siswa, Kelas, Mapel), seleksi per halaman dengan status indeterminate, floating action bar responsif, modal konfirmasi dengan rincian aman, transaksi mandiri per baris, audit log bebas data sensitif, dan 8 feature test komprehensif (113 assertions).
+2026-10-11 | 12 | feat: pembaruan tampilan frontend tahap 1 (App\Support\Ui, 9 komponen Blade x-ui.*, standardisasi warna status WCAG AA >= 4.5:1, aturan mobile teks 16px dan target sentuh 44px, tabel daftar bertumpuk via data-label, form absensi sticky bar, peremajaan dashboard, halaman guru & siswa; seluruh 330 test PASS).
+2026-10-11 | 12 | feat: perbaikan desain tahap 1 (koreksi mode gelap bar tanggal/hari ke dark:bg-slate-800, penguatan kontras teks sekunder/meta, elevasi kartu jadwal berbayang dan ber-ring, peremajaan strip rekap H/I/S/A beraksen tinted tanpa latar kusam, sticky kolom matriks opak berbayang, single source docs/DESAIN.md, penegakan aturan R1-R4 via TampilanKonsistenTest; seluruh 331 test PASS).
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:
+- [ ] **Pembaruan Tampilan Frontend Tahap 2 (Tabel-tabel Admin):** Standardisasi seluruh tabel CRUD admin (siswa, guru, kelas, mapel, jurusan, jadwal, laporan, arsip, pergantian periode, pengaturan periode) ke komponen `x-ui.table` bertumpuk di mobile dan `x-ui.filter-bar`.
 - [ ] hapus permanen dari menu Data Terhapus (belum dibuat sengaja)
 - [ ] **Batasan dan Pertimbangan Arsitektur:**
   - Pembagi persentase siswa pindah: Siswa yang baru pindah kelas di tengah periode memiliki pembagi persentase berbasis sesi yang ia ikuti (AB-07).
