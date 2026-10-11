@@ -117,14 +117,14 @@ test('Komponen Blade x-ui merender token desain dengan benar', function () {
     // 1. x-ui.card
     $cardHtml = Blade::render('<x-ui.card>Isi Kartu</x-ui.card>');
     expect($cardHtml)->toContain('border-2');
-    expect($cardHtml)->toContain('dark:border-gray-600');
+    expect($cardHtml)->toContain('dark:border-slate-600');
     expect($cardHtml)->toContain('Isi Kartu');
 
     // 2. x-ui.status-badge
     $badgeHtml = Blade::render('<x-ui.status-badge status="hadir" />');
     expect($badgeHtml)->toContain('Hadir');
-    expect($badgeHtml)->toContain('bg-emerald-700');
-    expect($badgeHtml)->toContain('dark:bg-emerald-500');
+    expect($badgeHtml)->toContain('bg-emerald-100');
+    expect($badgeHtml)->toContain('dark:bg-emerald-500/15');
     expect($badgeHtml)->toContain('<svg');
 
     // 3. x-ui.stat-card

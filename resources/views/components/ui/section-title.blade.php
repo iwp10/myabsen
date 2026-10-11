@@ -2,14 +2,14 @@
 
 <div {{ $attributes->merge(['class' => 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4']) }}>
     <div>
-        <h2 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
             @if(isset($icon))
-                <span class="text-blue-600 dark:text-blue-400">{{ $icon }}</span>
+                <span class="text-emerald-700 dark:text-emerald-400">{{ $icon }}</span>
             @endif
             <span>{{ $title }}</span>
         </h2>
         @if($description)
-            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5">
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-0.5">
                 {{ $description }}
             </p>
         @endif

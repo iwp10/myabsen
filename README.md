@@ -101,11 +101,13 @@ Proyek ini dibangun menggunakan *stack* teknologi berikut (sesuai dengan aturan 
 
 ## 🎨 Konvensi Tampilan
 
-Antarmuka MyAbsen mengikuti standar desain terpusat dan aksesibilitas:
-- **Satu Sumber Desain:** Menggunakan komponen Blade `components/ui` (`card`, `stat-card`, `status-badge`, `table`, `filter-bar`, `empty-state`, `section-title`, `page-header`, `button`) dan helper presentasi `App\Support\Ui`.
-- **Warna Status Baku:** Hadir (*emerald*), Izin (*blue*), Sakit (*amber*), Alpa (*red*), Belum diabsen (*gray border-dashed*) dengan ikon Tabler yang lolos uji kontras WCAG AA (minimal 4.5:1) di mode terang maupun gelap.
-- **Standar Mobile:** Target sentuh interaktif minimal 44x44px, teks dasar dan input form minimal 16px (mencegah zoom otomatis iOS), dan ramah layar hingga 360px.
-- **Tabel Transformatif:** Tabel daftar sederhana otomatis berubah menjadi susunan kartu bertumpuk pada layar mobile (< 768px) melalui kelas `responsive-stack-table` dan atribut `data-label` tanpa penggandaan markup DOM. Form absensi guru dilengkapi bilah Simpan melekat (*sticky bottom*) dengan *safe-area*.
+Antarmuka MyAbsen mengikuti standar desain terpusat, konsisten, dan aksesibel. Panduan lengkap token desain dan hasil uji kontras WCAG terdokumentasi di [**docs/DESAIN.md**](docs/DESAIN.md).
+
+- **Satu Sumber Kebenaran Desain:** Komponen Blade terpadu di `resources/views/components/ui/` (`card`, `stat-card`, `status-badge`, `table`, `filter-bar`, `empty-state`, `section-title`, `page-header`, `button`) dan kelas helper presentasi murni `App\Support\Ui`. Dilarang menuliskan warna mentah tanpa varian `dark:`.
+- **Satu Warna Satu Arti (Status Kehadiran):** Hadir (*emerald*), Izin (*blue*), Sakit (*amber*), Alpa (*red*), Belum diabsen (*slate border-dashed*), dipadukan dengan ikon Tabler dan teks jelas, dengan pola *tinted* yang ramah mata.
+- **Hierarki Permukaan & Mode Gelap:** Latar halaman `bg-slate-50` / `dark:bg-slate-950`, permukaan kartu `bg-white` / `dark:bg-slate-900`, dan elevated (bar tanggal/hari, panel, item jadwal) `bg-slate-100` / `dark:bg-slate-800` dengan border tegas `border-2 border-slate-300 dark:border-slate-600` serta bayangan gelap mendalam.
+- **Keterbacaan & Standar Aksesibilitas (WCAG AA):** Rasio kontras teks minimal 4.5:1 (3:1 untuk teks besar $\ge$24px atau $\ge$18.66px bold dan batas/ikon), target sentuh interaktif mobile minimal 44x44px, teks input form minimal 16px (mencegah zoom otomatis pada iOS), dan ramah layar mobile hingga 360px.
+- **Tabel Transformatif & Form Melekat:** Tabel daftar sederhana otomatis bertransformasi menjadi kartu bertumpuk pada layar HP (< 768px) menggunakan kelas `responsive-stack-table` dan atribut `data-label`. Form absensi guru dilengkapi bilah Simpan melekat (*sticky bottom*) dengan *safe-area*.
 
 ---
 

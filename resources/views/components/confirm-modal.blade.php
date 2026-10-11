@@ -15,26 +15,26 @@
     ">
     
     <x-modal name="global-confirm-modal" focusable maxWidth="md">
-        <form :action="action" method="POST" class="p-6 relative">
+        <form :action="action" method="POST" class="p-6 relative bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-xl">
             @csrf
             <input type="hidden" name="_method" :value="method">
             
             <!-- Tombol X untuk close modal -->
-            <button type="button" x-on:click="$dispatch('close-modal', 'global-confirm-modal')" class="absolute top-3 right-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/50" aria-label="Tutup Modal">
+            <button type="button" x-on:click="$dispatch('close-modal', 'global-confirm-modal')" class="absolute top-3 right-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500/50" aria-label="Tutup Modal">
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
             
             <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/15 border border-red-400 dark:border-red-500/50 flex items-center justify-center text-red-700 dark:text-red-400">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100" x-text="title"></h2>
-                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line" x-html="message"></p>
+                    <h2 class="text-lg font-bold text-slate-900 dark:text-white" x-text="title"></h2>
+                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-300 whitespace-pre-line" x-html="message"></p>
                 </div>
             </div>
 

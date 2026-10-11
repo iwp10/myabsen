@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-semibold text-xl text-slate-800 dark:text-slate-200 leading-tight">
             {{ __('Dashboard Admin') }}
         </h2>
     </x-slot>
@@ -14,8 +14,8 @@
                 </x-alert>
             @endif
 
-            <!-- Banner Sapaan Atas (Solid Blue & Shadow) -->
-            <div class="bg-blue-600 dark:bg-blue-700 rounded-2xl p-6 text-white shadow-md relative overflow-hidden" style="background-color: #2563eb;">
+            <!-- Banner Sapaan Atas (Emerald Primer) -->
+            <div class="bg-emerald-700 dark:bg-emerald-800 rounded-2xl p-6 text-white shadow-md border-2 border-emerald-800 dark:border-emerald-700 relative overflow-hidden">
                 <div class="absolute -right-8 -bottom-10 opacity-10 pointer-events-none">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-56 h-56 text-white">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -52,9 +52,9 @@
 
             <!-- Pengingat Pergantian Periode (Jika berbeda dengan saran sistem) -->
             @if ($isBerbedaDenganSaran)
-                <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="bg-amber-100 dark:bg-amber-500/15 border-2 border-amber-400 dark:border-amber-500/50 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
+                        <div class="w-10 h-10 rounded-xl bg-amber-200 dark:bg-amber-500/25 text-amber-900 dark:text-amber-300 flex items-center justify-center flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                                 <path d="M12 9v4" />
@@ -72,7 +72,7 @@
                         </div>
                     </div>
                     <a href="{{ route('admin.pengaturan-periode.index') }}"
-                       class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-xl shadow-xs transition flex-shrink-0">
+                       class="inline-flex items-center justify-center gap-1.5 px-4 py-2 min-h-[44px] bg-amber-600 hover:bg-amber-700 active:bg-amber-800 dark:bg-amber-400 dark:hover:bg-amber-300 text-white dark:text-slate-950 text-xs font-semibold rounded-xl shadow-xs transition flex-shrink-0">
                         <span>Ganti periode</span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -138,17 +138,17 @@
             </div>
 
             <!-- Aksi Cepat (Quick Actions) -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700/60">
+            <div class="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-xs border-2 border-slate-300 dark:border-slate-600">
+                <div class="flex items-center justify-between pb-4 border-b-2 border-slate-200 dark:border-slate-700">
                     <div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-blue-600 dark:text-blue-400">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-emerald-700 dark:text-emerald-400">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                                 <path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0z" />
                             </svg>
                             Aksi Cepat
                         </h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
                             Pintasan navigasi langsung untuk mempermudah operasional harian administrator.
                         </p>
                     </div>
@@ -157,24 +157,24 @@
                 <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Pintasan Laporan -->
                     <a href="{{ route('admin.laporan.index') }}"
-                       class="group p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 bg-gray-50/50 dark:bg-gray-900/40 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 transition duration-150 flex flex-col justify-between">
+                       class="group p-4 rounded-xl border-2 border-slate-300 dark:border-slate-600 hover:border-emerald-500 dark:hover:border-emerald-400 bg-white dark:bg-slate-800 shadow-xs dark:shadow-lg dark:shadow-black/40 dark:ring-1 dark:ring-white/5 transition duration-150 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between">
-                                <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 17h6" /><path d="M9 13h6" /></svg>
+                                <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-700 dark:text-blue-400" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 17h6" /><path d="M9 13h6" /></svg>
                                 </div>
-                                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">
+                                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300 border border-blue-400 dark:border-blue-500/50">
                                     Rekap
                                 </span>
                             </div>
-                            <h4 class="mt-3 text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            <h4 class="mt-3 text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                                 Rekap Laporan Absensi
                             </h4>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">
                                 Pantau kehadiran siswa dan ekspor laporan ke format Excel atau PDF resmi.
                             </p>
                         </div>
-                        <div class="mt-4 pt-3 border-t border-gray-200/60 dark:border-gray-700/60 flex items-center text-xs font-semibold text-blue-600 dark:text-blue-400">
+                        <div class="mt-4 pt-3 border-t-2 border-slate-200 dark:border-slate-700 flex items-center text-xs font-semibold text-emerald-700 dark:text-emerald-400">
                             <span>Buka Laporan</span>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -185,24 +185,24 @@
 
                     <!-- Pintasan Koreksi Absensi -->
                     <a href="{{ route('admin.koreksi-absensi.index') }}"
-                       class="group p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-500 dark:hover:border-purple-500 bg-gray-50/50 dark:bg-gray-900/40 hover:bg-purple-50/50 dark:hover:bg-purple-950/20 transition duration-150 flex flex-col justify-between">
+                       class="group p-4 rounded-xl border-2 border-slate-300 dark:border-slate-600 hover:border-emerald-500 dark:hover:border-emerald-400 bg-white dark:bg-slate-800 shadow-xs dark:shadow-lg dark:shadow-black/40 dark:ring-1 dark:ring-white/5 transition duration-150 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between">
-                                <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-purple-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 5h10l2 2l-2 2h-10a2 2 0 0 1 -2 -2a2 2 0 0 1 2 -2" /><path d="M13 13h6l2 2l-2 2h-6a2 2 0 0 1 -2 -2a2 2 0 0 1 2 -2" /><path d="M7 21h8l2 2l-2 2h-8a2 2 0 0 1 -2 -2a2 2 0 0 1 2 -2" /></svg>
+                                <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-500/15 text-purple-700 dark:text-purple-300 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-purple-700 dark:text-purple-400" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 5h10l2 2l-2 2h-10a2 2 0 0 1 -2 -2a2 2 0 0 1 2 -2" /><path d="M13 13h6l2 2l-2 2h-6a2 2 0 0 1 -2 -2a2 2 0 0 1 2 -2" /><path d="M7 21h8l2 2l-2 2h-8a2 2 0 0 1 -2 -2a2 2 0 0 1 2 -2" /></svg>
                                 </div>
-                                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300">
+                                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-500/15 text-purple-800 dark:text-purple-300 border border-purple-400 dark:border-purple-500/50">
                                     Koreksi
                                 </span>
                             </div>
-                            <h4 class="mt-3 text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                            <h4 class="mt-3 text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                                 Koreksi Absensi
                             </h4>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">
                                 Ubah atau lengkapi data absensi siswa pada tanggal lampau per kelas.
                             </p>
                         </div>
-                        <div class="mt-4 pt-3 border-t border-gray-200/60 dark:border-gray-700/60 flex items-center text-xs font-semibold text-purple-600 dark:text-purple-400">
+                        <div class="mt-4 pt-3 border-t-2 border-slate-200 dark:border-slate-700 flex items-center text-xs font-semibold text-emerald-700 dark:text-emerald-400">
                             <span>Koreksi Absensi</span>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -213,24 +213,24 @@
 
                     <!-- Pintasan Kelola Siswa -->
                     <a href="{{ route('admin.siswa.index') }}"
-                       class="group p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-500 dark:hover:border-emerald-500 bg-gray-50/50 dark:bg-gray-900/40 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 transition duration-150 flex flex-col justify-between">
+                       class="group p-4 rounded-xl border-2 border-slate-300 dark:border-slate-600 hover:border-emerald-500 dark:hover:border-emerald-400 bg-white dark:bg-slate-800 shadow-xs dark:shadow-lg dark:shadow-black/40 dark:ring-1 dark:ring-white/5 transition duration-150 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between">
-                                <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M16 19h6" /><path d="M19 16v6" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4" /></svg>
+                                <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-emerald-700 dark:text-emerald-400" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M16 19h6" /><path d="M19 16v6" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4" /></svg>
                                 </div>
-                                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300">
+                                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-400 dark:border-emerald-500/50">
                                     Master
                                 </span>
                             </div>
-                            <h4 class="mt-3 text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                            <h4 class="mt-3 text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                                 Kelola Data Siswa
                             </h4>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">
                                 Tambah data siswa baru, impor berkas Excel, atau perbarui profil siswa.
                             </p>
                         </div>
-                        <div class="mt-4 pt-3 border-t border-gray-200/60 dark:border-gray-700/60 flex items-center text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                        <div class="mt-4 pt-3 border-t-2 border-slate-200 dark:border-slate-700 flex items-center text-xs font-semibold text-emerald-700 dark:text-emerald-400">
                             <span>Kelola Siswa</span>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -241,24 +241,24 @@
 
                     <!-- Pintasan Jadwal Pelajaran -->
                     <a href="{{ route('admin.jadwal.index') }}"
-                       class="group p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-amber-500 dark:hover:border-amber-500 bg-gray-50/50 dark:bg-gray-900/40 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 transition duration-150 flex flex-col justify-between">
+                       class="group p-4 rounded-xl border-2 border-slate-300 dark:border-slate-600 hover:border-emerald-500 dark:hover:border-emerald-400 bg-white dark:bg-slate-800 shadow-xs dark:shadow-lg dark:shadow-black/40 dark:ring-1 dark:ring-white/5 transition duration-150 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between">
-                                <div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M11 15h1" /><path d="M12 15v3" /></svg>
+                                <div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-amber-700 dark:text-amber-400" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M11 15h1" /><path d="M12 15v3" /></svg>
                                 </div>
-                                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300">
+                                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-400 dark:border-amber-500/50">
                                     Jadwal
                                 </span>
                             </div>
-                            <h4 class="mt-3 text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                            <h4 class="mt-3 text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                                 Jadwal Pelajaran
                             </h4>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">
                                 Atur alokasi mata pelajaran, kelas, guru pengajar, dan jam absensi harian.
                             </p>
                         </div>
-                        <div class="mt-4 pt-3 border-t border-gray-200/60 dark:border-gray-700/60 flex items-center text-xs font-semibold text-amber-600 dark:text-amber-400">
+                        <div class="mt-4 pt-3 border-t-2 border-slate-200 dark:border-slate-700 flex items-center text-xs font-semibold text-emerald-700 dark:text-emerald-400">
                             <span>Atur Jadwal</span>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform">
                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>

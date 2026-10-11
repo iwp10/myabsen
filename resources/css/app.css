@@ -51,14 +51,14 @@
     }
 
     .responsive-stack-table tbody tr {
-        border-bottom: 2px solid #e5e7eb;
+        border-bottom: 2px solid #e2e8f0;
         padding: 1rem;
         background-color: #ffffff;
     }
 
     .dark .responsive-stack-table tbody tr {
-        border-bottom: 2px solid #374151;
-        background-color: #1f2937;
+        border-bottom: 2px solid #334155;
+        background-color: #0f172a;
     }
 
     .responsive-stack-table tbody tr:last-child {
@@ -79,14 +79,14 @@
         content: attr(data-label);
         font-weight: 700;
         font-size: 0.875rem;
-        color: #4b5563;
+        color: #475569;
         text-align: left;
         margin-right: 1rem;
         flex-shrink: 0;
     }
 
     .dark .responsive-stack-table td::before {
-        color: #d1d5db;
+        color: #cbd5e1;
     }
 
     .responsive-stack-table td:empty {
