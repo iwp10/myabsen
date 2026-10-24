@@ -63,18 +63,26 @@ Baca keduanya sebelum mengerjakan tugas apa pun. Jika kode bertentangan dengan P
 - Perubahan skema selalu lewat migration baru. Jangan edit migration yang sudah dijalankan.
 - Hindari N+1 (pakai eager loading) dan pasang index sesuai PRD.
 - Setiap aturan bisnis di PRD (AB-xx) harus punya test (feature test).
-- Setelah tiap fase: jalankan `php artisan test`, perbarui baris fasenya di `docs/PROGRESS.md`, lalu ringkas file yang berubah.
-- Bila menyentuh `resources/js`, jalankan `npm run test:js` sebelum membuat PR. Logika Alpine yang kompleks atau dapat diuji wajib dipindahkan ke modul Javascript murni di `resources/js` dan dilengkapi dengan unit test JS (`resources/js/tests/`).
-- Dokumen (`docs/PRD.md`, `README.md`, `docs/PROGRESS.md`) harus diperbarui bersama kode dalam PR yang sama agar tidak tertinggal.
+- Wajib uji otomatis sebelum membuat PR: jalankan `php artisan test` (harus 100% lulus) dan jika menyentuh file JavaScript atau aset frontend, wajib jalankan `npm run test:js`.
+- Logika Alpine yang kompleks atau dapat diuji wajib dipindahkan ke modul Javascript murni di `resources/js` dan dilengkapi dengan unit test JS (`resources/js/tests/`).
+- Dokumen (`docs/PRD.md`, `README.md`, `docs/PROGRESS.md`, `docs/DESAIN.md`, dan panduan pengguna) harus diperbarui bersama kode dalam PR yang sama agar tidak tertinggal.
 - Jangan menyentuh file `.env`, jangan commit file `.env` atau file dump SQL, dan jangan menaruh secret di kode.
 - Jangan pernah menulis password atau kredensial asli di dokumen maupun di kode program (gunakan nilai contoh yang aman atau variabel environment).
+- Larangan penulisan ulang berkas massal: Jangan mengubah encoding berkas, jangan menimpa berkas yang tidak relevan dengan tugas, dan pertahankan komentar serta format yang ada.
 - Jika ada yang ambigu atau bertentangan dengan PRD, tanya dulu, jangan berasumsi.
 
 ## Git dan tim
-- Jangan commit langsung ke `main`. Selalu gunakan Pull Request (PR wajib). Kerja di branch `fitur/...`, `perbaikan/...`, `refactor/...`, `test/...`, `chore/...`, atau `docs/...`.
+- Jangan commit atau push langsung ke `main`. Selalu gunakan Pull Request (PR wajib). Kerja di branch dengan awalan yang sesuai:
+  - `fitur/...` atau `feat/...` (fitur baru)
+  - `perbaikan/...` atau `fix/...` (perbaikan bug)
+  - `refactor/...` (perombakan struktur kode tanpa mengubah fungsi)
+  - `test/...` (penambahan atau perbaikan pengujian)
+  - `chore/...` (pemeliharaan dependensi, skrip, atau konfigurasi)
+  - `docs/...` (pembaruan atau penambahan dokumentasi)
 - Format commit: `feat:`, `fix:`, `refactor:`, `test:`, `chore:`, `docs:` diikuti deskripsi singkat.
+- Larangan perintah git destruktif oleh agent: Agent DILARANG menjalankan `git checkout`, `git restore`, `git reset`, `git clean`, `git stash`, `git push`, atau commit tanpa izin eksplisit dari pemilik proyek.
 - Setiap migrasi baru wajib disebut di PR ("jalankan php artisan migrate").
-- Jangan ubah `AGENTS.md` dan `docs/PRD.md` kecuali diminta secara eksplisit.
+- Jangan ubah `AGENTS.md` dan `docs/PRD.md` kecuali diminta secara eksplisit oleh pemilik proyek.
 - Sebelum membuat migration, pastikan branch sudah up to date dengan `main`.
 - Sebelum commit setelah merge atau pull: jalankan `git grep -n '^<<<<<<<'` dan pastikan kosong; selesaikan konflik di editor, bukan dengan menyimpan penanda; jalankan `php artisan test` sebelum push.
 - Di `docs/PROGRESS.md`, edit hanya baris fase yang sedang dikerjakan.
