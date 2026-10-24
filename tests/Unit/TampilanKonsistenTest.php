@@ -39,6 +39,16 @@ class TampilanKonsistenTest extends TestCase
             'resources/views/components/ui/file-input.blade.php',
             'resources/views/components/ui/icon.blade.php',
             'resources/views/components/ui/bulan-select.blade.php',
+            'resources/views/profile/edit.blade.php',
+            'resources/views/profile/partials/update-password-form.blade.php',
+            'resources/views/errors/403.blade.php',
+            'resources/views/errors/503.blade.php',
+            'resources/views/components/text-input.blade.php',
+            'resources/views/components/input-label.blade.php',
+            'resources/views/components/input-error.blade.php',
+            'resources/views/components/dropdown.blade.php',
+            'resources/views/components/dropdown-link.blade.php',
+            'resources/views/components/modal.blade.php',
         ];
 
         return array_map(fn ($rel) => $base.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $rel), $relativePaths);

@@ -192,3 +192,25 @@ Semua pasangan warna teks dan elemen UI di atas **100% LULUS** standar WCAG AA (
    - Sinkron dengan filter pencarian sisi klien melalui `setTersedia(idTersedia)`: baris yang tersembunyi otomatis dibuang dari array `terpilih` sehingga pengguna tidak memproses data yang tidak terlihat.
    - Mempertahankan target ketuk minimal 44px (`min-h-[44px]`), label aksesibilitas eksplisit (`aria-label`), dan token warna border/fokus sesuai desain.
 
+---
+
+## 5. Pola Halaman Galat & Profil dalam Cakupan Penegak Desain
+
+1. **Halaman Galat Berdiri Sendiri & Wajib Berbahasa Indonesia (403, 404, 419, 500, 503)**:
+   - Menggunakan struktur dokumen HTML utuh yang berdiri sendiri (`<!DOCTYPE html>`, tanpa layout app).
+   - Seluruh teks judul, pesan penjelas, dan tombol aksi **WAJIB menggunakan Bahasa Indonesia awam yang ramah pengguna**:
+     - **403**: Judul "Akses Ditolak", penjelasan "Anda tidak memiliki izin untuk membuka halaman ini. Jika Anda merasa ini keliru, hubungi admin sekolah."
+     - **503**: Judul "Sistem Sedang Dalam Pemeliharaan", penjelasan "MyAbsen sedang diperbarui. Silakan coba lagi beberapa saat lagi."
+     - Dilarang menampilkan teks bawaan bahasa Inggris ("Forbidden", "THIS ACTION IS UNAUTHORIZED", "Service Unavailable").
+   - Halaman **503 HARUS berdiri sendiri secara mutlak**: tanpa Auth, tanpa session, tanpa `@csrf`, tanpa query database, dan memuat gaya cadangan inline (*fallback style*) agar tampilan tetap terpusat dan terbaca jelas meskipun berkas CSS Vite gagal dimuat. Tombol aksi menyediakan "Muat Ulang" (`location.reload()`) dan tautan ke alamat beranda.
+   - Halaman **403 menyediakan navigasi peran cerdas**: pengguna terautentikasi diarahkan dengan tombol "Kembali ke Dashboard" menuju dashboard role-nya masing-masing (`admin.dashboard`, `guru.dashboard`, `siswa.dashboard`), sedangkan tamu diarahkan dengan tombol "Ke Halaman Login".
+   - Tata visual konsisten dengan halaman galat lainnya: kartu elevated di tengah layar (`max-w-md w-full`), lingkaran ikon tinted dengan ikon berukuran eksplisit (`x-ui.icon` ukuran `lg`), tipografi tegas, dan garis bingkai `border-2`.
+2. **Penyelarasan Halaman Profil & Ganti Password**:
+   - Kartu profil dibungkus kontainer kartu elevated `bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl shadow-sm p-4 sm:p-6 lg:p-8`.
+   - Menggunakan komponen input terstandarisasi (`x-text-input`) dengan `border-2 border-slate-400 dark:border-slate-500`, tinggi minimal 44px, ukuran teks 16px (mencegah zoom iOS), dan fokus ring emerald.
+   - Komponen label (`x-input-label`) diselaraskan ke `font-semibold text-slate-800 dark:text-slate-200` dan tombol simpan (`x-primary-button`) menggunakan token primer emerald.
+3. **Perluasan Cakupan Penegak Desain Otomatis (`TampilanKonsistenTest`)**:
+   - Seluruh berkas di `resources/views/profile/**` (`edit.blade.php`, `partials/update-password-form.blade.php`), halaman galat kustom `resources/views/errors/403.blade.php`, `503.blade.php`, serta komponen Blade Breeze pendukung (`text-input`, `input-label`, `input-error`, `dropdown`, `dropdown-link`, `modal`) dimasukkan ke dalam cakupan penegak desain otomatis (R1 sampai R6).
+   - Penegakan ketat meliputi: semua utilitas warna wajib berpasangan `dark:`, bebas teks redup, bebas class dinamis, dan seluruh elemen `<svg>` wajib memiliki ukuran eksplisit.
+
+
