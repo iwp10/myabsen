@@ -76,6 +76,7 @@ Baca keduanya sebelum mengerjakan tugas apa pun. Jika kode bertentangan dengan P
 - Setiap migrasi baru wajib disebut di PR ("jalankan php artisan migrate").
 - Jangan ubah `AGENTS.md` dan `docs/PRD.md` kecuali diminta secara eksplisit.
 - Sebelum membuat migration, pastikan branch sudah up to date dengan `main`.
+- Sebelum commit setelah merge atau pull: jalankan `git grep -n '^<<<<<<<'` dan pastikan kosong; selesaikan konflik di editor, bukan dengan menyimpan penanda; jalankan `php artisan test` sebelum push.
 - Di `docs/PROGRESS.md`, edit hanya baris fase yang sedang dikerjakan.
 - Jangan pernah commit file `.env` atau file dump SQL.
 

@@ -211,17 +211,10 @@
                         <table class="border-collapse text-sm w-full" style="min-width: max-content">
                             <thead>
                                 {{-- Baris tanggal / nomor pertemuan --}}
-<<<<<<< HEAD
                                 <tr class="bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-400 dark:border-slate-500">
                                     <th class="sticky left-0 z-20 bg-slate-100 dark:bg-slate-800 px-3 py-3 text-center font-bold text-slate-900 dark:text-white border-r-2 border-slate-300 dark:border-slate-600 w-12">No</th>
                                     <th class="sticky left-12 z-20 bg-slate-100 dark:bg-slate-800 px-3 py-3 text-left font-bold text-slate-900 dark:text-white border-r-2 border-slate-300 dark:border-slate-600 w-32">NIS</th>
                                     <th class="sticky left-[11rem] z-20 bg-slate-100 dark:bg-slate-800 px-4 py-3 text-left font-bold text-slate-900 dark:text-white border-r-2 border-slate-300 dark:border-slate-600 w-60 shadow-[3px_0_5px_-2px_rgba(0,0,0,0.15)]">Nama Siswa</th>
-=======
-                                <tr class="bg-gray-50 dark:bg-gray-700/60">
-                                    <th class="sticky left-0 z-10 bg-gray-50 dark:bg-gray-700/60 px-3 py-2 text-left font-semibold text-gray-600 dark:text-gray-300 border-b border-r border-gray-200 dark:border-gray-600 w-8">No</th>
-                                    <th class="sticky left-8 z-10 bg-gray-50 dark:bg-gray-700/60 px-3 py-2 text-left font-semibold text-gray-600 dark:text-gray-300 border-b border-r border-gray-200 dark:border-gray-600 w-32">NIS</th>
-                                    <th class="sticky left-[10rem] z-10 bg-gray-50 dark:bg-gray-700/60 px-3 py-2 text-left font-semibold text-gray-600 dark:text-gray-300 border-b border-r border-gray-200 dark:border-gray-600 w-52">Nama Siswa</th>
->>>>>>> 1e18dd7 (fix: update riwayat detail)
                                     @foreach($sesiList as $idx => $sesi)
                                         <th class="px-2 py-2 border-r-2 border-slate-200 dark:border-slate-700 text-center font-bold text-slate-700 dark:text-slate-200 w-16">
                                             <div class="text-xs font-extrabold text-blue-700 dark:text-blue-400">P{{ $idx + 1 }}</div>
