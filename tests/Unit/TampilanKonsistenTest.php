@@ -49,6 +49,24 @@ class TampilanKonsistenTest extends TestCase
             'resources/views/components/dropdown.blade.php',
             'resources/views/components/dropdown-link.blade.php',
             'resources/views/components/modal.blade.php',
+            'resources/views/admin/siswa/index.blade.php',
+            'resources/views/admin/siswa/create.blade.php',
+            'resources/views/admin/siswa/edit.blade.php',
+            'resources/views/admin/guru/index.blade.php',
+            'resources/views/admin/guru/create.blade.php',
+            'resources/views/admin/guru/edit.blade.php',
+            'resources/views/admin/kelas/index.blade.php',
+            'resources/views/admin/kelas/create.blade.php',
+            'resources/views/admin/kelas/edit.blade.php',
+            'resources/views/admin/mapel/index.blade.php',
+            'resources/views/admin/mapel/create.blade.php',
+            'resources/views/admin/mapel/edit.blade.php',
+            'resources/views/admin/jurusan/index.blade.php',
+            'resources/views/admin/jurusan/create.blade.php',
+            'resources/views/admin/jurusan/edit.blade.php',
+            'resources/views/admin/jadwal/index.blade.php',
+            'resources/views/admin/jadwal/create.blade.php',
+            'resources/views/admin/jadwal/edit.blade.php',
         ];
 
         return array_map(fn ($rel) => $base.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $rel), $relativePaths);
@@ -527,6 +545,12 @@ class TampilanKonsistenTest extends TestCase
             $base.DIRECTORY_SEPARATOR.'layouts',
             $base.DIRECTORY_SEPARATOR.'components',
             $base.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'pergantian_periode',
+            $base.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'siswa',
+            $base.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'guru',
+            $base.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'kelas',
+            $base.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'mapel',
+            $base.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'jurusan',
+            $base.DIRECTORY_SEPARATOR.'admin'.DIRECTORY_SEPARATOR.'jadwal',
         ];
 
         $violations = [];
@@ -631,5 +655,77 @@ class TampilanKonsistenTest extends TestCase
         $this->assertStringContainsString('@change="toggleSatu(item.id)"', $renderedAlpineBaris);
         $this->assertStringContainsString('name="siswa_ids[]"', $renderedAlpineBaris);
         $this->assertStringContainsString(':aria-label="item.name"', $renderedAlpineBaris);
+    }
+
+    /**
+     * R7: Setiap <table> di cakupan master data admin memakai x-ui.table, dan setiap <td> di dalamnya memiliki data-label.
+     */
+    public function test_r7_setiap_table_memakai_x_ui_table_dan_setiap_td_punya_data_label(): void
+    {
+        $base = dirname(__DIR__, 2);
+        $indexFiles = [
+            'resources/views/admin/siswa/index.blade.php',
+            'resources/views/admin/guru/index.blade.php',
+            'resources/views/admin/kelas/index.blade.php',
+            'resources/views/admin/mapel/index.blade.php',
+            'resources/views/admin/jurusan/index.blade.php',
+            'resources/views/admin/jadwal/index.blade.php',
+        ];
+
+        $violations = [];
+
+        foreach ($indexFiles as $rel) {
+            $path = $base.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $rel);
+            if (! file_exists($path)) {
+                $violations[] = "{$rel} | File tidak ditemukan";
+
+                continue;
+            }
+
+            $content = file_get_contents($path);
+
+            // Wajib memakai x-ui.table
+            if (! str_contains($content, '<x-ui.table>') || ! str_contains($content, '</x-ui.table>')) {
+                $violations[] = "{$rel} | Tidak membungkus tabel dengan <x-ui.table>";
+            }
+
+            // Ambil semua tag <td ...>
+            preg_match_all('/<td\b([^>]*)>/i', $content, $tdMatches);
+            if (empty($tdMatches[1])) {
+                $violations[] = "{$rel} | Tidak menemukan tag <td> di dalam file";
+
+                continue;
+            }
+
+            foreach ($tdMatches[1] as $idx => $attrs) {
+                if (! preg_match('/data-label\s*=\s*["\']([^"\']+)["\']/i', $attrs, $dlMatch)) {
+                    $violations[] = "{$rel} | <td> #{$idx} tidak memiliki atribut data-label valid: <td{$attrs}>";
+                }
+            }
+        }
+
+        $this->assertEmpty($violations, 'Pelanggaran R7 ditemukan (tabel tanpa x-ui.table atau <td> tanpa data-label): '.PHP_EOL.implode(PHP_EOL, $violations));
+    }
+
+    /**
+     * R8: Dalam cakupan tidak ada pasangan markup ganda tampilan HP/desktop untuk daftar yang punya checkbox.
+     * Satu baris data = satu x-ui.pilih-baris.
+     */
+    public function test_r8_tidak_ada_pasangan_markup_ganda_daftar_dengan_checkbox(): void
+    {
+        $base = dirname(__DIR__, 2);
+        $siswaIndexPath = $base.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, 'resources/views/admin/siswa/index.blade.php');
+
+        $this->assertFileExists($siswaIndexPath);
+        $content = file_get_contents($siswaIndexPath);
+
+        // Cari pemakaian x-ui.pilih-baris
+        preg_match_all('/<x-ui\.pilih-baris\b/i', $content, $matches);
+
+        // Dalam loop @forelse ($siswas as $siswa), x-ui.pilih-baris hanya boleh muncul tepat 1 kali
+        $this->assertCount(1, $matches[0], 'Pelanggaran R8: x-ui.pilih-baris muncul lebih dari 1 kali (terindikasi duplikasi markup HP dan desktop terpisah).');
+
+        // Pastikan tidak ada blok hidden md:table atau sejenisnya yang menduplikasi baris
+        $this->assertDoesNotMatchRegularExpression('/hidden\s+md:table/i', $content, 'Pelanggaran R8: Ditemukan teknik menyembunyikan tabel/kartu secara terpisah (hidden md:table).');
     }
 }

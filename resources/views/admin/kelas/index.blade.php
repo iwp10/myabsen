@@ -1,127 +1,143 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-semibold text-xl text-slate-800 dark:text-slate-200 leading-tight">
             {{ __('Kelola Kelas') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-8 sm:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             @if (session('success'))
-                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                    <span class="block sm:inline">{{ session('success') }}</span>
-                </div>
+                <x-alert type="success" :message="session('success')" />
             @endif
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                        <div class="flex flex-col">
-                            <h3 class="text-lg font-bold">Daftar Kelas</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Menampilkan {{ $kelas->total() }} kelas</p>
-                            @if($activePeriode['tahun_ajaran'])
-                                <span class="text-xs text-green-600 dark:text-green-400 mt-1">Periode Aktif: {{ $activePeriode['tahun_ajaran'] }} - {{ $activePeriode['semester'] }}</span>
-                            @endif
-                        </div>
-                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                            <form action="{{ route('admin.kelas.index') }}" method="GET" class="flex flex-col sm:flex-row gap-2 w-full">
-                                <select name="periode" class="w-full sm:w-56 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
-                                    <option value="">Semua periode</option>
-                                    @foreach($daftarPeriode as $item)
-                                        <option value="{{ $item['value'] }}" {{ $filterPeriode === $item['value'] ? 'selected' : '' }}>
-                                            {{ $item['label'] }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <select name="tingkat" class="w-full sm:w-36 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
-                                    <option value="">Semua tingkat</option>
-                                    @foreach($daftarTingkat as $t)
-                                        <option value="{{ $t }}" {{ (string)$filterTingkat === (string)$t ? 'selected' : '' }}>
-                                            Tingkat {{ $t }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, tingkat, jurusan..." class="w-full sm:w-48 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
-                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition">Cari</button>
-                                @if(request()->hasAny(['search', 'periode', 'tahun_ajaran', 'semester', 'tingkat']) && (request('search') || request('periode') || request('tahun_ajaran') || request('semester') || request('tingkat')))
-                                    <a href="{{ route('admin.kelas.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-3 rounded-md text-sm flex items-center justify-center transition">Reset</a>
-                                @endif
-                            </form>
-                            <a href="{{ route('admin.kelas.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm text-center transition">
-                                Tambah Kelas
+            @if (session('error'))
+                <x-alert type="error" :message="session('error')" />
+            @endif
+
+            <x-ui.page-header title="Kelola Kelas" :description="'Menampilkan ' . $kelas->total() . ' kelas'">
+                <x-slot:actions>
+                    <a href="{{ route('admin.kelas.create') }}" class="{{ \App\Support\Ui::tombol('primary') }} w-full sm:w-auto">
+                        <x-ui.icon name="plus" size="sm" class="mr-1.5" />
+                        Tambah Kelas
+                    </a>
+                </x-slot:actions>
+            </x-ui.page-header>
+
+            {{-- Filter Terpadu --}}
+            <x-ui.filter-bar :action="route('admin.kelas.index')">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 w-full">
+                    <div class="w-full sm:w-56 min-w-0">
+                        <label for="filter_periode" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Periode</label>
+                        <x-ui.select id="filter_periode" name="periode">
+                            <option value="">Semua periode</option>
+                            @foreach($daftarPeriode as $item)
+                                <option value="{{ $item['value'] }}" {{ $filterPeriode === $item['value'] ? 'selected' : '' }}>
+                                    {{ $item['label'] }}
+                                </option>
+                            @endforeach
+                        </x-ui.select>
+                    </div>
+
+                    <div class="w-full sm:w-44 min-w-0">
+                        <label for="filter_tingkat" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tingkat</label>
+                        <x-ui.select id="filter_tingkat" name="tingkat">
+                            <option value="">Semua tingkat</option>
+                            @foreach($daftarTingkat as $t)
+                                <option value="{{ $t }}" {{ (string)$filterTingkat === (string)$t ? 'selected' : '' }}>
+                                    Tingkat {{ $t }}
+                                </option>
+                            @endforeach
+                        </x-ui.select>
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                        <label for="filter_search" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pencarian</label>
+                        <x-text-input id="filter_search" type="text" name="search" :value="request('search')" placeholder="Cari nama, jurusan..." class="w-full" />
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-1 w-full sm:w-auto">
+                        <button type="submit" class="{{ \App\Support\Ui::tombol('primary') }} w-full sm:w-auto">
+                            Cari
+                        </button>
+                        @php
+                            $hasActiveFilters = request()->hasAny(['search', 'periode', 'tahun_ajaran', 'semester', 'tingkat']) && (request('search') || request('periode') || request('tahun_ajaran') || request('semester') || request('tingkat'));
+                        @endphp
+                        @if($hasActiveFilters)
+                            <a href="{{ route('admin.kelas.index') }}" class="{{ \App\Support\Ui::tombol('secondary') }} w-full sm:w-auto">
+                                Reset
                             </a>
-                        </div>
-                    </div>
-
-                    @if ($errors->any())
-                        <div class="mb-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 px-4 py-3 rounded text-sm">
-                            <ul class="list-disc pl-5 space-y-1">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 whitespace-nowrap">Nama</th>
-                                    <th scope="col" class="px-6 py-3 whitespace-nowrap">Tingkat</th>
-                                    <th scope="col" class="px-6 py-3 whitespace-nowrap">Jurusan</th>
-                                    <th scope="col" class="px-6 py-3 whitespace-nowrap">Tahun Ajaran</th>
-                                    <th scope="col" class="px-6 py-3 whitespace-nowrap">Semester</th>
-                                    <th scope="col" class="px-6 py-3 whitespace-nowrap">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($kelas as $k)
-                                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">{{ $k->nama }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $k->tingkat }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $k->jurusan->nama }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $k->tahun_ajaran }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $k->semester }}</td>
-                                        <td class="px-6 py-4 flex space-x-2 whitespace-nowrap">
-                                            <a href="{{ route('admin.kelas.edit', $k) }}" class="text-blue-600 dark:text-blue-400 hover:underline">Edit</a>
-                                            <button type="button" 
-                                                x-data=""
-                                                x-on:click.prevent="$dispatch('open-confirm-modal', {
-                                                    title: 'Konfirmasi Hapus',
-                                                    message: 'Apakah Anda yakin ingin menghapus kelas ini?\n\nData yang sudah dihapus mungkin tidak dapat dikembalikan.',
-                                                    action: '{{ route('admin.kelas.destroy', $k) }}',
-                                                    method: 'DELETE',
-                                                    confirmText: 'Hapus'
-                                                })"
-                                                class="text-red-600 dark:text-red-400 hover:underline">
-                                                Hapus
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="6" class="px-6 py-12 text-center">
-                                            <div class="flex flex-col items-center justify-center">
-                                                <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 mb-3">
-                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                                    </svg>
-                                                </div>
-                                                <p class="text-base font-medium text-gray-900 dark:text-gray-100">Belum ada data kelas</p>
-                                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Data kelas yang ditambahkan akan tampil di sini.</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="mt-4">
-                        {{ $kelas->links() }}
+                        @endif
                     </div>
                 </div>
+            </x-ui.filter-bar>
+
+            {{-- Tabel Daftar Kelas --}}
+            <x-ui.table>
+                <thead class="{{ \App\Support\Ui::tableHeader() }}">
+                    <tr>
+                        <th scope="col" class="px-6 py-3.5 whitespace-nowrap">Nama Kelas</th>
+                        <th scope="col" class="px-6 py-3.5 whitespace-nowrap">Tingkat</th>
+                        <th scope="col" class="px-6 py-3.5 whitespace-nowrap">Jurusan</th>
+                        <th scope="col" class="px-6 py-3.5 whitespace-nowrap">Tahun Ajaran</th>
+                        <th scope="col" class="px-6 py-3.5 whitespace-nowrap">Semester</th>
+                        <th scope="col" class="px-6 py-3.5 whitespace-nowrap text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y-2 divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-900">
+                    @forelse ($kelas as $k)
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
+                            <td class="stack-title px-6 py-4 font-bold text-slate-900 dark:text-white" data-label="Nama Kelas">
+                                {{ $k->nama }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-slate-700 dark:text-slate-300" data-label="Tingkat">
+                                Tingkat {{ $k->tingkat }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-slate-700 dark:text-slate-300" data-label="Jurusan">
+                                {{ $k->jurusan->nama }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-slate-600 dark:text-slate-300" data-label="Tahun Ajaran">
+                                {{ $k->tahun_ajaran }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap" data-label="Semester">
+                                <span class="{{ \App\Support\Ui::badgeSemester($k->semester) }}">
+                                    {{ $k->semester }}
+                                </span>
+                            </td>
+                            <td class="stack-actions px-6 py-4 whitespace-nowrap text-right" data-label="Aksi">
+                                <a href="{{ route('admin.kelas.edit', $k) }}" class="inline-flex items-center justify-center min-h-[44px] px-3 py-2 text-sm font-semibold text-blue-700 dark:text-blue-400 hover:underline">
+                                    Edit
+                                </a>
+                                <button type="button" 
+                                    x-data=""
+                                    x-on:click.prevent="$dispatch('open-confirm-modal', {
+                                        title: 'Konfirmasi Hapus',
+                                        message: 'Apakah Anda yakin ingin menghapus kelas ini?\n\nData yang sudah dihapus mungkin tidak dapat dikembalikan.',
+                                        action: '{{ route('admin.kelas.destroy', $k) }}',
+                                        method: 'DELETE',
+                                        confirmText: 'Hapus'
+                                    })"
+                                    class="inline-flex items-center justify-center min-h-[44px] px-3 py-2 text-sm font-semibold text-red-700 dark:text-red-400 hover:underline">
+                                    Hapus
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center" data-label="Data Kosong">
+                                <x-ui.empty-state
+                                    title="Belum ada data kelas"
+                                    description="Data kelas rombongan belajar yang ditambahkan akan tampil di sini."
+                                    icon="building"
+                                />
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </x-ui.table>
+
+            <div class="mt-4">
+                {{ $kelas->links() }}
             </div>
         </div>
     </div>

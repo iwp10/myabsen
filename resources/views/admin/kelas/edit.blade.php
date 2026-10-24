@@ -1,84 +1,76 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-semibold text-xl text-slate-800 dark:text-slate-200 leading-tight">
             {{ __('Edit Kelas') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <form action="{{ route('admin.kelas.update', $kelas) }}" method="POST" novalidate>
-                        @csrf
-                        @method('PUT')
-                        
-                        <div class="mb-4">
-                            <label for="nama" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Kelas</label>
-                            <input type="text" name="nama" id="nama" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white" value="{{ old('nama', $kelas->nama) }}" required>
-                            @error('nama')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+    <div class="py-8 sm:py-12">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <x-ui.page-header title="Edit Kelas" :description="'Perbarui data rombongan belajar ' . $kelas->nama" />
 
-                        <div class="mb-4">
-                            <label for="tingkat" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tingkat (Misal: 10, 11, 12)</label>
-                            <input type="number" name="tingkat" id="tingkat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white" value="{{ old('tingkat', $kelas->tingkat) }}" required min="1" max="13">
-                            @error('tingkat')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+            <x-ui.card>
+                <form action="{{ route('admin.kelas.update', $kelas) }}" method="POST" novalidate class="space-y-5">
+                    @csrf
+                    @method('PUT')
+                    
+                    <div>
+                        <x-input-label for="nama" value="Nama Kelas" />
+                        <x-text-input type="text" name="nama" id="nama" class="mt-1 block w-full" :value="old('nama', $kelas->nama)" required autofocus />
+                        <x-input-error :messages="$errors->get('nama')" class="mt-1" />
+                    </div>
 
-                        <div class="mb-4">
-                            <label for="jurusan_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Jurusan</label>
-                            <select name="jurusan_id" id="jurusan_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white dark:[color-scheme:dark]" required>
-                                <option value="">-- Pilih Jurusan --</option>
-                                @foreach($jurusans as $jurusan)
-                                    <option value="{{ $jurusan->id }}" {{ old('jurusan_id', $kelas->jurusan_id) == $jurusan->id ? 'selected' : '' }}>
-                                        {{ $jurusan->nama }}
+                    <div>
+                        <x-input-label for="tingkat" value="Tingkat (Contoh: 10, 11, 12)" />
+                        <x-text-input type="number" name="tingkat" id="tingkat" class="mt-1 block w-full" :value="old('tingkat', $kelas->tingkat)" required min="1" max="13" />
+                        <x-input-error :messages="$errors->get('tingkat')" class="mt-1" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="jurusan_id" value="Jurusan" />
+                        <x-ui.select name="jurusan_id" id="jurusan_id" required wrapperClass="mt-1">
+                            <option value="">-- Pilih Jurusan --</option>
+                            @foreach($jurusans as $jurusan)
+                                <option value="{{ $jurusan->id }}" {{ old('jurusan_id', $kelas->jurusan_id) == $jurusan->id ? 'selected' : '' }}>
+                                    {{ $jurusan->nama }}
+                                </option>
+                            @endforeach
+                        </x-ui.select>
+                        <x-input-error :messages="$errors->get('jurusan_id')" class="mt-1" />
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <x-input-label for="tahun_ajaran" value="Tahun Ajaran" />
+                            <x-ui.select name="tahun_ajaran" id="tahun_ajaran" required wrapperClass="mt-1">
+                                @foreach($daftarTahunAjaran as $ta)
+                                    <option value="{{ $ta }}" {{ old('tahun_ajaran', $kelas->tahun_ajaran) === $ta ? 'selected' : '' }}>
+                                        {{ $ta }}
                                     </option>
                                 @endforeach
-                            </select>
-                            @error('jurusan_id')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
+                            </x-ui.select>
+                            <x-input-error :messages="$errors->get('tahun_ajaran')" class="mt-1" />
                         </div>
+                        <div>
+                            <x-input-label for="semester" value="Semester" />
+                            <x-ui.select name="semester" id="semester" required wrapperClass="mt-1">
+                                <option value="Ganjil" {{ old('semester', $kelas->semester) == 'Ganjil' ? 'selected' : '' }}>Ganjil</option>
+                                <option value="Genap" {{ old('semester', $kelas->semester) == 'Genap' ? 'selected' : '' }}>Genap</option>
+                            </x-ui.select>
+                            <x-input-error :messages="$errors->get('semester')" class="mt-1" />
+                        </div>
+                    </div>
 
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label for="tahun_ajaran" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tahun Ajaran</label>
-                                <select name="tahun_ajaran" id="tahun_ajaran" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white dark:[color-scheme:dark]" required>
-                                    @foreach($daftarTahunAjaran as $ta)
-                                        <option value="{{ $ta }}" {{ old('tahun_ajaran', $kelas->tahun_ajaran) === $ta ? 'selected' : '' }}>
-                                            {{ $ta }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('tahun_ajaran')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-                            <div>
-                                <label for="semester" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Semester</label>
-                                <select name="semester" id="semester" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white dark:[color-scheme:dark]" required>
-                                    <option value="Ganjil" {{ old('semester', $kelas->semester) == 'Ganjil' ? 'selected' : '' }}>Ganjil</option>
-                                    <option value="Genap" {{ old('semester', $kelas->semester) == 'Genap' ? 'selected' : '' }}>Genap</option>
-                                </select>
-                                @error('semester')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-end mt-4">
-                            <a href="{{ route('admin.kelas.index') }}" class="text-gray-600 dark:text-gray-400 hover:underline mr-4">Batal</a>
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Perbarui
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+                    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t-2 border-slate-200 dark:border-slate-700">
+                        <a href="{{ route('admin.kelas.index') }}" class="{{ \App\Support\Ui::tombol('secondary') }} w-full sm:w-auto">
+                            Batal
+                        </a>
+                        <button type="submit" class="{{ \App\Support\Ui::tombol('primary') }} w-full sm:w-auto">
+                            Perbarui
+                        </button>
+                    </div>
+                </form>
+            </x-ui.card>
         </div>
     </div>
 </x-app-layout>
