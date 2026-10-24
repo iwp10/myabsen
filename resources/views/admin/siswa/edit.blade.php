@@ -1,58 +1,54 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-semibold text-xl text-slate-800 dark:text-slate-200 leading-tight">
             {{ __('Edit Siswa') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <form action="{{ route('admin.siswa.update', $siswa) }}" method="POST" novalidate>
-                        @csrf
-                        @method('PUT')
-                        
-                        <div class="mb-4">
-                            <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Lengkap</label>
-                            <input type="text" name="name" id="name" value="{{ old('name', $siswa->user->name) }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
-                            @error('name')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+    <div class="py-8 sm:py-12">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <x-ui.page-header title="Edit Siswa" :description="'Perbarui data siswa ' . $siswa->user->name" />
 
-                        <div class="mb-4">
-                            <label for="nis" class="block text-sm font-medium text-gray-700 dark:text-gray-300">NIS / Username</label>
-                            <input type="text" name="nis" id="nis" value="{{ old('nis', $siswa->nis) }}" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
-                            @error('nis')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+            <x-ui.card>
+                <form action="{{ route('admin.siswa.update', $siswa) }}" method="POST" novalidate class="space-y-5">
+                    @csrf
+                    @method('PUT')
+                    
+                    <div>
+                        <x-input-label for="name" value="Nama Lengkap" />
+                        <x-text-input type="text" name="name" id="name" class="mt-1 block w-full" :value="old('name', $siswa->user->name)" required autofocus />
+                        <x-input-error :messages="$errors->get('name')" class="mt-1" />
+                    </div>
 
-                        <div class="mb-4">
-                            <label for="kelas_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Kelas</label>
-                            <select name="kelas_id" id="kelas_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
-                                <option value="" disabled>-- Pilih Kelas --</option>
-                                @foreach($kelas as $k)
-                                    <option value="{{ $k->id }}" {{ old('kelas_id', $siswa->kelas_id) == $k->id ? 'selected' : '' }}>
-                                        {{ $k->tingkat }} {{ $k->nama }} - {{ $k->jurusan->kode }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('kelas_id')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                    <div>
+                        <x-input-label for="nis" value="NIS / Username" />
+                        <x-text-input type="text" name="nis" id="nis" class="mt-1 block w-full" :value="old('nis', $siswa->nis)" required />
+                        <x-input-error :messages="$errors->get('nis')" class="mt-1" />
+                    </div>
 
-                        <div class="flex items-center gap-4 mt-6">
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Update
-                            </button>
-                            <a href="{{ route('admin.siswa.index') }}" class="text-gray-600 dark:text-gray-400 hover:underline">Batal</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
+                    <div>
+                        <x-input-label for="kelas_id" value="Kelas" />
+                        <x-ui.select name="kelas_id" id="kelas_id" required wrapperClass="mt-1">
+                            <option value="">-- Pilih Kelas --</option>
+                            @foreach($kelas as $k)
+                                <option value="{{ $k->id }}" {{ old('kelas_id', $siswa->kelas_id) == $k->id ? 'selected' : '' }}>
+                                    {{ $k->tingkat }} {{ $k->nama }} - {{ $k->jurusan->kode }}
+                                </option>
+                            @endforeach
+                        </x-ui.select>
+                        <x-input-error :messages="$errors->get('kelas_id')" class="mt-1" />
+                    </div>
+
+                    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t-2 border-slate-200 dark:border-slate-700">
+                        <a href="{{ route('admin.siswa.index') }}" class="{{ \App\Support\Ui::tombol('secondary') }} w-full sm:w-auto">
+                            Batal
+                        </a>
+                        <button type="submit" class="{{ \App\Support\Ui::tombol('primary') }} w-full sm:w-auto">
+                            Perbarui
+                        </button>
+                    </div>
+                </form>
+            </x-ui.card>
         </div>
     </div>
 </x-app-layout>

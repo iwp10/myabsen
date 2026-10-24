@@ -1,102 +1,104 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-semibold text-xl text-slate-800 dark:text-slate-200 leading-tight">
             {{ __('Edit Jadwal') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <form action="{{ route('admin.jadwal.update', $jadwal) }}" method="POST" novalidate>
-                        @csrf
-                        @method('PUT')
-                        
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Kelas</label>
-                            <select name="kelas_id" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" required>
-                                @foreach($kelas as $k)
-                                    <option value="{{ $k->id }}" {{ old('kelas_id', $jadwal->kelas_id) == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
+    <div class="py-8 sm:py-12">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <x-ui.page-header title="Edit Jadwal" :description="'Perbarui jadwal pelajaran ' . $jadwal->mapel->nama . ' - ' . $jadwal->kelas->nama" />
+
+            <x-ui.card>
+                <form action="{{ route('admin.jadwal.update', $jadwal) }}" method="POST" novalidate class="space-y-5">
+                    @csrf
+                    @method('PUT')
+                    
+                    <div>
+                        <x-input-label for="kelas_id" value="Kelas" />
+                        <x-ui.select name="kelas_id" id="kelas_id" required wrapperClass="mt-1">
+                            @foreach($kelas as $k)
+                                <option value="{{ $k->id }}" {{ old('kelas_id', $jadwal->kelas_id) == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
+                            @endforeach
+                        </x-ui.select>
+                        <x-input-error :messages="$errors->get('kelas_id')" class="mt-1" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="mapel_id" value="Mata Pelajaran" />
+                        <x-ui.select name="mapel_id" id="mapel_id" required wrapperClass="mt-1">
+                            @foreach($mapel as $m)
+                                <option value="{{ $m->id }}" {{ old('mapel_id', $jadwal->mapel_id) == $m->id ? 'selected' : '' }}>{{ $m->nama }}</option>
+                            @endforeach
+                        </x-ui.select>
+                        <x-input-error :messages="$errors->get('mapel_id')" class="mt-1" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="guru_id" value="Guru Pengajar" />
+                        <x-ui.select name="guru_id" id="guru_id" required wrapperClass="mt-1">
+                            @foreach($guru as $g)
+                                <option value="{{ $g->id }}" {{ old('guru_id', $jadwal->guru_id) == $g->id ? 'selected' : '' }}>{{ $g->user->name }}</option>
+                            @endforeach
+                        </x-ui.select>
+                        <x-input-error :messages="$errors->get('guru_id')" class="mt-1" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="hari" value="Hari" />
+                        <x-ui.select name="hari" id="hari" required wrapperClass="mt-1">
+                            @foreach(['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'] as $h)
+                                <option value="{{ $h }}" {{ old('hari', $jadwal->hari) == $h ? 'selected' : '' }}>{{ ucfirst($h) }}</option>
+                            @endforeach
+                        </x-ui.select>
+                        <x-input-error :messages="$errors->get('hari')" class="mt-1" />
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <x-input-label for="jam_mulai" value="Jam Mulai" />
+                            <x-text-input type="time" name="jam_mulai" id="jam_mulai" class="mt-1 block w-full" :value="old('jam_mulai', substr($jadwal->jam_mulai, 0, 5))" required />
+                            <x-input-error :messages="$errors->get('jam_mulai')" class="mt-1" />
+                        </div>
+                        <div>
+                            <x-input-label for="jam_selesai" value="Jam Selesai" />
+                            <x-text-input type="time" name="jam_selesai" id="jam_selesai" class="mt-1 block w-full" :value="old('jam_selesai', substr($jadwal->jam_selesai, 0, 5))" required />
+                            <x-input-error :messages="$errors->get('jam_selesai')" class="mt-1" />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <x-input-label for="tahun_ajaran" value="Tahun Ajaran" />
+                            <x-ui.select name="tahun_ajaran" id="tahun_ajaran" required wrapperClass="mt-1">
+                                @foreach($daftarTahunAjaran as $ta)
+                                    <option value="{{ $ta }}" {{ old('tahun_ajaran', $jadwal->tahun_ajaran) === $ta ? 'selected' : '' }}>
+                                        {{ $ta }}
+                                    </option>
                                 @endforeach
-                            </select>
-                            @error('kelas_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            </x-ui.select>
+                            <x-input-error :messages="$errors->get('tahun_ajaran')" class="mt-1" />
                         </div>
+                        <div>
+                            <x-input-label for="semester" value="Semester" />
+                            <x-ui.select name="semester" id="semester" required wrapperClass="mt-1">
+                                <option value="Ganjil" {{ old('semester', $jadwal->semester) == 'Ganjil' ? 'selected' : '' }}>Ganjil</option>
+                                <option value="Genap" {{ old('semester', $jadwal->semester) == 'Genap' ? 'selected' : '' }}>Genap</option>
+                            </x-ui.select>
+                            <x-input-error :messages="$errors->get('semester')" class="mt-1" />
+                        </div>
+                    </div>
 
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Mata Pelajaran</label>
-                            <select name="mapel_id" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" required>
-                                @foreach($mapel as $m)
-                                    <option value="{{ $m->id }}" {{ old('mapel_id', $jadwal->mapel_id) == $m->id ? 'selected' : '' }}>{{ $m->nama }}</option>
-                                @endforeach
-                            </select>
-                            @error('mapel_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Guru</label>
-                            <select name="guru_id" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" required>
-                                @foreach($guru as $g)
-                                    <option value="{{ $g->id }}" {{ old('guru_id', $jadwal->guru_id) == $g->id ? 'selected' : '' }}>{{ $g->user->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('guru_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Hari</label>
-                            <select name="hari" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" required>
-                                @foreach(['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'] as $h)
-                                    <option value="{{ $h }}" {{ old('hari', $jadwal->hari) == $h ? 'selected' : '' }}>{{ ucfirst($h) }}</option>
-                                @endforeach
-                            </select>
-                            @error('hari') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Jam Mulai</label>
-                                <input type="time" name="jam_mulai" value="{{ old('jam_mulai', substr($jadwal->jam_mulai, 0, 5)) }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" required>
-                                @error('jam_mulai') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Jam Selesai</label>
-                                <input type="time" name="jam_selesai" value="{{ old('jam_selesai', substr($jadwal->jam_selesai, 0, 5)) }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" required>
-                                @error('jam_selesai') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tahun Ajaran</label>
-                                <select name="tahun_ajaran" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" required>
-                                    @foreach($daftarTahunAjaran as $ta)
-                                        <option value="{{ $ta }}" {{ old('tahun_ajaran', $jadwal->tahun_ajaran) === $ta ? 'selected' : '' }}>
-                                            {{ $ta }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('tahun_ajaran') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Semester</label>
-                                <select name="semester" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:focus:border-indigo-600 dark:focus:ring-indigo-600" required>
-                                    <option value="Ganjil" {{ old('semester', $jadwal->semester) == 'Ganjil' ? 'selected' : '' }}>Ganjil</option>
-                                    <option value="Genap" {{ old('semester', $jadwal->semester) == 'Genap' ? 'selected' : '' }}>Genap</option>
-                                </select>
-                                @error('semester') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-end mt-4">
-                            <a href="{{ route('admin.jadwal.index') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:underline mr-4">Batal</a>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
-                                Simpan Perubahan
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+                    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t-2 border-slate-200 dark:border-slate-700">
+                        <a href="{{ route('admin.jadwal.index') }}" class="{{ \App\Support\Ui::tombol('secondary') }} w-full sm:w-auto">
+                            Batal
+                        </a>
+                        <button type="submit" class="{{ \App\Support\Ui::tombol('primary') }} w-full sm:w-auto">
+                            Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </x-ui.card>
         </div>
     </div>
 </x-app-layout>

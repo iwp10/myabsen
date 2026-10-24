@@ -1,42 +1,40 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-semibold text-xl text-slate-800 dark:text-slate-200 leading-tight">
             {{ __('Tambah Jurusan') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <form action="{{ route('admin.jurusan.store') }}" method="POST" novalidate>
-                        @csrf
-                        
-                        <div class="mb-4">
-                            <label for="nama" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Jurusan</label>
-                            <input type="text" name="nama" id="nama" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white" value="{{ old('nama') }}" required>
-                            @error('nama')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+    <div class="py-8 sm:py-12">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <x-ui.page-header title="Tambah Jurusan" description="Masukkan data keahlian jurusan baru ke dalam sistem" />
 
-                        <div class="mb-4">
-                            <label for="kode" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Kode Jurusan</label>
-                            <input type="text" name="kode" id="kode" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white" value="{{ old('kode') }}" required>
-                            @error('kode')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+            <x-ui.card>
+                <form action="{{ route('admin.jurusan.store') }}" method="POST" novalidate class="space-y-5">
+                    @csrf
+                    
+                    <div>
+                        <x-input-label for="nama" value="Nama Jurusan (Contoh: Rekayasa Perangkat Lunak)" />
+                        <x-text-input type="text" name="nama" id="nama" class="mt-1 block w-full" :value="old('nama')" required autofocus />
+                        <x-input-error :messages="$errors->get('nama')" class="mt-1" />
+                    </div>
 
-                        <div class="flex items-center justify-end mt-4">
-                            <a href="{{ route('admin.jurusan.index') }}" class="text-gray-600 dark:text-gray-400 hover:underline mr-4">Batal</a>
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Simpan
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+                    <div>
+                        <x-input-label for="kode" value="Kode Jurusan (Contoh: RPL, TKJ, DKV)" />
+                        <x-text-input type="text" name="kode" id="kode" class="mt-1 block w-full" :value="old('kode')" required />
+                        <x-input-error :messages="$errors->get('kode')" class="mt-1" />
+                    </div>
+
+                    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t-2 border-slate-200 dark:border-slate-700">
+                        <a href="{{ route('admin.jurusan.index') }}" class="{{ \App\Support\Ui::tombol('secondary') }} w-full sm:w-auto">
+                            Batal
+                        </a>
+                        <button type="submit" class="{{ \App\Support\Ui::tombol('primary') }} w-full sm:w-auto">
+                            Simpan
+                        </button>
+                    </div>
+                </form>
+            </x-ui.card>
         </div>
     </div>
 </x-app-layout>

@@ -1,89 +1,99 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-semibold text-xl text-slate-800 dark:text-slate-200 leading-tight">
             {{ __('Kelola Mata Pelajaran') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-8 sm:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             @if (session('success'))
-                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                    <span class="block sm:inline">{{ session('success') }}</span>
-                </div>
+                <x-alert type="success" :message="session('success')" />
             @endif
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                        <h3 class="text-lg font-bold">Daftar Mata Pelajaran</h3>
-                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                            <form action="{{ route('admin.mapel.index') }}" method="GET" class="flex gap-2">
-                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau kode..." class="w-full sm:w-64 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
-                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition">Cari</button>
-                                @if(request('search'))
-                                    <a href="{{ route('admin.mapel.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-3 rounded-md text-sm flex items-center justify-center transition">Reset</a>
-                                @endif
-                            </form>
-                            <a href="{{ route('admin.mapel.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm text-center transition">
-                                Tambah Mata Pelajaran
-                            </a>
-                        </div>
-                    </div>
+            <x-ui.page-header title="Kelola Mata Pelajaran" :description="'Menampilkan ' . $mapels->total() . ' mata pelajaran'">
+                <x-slot:actions>
+                    <a href="{{ route('admin.mapel.create') }}" class="{{ \App\Support\Ui::tombol('primary') }} w-full sm:w-auto">
+                        <x-ui.icon name="plus" size="sm" class="mr-1.5" />
+                        Tambah Mata Pelajaran
+                    </a>
+                </x-slot:actions>
+            </x-ui.page-header>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 whitespace-nowrap">Nama</th>
-                                    <th scope="col" class="px-6 py-3 whitespace-nowrap">Kode</th>
-                                    <th scope="col" class="px-6 py-3 whitespace-nowrap">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($mapels as $mapel)
-                                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">{{ $mapel->nama }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $mapel->kode }}</td>
-                                        <td class="px-6 py-4 flex space-x-2 whitespace-nowrap">
-                                            <a href="{{ route('admin.mapel.edit', $mapel) }}" class="text-blue-600 dark:text-blue-400 hover:underline">Edit</a>
-                                            <button type="button" 
-                                                x-data=""
-                                                x-on:click.prevent="$dispatch('open-confirm-modal', {
-                                                    title: 'Konfirmasi Hapus',
-                                                    message: 'Apakah Anda yakin ingin menghapus mata pelajaran ini?\n\nData yang sudah dihapus mungkin tidak dapat dikembalikan.',
-                                                    action: '{{ route('admin.mapel.destroy', $mapel) }}',
-                                                    method: 'DELETE',
-                                                    confirmText: 'Hapus'
-                                                })"
-                                                class="text-red-600 dark:text-red-400 hover:underline">
-                                                Hapus
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3" class="px-6 py-12 text-center">
-                                            <div class="flex flex-col items-center justify-center">
-                                                <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 mb-3">
-                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                                                    </svg>
-                                                </div>
-                                                <p class="text-base font-medium text-gray-900 dark:text-gray-100">Belum ada data mata pelajaran</p>
-                                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Data mata pelajaran yang ditambahkan akan tampil di sini.</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+            {{-- Form Filter --}}
+            <x-ui.filter-bar :action="route('admin.mapel.index')">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 w-full">
+                    <div class="flex-1 min-w-0">
+                        <label for="filter_search" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pencarian</label>
+                        <x-text-input id="filter_search" type="text" name="search" :value="request('search')" placeholder="Cari nama atau kode mapel..." class="w-full" />
                     </div>
-                    
-                    <div class="mt-4">
-                        {{ $mapels->links() }}
+                    <div class="flex items-center gap-2 pt-1 w-full sm:w-auto">
+                        <button type="submit" class="{{ \App\Support\Ui::tombol('primary') }} w-full sm:w-auto">
+                            Cari
+                        </button>
+                        @if(request('search'))
+                            <a href="{{ route('admin.mapel.index') }}" class="{{ \App\Support\Ui::tombol('secondary') }} w-full sm:w-auto">
+                                Reset
+                            </a>
+                        @endif
                     </div>
                 </div>
+            </x-ui.filter-bar>
+
+            {{-- Tabel Daftar Mata Pelajaran --}}
+            <x-ui.table>
+                <thead class="{{ \App\Support\Ui::tableHeader() }}">
+                    <tr>
+                        <th scope="col" class="px-6 py-3.5 whitespace-nowrap">Nama Mata Pelajaran</th>
+                        <th scope="col" class="px-6 py-3.5 whitespace-nowrap">Kode</th>
+                        <th scope="col" class="px-6 py-3.5 whitespace-nowrap text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y-2 divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-900">
+                    @forelse ($mapels as $mapel)
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
+                            <td class="stack-title px-6 py-4 font-bold text-slate-900 dark:text-white" data-label="Nama Mata Pelajaran">
+                                {{ $mapel->nama }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-slate-700 dark:text-slate-300" data-label="Kode">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 font-mono">
+                                    {{ $mapel->kode }}
+                                </span>
+                            </td>
+                            <td class="stack-actions px-6 py-4 whitespace-nowrap text-right" data-label="Aksi">
+                                <a href="{{ route('admin.mapel.edit', $mapel) }}" class="inline-flex items-center justify-center min-h-[44px] px-3 py-2 text-sm font-semibold text-blue-700 dark:text-blue-400 hover:underline">
+                                    Edit
+                                </a>
+                                <button type="button" 
+                                    x-data=""
+                                    x-on:click.prevent="$dispatch('open-confirm-modal', {
+                                        title: 'Konfirmasi Hapus',
+                                        message: 'Apakah Anda yakin ingin menghapus mata pelajaran ini?\n\nData yang sudah dihapus mungkin tidak dapat dikembalikan.',
+                                        action: '{{ route('admin.mapel.destroy', $mapel) }}',
+                                        method: 'DELETE',
+                                        confirmText: 'Hapus'
+                                    })"
+                                    class="inline-flex items-center justify-center min-h-[44px] px-3 py-2 text-sm font-semibold text-red-700 dark:text-red-400 hover:underline">
+                                    Hapus
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="px-6 py-12 text-center" data-label="Data Kosong">
+                                <x-ui.empty-state
+                                    title="Belum ada data mata pelajaran"
+                                    description="Data mata pelajaran yang ditambahkan akan tampil di sini."
+                                    icon="book"
+                                />
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </x-ui.table>
+
+            <div class="mt-4">
+                {{ $mapels->links() }}
             </div>
         </div>
     </div>

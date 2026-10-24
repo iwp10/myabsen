@@ -213,4 +213,47 @@ Semua pasangan warna teks dan elemen UI di atas **100% LULUS** standar WCAG AA (
    - Seluruh berkas di `resources/views/profile/**` (`edit.blade.php`, `partials/update-password-form.blade.php`), halaman galat kustom `resources/views/errors/403.blade.php`, `503.blade.php`, serta komponen Blade Breeze pendukung (`text-input`, `input-label`, `input-error`, `dropdown`, `dropdown-link`, `modal`) dimasukkan ke dalam cakupan penegak desain otomatis (R1 sampai R6).
    - Penegakan ketat meliputi: semua utilitas warna wajib berpasangan `dark:`, bebas teks redup, bebas class dinamis, dan seluruh elemen `<svg>` wajib memiliki ukuran eksplisit.
 
+---
+
+## 6. Pola Mobile Master Data Admin & Tabel-Menjadi-Kartu Satu Markup (Tahap 2A)
+
+1. **Pola Satu Markup Tabel-Menjadi-Kartu (`.responsive-stack-table`)**:
+   - Menghindari duplikasi markup DOM: SATU elemen `<table>` otomatis beradaptasi menjadi tabel standar di desktop (`md:` ke atas) dan menjadi susunan kartu bertumpuk di layar HP (< 768px).
+   - `thead tr` di HP disembunyikan secara visual (`position: absolute; top: -9999px; left: -9999px; overflow: hidden;`) tanpa menghilangkannya dari pohon aksesibilitas pembaca layar (screen reader).
+   - Setiap elemen `<td>` wajib memiliki atribut `data-label="..."` yang ditampilkan melalui pseudo-elemen `::before` sebagai label kecil kapital berkontras tinggi (`text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400`).
+   - **Elemen Khusus Kartu**:
+     - `.stack-title`: Diterapkan pada sel pertama (nama/judul utama). Tampil menonjol sebagai judul kartu (`text-base font-bold text-slate-900 dark:text-slate-100`) tanpa label `::before`.
+     - `.stack-actions`: Diterapkan pada sel kolom aksi. Di HP, sel ini otomatis berada di dasar kartu, dibatasi garis pemisah `border-t-2 border-slate-200 dark:border-slate-700`, dengan tombol aksi membentang atau berjarak nyaman dengan target ketuk minimal 44x44px.
+     - `.stack-checkbox`: Diterapkan pada kolom seleksi massal. Menempatkan checkbox di pojok kartu dengan target sentuh aman (`min-h-[44px] min-w-[44px]`).
+   - Kartu di HP memiliki bingkai tegas `border-2 border-slate-300 dark:border-slate-600`, sudut membulat `rounded-xl`, berbayang elevasi `shadow-sm dark:bg-slate-800 dark:shadow-md dark:shadow-black/40`, dengan `word-break: break-word` agar teks panjang tidak pernah meluber melewati 320px.
+
+2. **Komponen Pembungkus Terpadu (`x-ui.table`)**:
+   - Pada layar desktop (`md:`), `x-ui.table` membungkus elemen tabel dengan kontainer `overflow-x-auto border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl shadow-sm`.
+   - Pada layar mobile (< 768px), styling kontainer luar desktop dilepas sehingga kartu-kartu individu tampil bersih tanpa kotak ganda yang membingungkan pengguna.
+
+3. **Bilah Header & Filter Mobile (`x-ui.page-header` & `x-ui.filter-bar`)**:
+   - `x-ui.page-header`: Pada layar HP, judul halaman dan deskripsi berada di atas, sedangkan tombol aksi (seperti "Tambah Siswa" atau "Import Siswa") membentang penuh di bawahnya dengan urutan wajar. Pada `md:` ke atas, tombol aksi kembali berdampingan di sisi kanan.
+   - `x-ui.filter-bar`: Mengadopsi tata letak fleksibel 1 kolom di HP (`grid grid-cols-1 md:grid-cols-*`). Kotak pencarian membentang penuh, seluruh dropdown menggunakan komponen `<x-ui.select>` dengan target sentuh minimal 44px, dan tombol Cari serta Reset membentang penuh di mobile.
+
+4. **Formulir Tambah & Ubah Mobile (Create & Edit)**:
+   - Form mengadopsi susunan 1 kolom di HP (`grid-cols-1`, dengan opsi `md:grid-cols-2` hanya di desktop jika diperlukan).
+   - Label selalu diletakkan di atas input dengan teks tegas (`text-slate-800 dark:text-slate-200`).
+   - Seluruh elemen input, select, dan textarea memenuhi aturan aksesibilitas: teks minimal 16px (mencegah zoom paksa iOS Safari) dan tinggi minimal 44px.
+   - Tombol Simpan dan Batal disusun berdampingan dengan ukuran target sentuh nyaman di layar sentuh.
+
+5. **Pilihan Massal & Bilah Aksi Melekat (Kelola Siswa)**:
+   - Di mobile, disediakan bilah kecil `x-ui.pilih-semua` di atas susunan kartu untuk mempermudah pemilihan seluruh data pada halaman aktif.
+   - Bilah aksi massal melayang di bawah layar (`fixed bottom-0` atau `sticky bottom-0`) dengan padding aman (*safe-area-inset-bottom*). Kontainer daftar diberikan padding bawah ekstra (`pb-24`) agar kartu data paling bawah tidak pernah tertutup oleh bilah aksi mengambang.
+   - Tetap menjamin SATU checkbox baris per data (tidak ada duplikasi DOM).
+
+6. **Pewarnaan Kolom Jadwal Terpusat (`Ui::badgeHari`, `Ui::badgeSemester`)**:
+   - Seluruh pewarnaan hari (Senin s.d. Sabtu) dan semester (Ganjil/Genap) dipusatkan melalui method helper `App\Support\Ui`. Dilarang menuliskan logika warna hari atau semester secara inline berulang-ulang di view.
+   - Di kartu mobile, hari dan jam pelajaran ditampilkan sebagai judul utama kartu, sementara kelas, mapel, dan guru tersaji sebagai baris berlabel yang rapi dan mudah dibaca.
+
+7. **Perluasan Penegak Desain Otomatis (`TampilanKonsistenTest`)**:
+   - **R1 - R6**: Diperluas ke seluruh 18 view master data admin (`admin/siswa/**`, `admin/guru/**`, `admin/kelas/**`, `admin/mapel/**`, `admin/jurusan/**`, `admin/jadwal/**`).
+   - **R7 (Tabel Bertumpuk & Data-Label)**: Memastikan setiap tag `<table>` di halaman index master data admin dibungkus oleh `x-ui.table` dan seluruh elemen `<td>` memiliki atribut `data-label` untuk representasi kartu mobile.
+   - **R8 (Pencegahan Duplikasi Baris Checkbox)**: Memastikan tidak ada pengulangan markup daftar ganda antara mobile dan desktop yang memicu duplikasi elemen `<x-ui.pilih-baris>`.
+
+
 
