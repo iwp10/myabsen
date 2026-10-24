@@ -5,29 +5,64 @@
         </h2>
     </x-slot>
 
-    <div class="py-6 sm:py-8" x-data="{ tab: '{{ $activeTab }}' }">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    @php
+        // Siapkan chip filter aktif untuk tab Semua Riwayat
+        $activeFilters = [];
+        if (request()->filled('periode') && request('periode') !== 'semua') {
+            $activeFilters['periode'] = [
+                'label' => 'Periode: ' . ($selectedPeriode['tahun_ajaran'] ?? '') . ' Sem ' . ($selectedPeriode['semester'] ?? ''),
+                'clear_url' => route('siswa.riwayat', array_filter(request()->except('periode'))),
+            ];
+        }
+        if (request()->filled('bulan')) {
+            $namaBulan = \App\Support\Ui::namaBulanIndo((int) request('bulan'));
+            $activeFilters['bulan'] = [
+                'label' => 'Bulan: ' . $namaBulan,
+                'clear_url' => route('siswa.riwayat', array_filter(request()->except('bulan'))),
+            ];
+        }
+        if (request()->filled('tanggal')) {
+            $activeFilters['tanggal'] = [
+                'label' => 'Tanggal: ' . \Carbon\Carbon::parse(request('tanggal'))->format('d/m/Y'),
+                'clear_url' => route('siswa.riwayat', array_filter(request()->except('tanggal'))),
+            ];
+        }
+        if (request()->filled('mapel_id')) {
+            $mObj = $mapels->firstWhere('id', request('mapel_id'));
+            $activeFilters['mapel_id'] = [
+                'label' => 'Mapel: ' . ($mObj->nama ?? request('mapel_id')),
+                'clear_url' => route('siswa.riwayat', array_filter(request()->except('mapel_id'))),
+            ];
+        }
+        if (request()->filled('status')) {
+            $activeFilters['status'] = [
+                'label' => 'Status: ' . ucfirst(request('status')),
+                'clear_url' => route('siswa.riwayat', array_filter(request()->except('status'))),
+            ];
+        }
+    @endphp
+
+    <div class="py-4 sm:py-8" x-data="{ tab: '{{ $activeTab }}' }">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-6">
 
             <!-- Banner Info Periode Dilihat & Filter Periode -->
-            <div class="bg-white dark:bg-slate-900 overflow-hidden shadow-xs rounded-xl p-5 sm:p-6 border-2 border-slate-300 dark:border-slate-600">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="bg-white dark:bg-slate-900 overflow-hidden shadow-xs rounded-xl p-4 sm:p-5 border-2 border-slate-300 dark:border-slate-600">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                     <div>
                         <h3 class="text-lg font-bold text-slate-900 dark:text-white">
                             Riwayat Kehadiran Siswa
                         </h3>
-                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-600 dark:text-slate-300 mt-0.5">
-                            <span>
-                                Periode Dilihat:
-                                <strong class="font-bold text-slate-900 dark:text-slate-100">
-                                    @if($filterPeriodeValue === 'semua')
-                                        Semua Periode
-                                    @else
-                                        {{ $selectedPeriode['tahun_ajaran'] }} - Semester {{ $selectedPeriode['semester'] }}
-                                    @endif
-                                </strong>
-                            </span>
+                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-0.5">
+                            <span>Periode Dilihat:</span>
+                            <strong class="font-bold text-slate-900 dark:text-white">
+                                @if($filterPeriodeValue === 'semua')
+                                    Semua Periode
+                                @else
+                                    {{ $selectedPeriode['tahun_ajaran'] }} - Semester {{ $selectedPeriode['semester'] }}
+                                @endif
+                            </strong>
                             @if($filterPeriodeValue !== 'semua' && isset($daftarPeriode) && collect($daftarPeriode)->firstWhere('is_aktif', true)['value'] === ($selectedPeriode['tahun_ajaran'].'|'.$selectedPeriode['semester']))
-                                <span class="shrink-0 whitespace-nowrap inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-400 dark:border-emerald-500/50">
+                                <span class="shrink-0 whitespace-nowrap inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-400 dark:border-emerald-500/50">
                                     (aktif)
                                 </span>
                             @endif
@@ -46,29 +81,32 @@
                                     </option>
                                 @endforeach
                             </x-ui.select>
-                            <noscript>
-                                <button type="submit" class="bg-emerald-700 dark:bg-emerald-400 text-white dark:text-slate-950 text-xs px-3 py-2 rounded-lg font-bold min-h-[44px]">Ubah</button>
-                            </noscript>
                         </form>
                     </div>
                 </div>
 
-                {{-- Tab Navigasi (Per Mata Pelajaran & Semua Riwayat) --}}
-                <div class="mt-6 border-b-2 border-slate-200 dark:border-slate-700 flex gap-6">
-                    <button type="button"
-                            @click="tab = 'per_mapel'"
-                            :class="tab === 'per_mapel' ? 'border-emerald-700 text-emerald-800 dark:text-emerald-300 dark:border-emerald-400 font-extrabold border-b-4' : 'border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white font-semibold'"
-                            class="pb-3 px-2 border-b-2 text-sm transition-all flex items-center gap-2 focus-visible:ring-4 focus-visible:ring-emerald-500/30 min-h-[44px]">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/><path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/></svg>
-                        <span>Per Mata Pelajaran</span>
-                    </button>
-                    <button type="button"
-                            @click="tab = 'semua'"
-                            :class="tab === 'semua' ? 'border-emerald-700 text-emerald-800 dark:text-emerald-300 dark:border-emerald-400 font-extrabold border-b-4' : 'border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white font-semibold'"
-                            class="pb-3 px-2 border-b-2 text-sm transition-all flex items-center gap-2 focus-visible:ring-4 focus-visible:ring-emerald-500/30 min-h-[44px]">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4m0 1a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1z"/><path d="M3 12m0 1a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1z"/><path d="M3 20m0 1a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1z"/></svg>
-                        <span>Semua Riwayat</span>
-                    </button>
+                {{-- Tab Navigasi Segmen Ramah Sentuh (Mudah diketuk & tidak terpotong di 320px) --}}
+                <div class="mt-4 pt-3 border-t-2 border-slate-200 dark:border-slate-700">
+                    <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border-2 border-slate-300 dark:border-slate-600 max-w-md">
+                        <button type="button"
+                                @click="tab = 'per_mapel'"
+                                :class="tab === 'per_mapel'
+                                    ? 'bg-white dark:bg-slate-900 text-emerald-800 dark:text-emerald-300 shadow-xs border-2 border-emerald-500 dark:border-emerald-400 font-bold'
+                                    : 'text-slate-700 dark:text-slate-300 font-semibold border-2 border-transparent hover:text-slate-900 dark:hover:text-white'"
+                                class="py-2 px-2.5 rounded-lg text-xs sm:text-sm transition flex items-center justify-center gap-1.5 min-h-[44px]">
+                            <x-ui.icon name="book" size="sm" class="shrink-0" />
+                            <span class="truncate">Per Mata Pelajaran</span>
+                        </button>
+                        <button type="button"
+                                @click="tab = 'semua'"
+                                :class="tab === 'semua'
+                                    ? 'bg-white dark:bg-slate-900 text-emerald-800 dark:text-emerald-300 shadow-xs border-2 border-emerald-500 dark:border-emerald-400 font-bold'
+                                    : 'text-slate-700 dark:text-slate-300 font-semibold border-2 border-transparent hover:text-slate-900 dark:hover:text-white'"
+                                class="py-2 px-2.5 rounded-lg text-xs sm:text-sm transition flex items-center justify-center gap-1.5 min-h-[44px]">
+                            <x-ui.icon name="history" size="sm" class="shrink-0" />
+                            <span class="truncate">Semua Riwayat</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -99,26 +137,26 @@
                         description="Persentase kehadiran per mata pelajaran akan muncul setelah absensi tercatat."
                     />
                 @else
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         @foreach($persentasePerMapel as $rekap)
                             @php
                                 $batasRendah = (int) config('absensi.batas_kehadiran_rendah', 75);
                                 $isMemenuhi = ($rekap->persentase >= $batasRendah);
                             @endphp
                             <a href="{{ route('siswa.riwayat.mapel', ['mapel' => $rekap->id, 'periode' => $filterPeriodeValue]) }}"
-                               class="group block bg-white dark:bg-slate-800 shadow-xs dark:shadow-lg dark:shadow-black/40 dark:ring-1 dark:ring-white/5 hover:shadow-md transition rounded-xl overflow-hidden border-2 border-slate-300 dark:border-slate-600 hover:border-emerald-500 dark:hover:border-emerald-400 p-5">
-                                <div class="flex items-start justify-between gap-2 mb-3">
-                                    <div class="min-w-0">
-                                        <h4 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors truncate">
+                               class="group block bg-white dark:bg-slate-800 shadow-xs dark:shadow-lg dark:shadow-black/40 dark:ring-1 dark:ring-white/5 hover:shadow-md transition rounded-xl overflow-hidden border-2 border-slate-300 dark:border-slate-600 hover:border-emerald-500 dark:hover:border-emerald-400 p-4 sm:p-5">
+                                <div class="flex items-start justify-between gap-2 mb-2">
+                                    <div class="min-w-0 flex-1">
+                                        <h4 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors leading-snug truncate">
                                             {{ $rekap->mapel }}
                                         </h4>
                                         <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5 flex items-center gap-1 truncate" title="{{ $rekap->guru ?? '-' }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-600 dark:text-slate-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/></svg>
-                                            <span class="truncate font-semibold text-slate-900 dark:text-slate-100">{{ $rekap->guru ?? '-' }}</span>
+                                            <x-ui.icon name="user" size="sm" class="w-3.5 h-3.5 text-slate-600 dark:text-slate-400 shrink-0" />
+                                            <span class="truncate font-semibold text-slate-800 dark:text-slate-200">{{ $rekap->guru ?? '-' }}</span>
                                         </p>
                                     </div>
-                                    <span class="flex-shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold {{ $isMemenuhi ? 'bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-400 dark:border-emerald-500/50' : 'bg-red-100 text-red-900 dark:bg-red-500/15 dark:text-red-300 border border-red-400 dark:border-red-500/50' }}">
-                                        {{ $isMemenuhi ? 'Memenuhi' : 'Di Bawah Target' }}
+                                    <span class="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold {{ $isMemenuhi ? 'bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-400 dark:border-emerald-500/50' : 'bg-red-100 text-red-900 dark:bg-red-500/15 dark:text-red-300 border border-red-400 dark:border-red-500/50' }}">
+                                        {{ $isMemenuhi ? 'Memenuhi' : 'Di Bawah' }}
                                     </span>
                                 </div>
 
@@ -132,25 +170,24 @@
                                         </div>
                                     </div>
                                     <div class="text-right">
-                                        <span class="text-xs font-bold px-2.5 py-1 bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 rounded-lg border-2 border-slate-300 dark:border-slate-600">
+                                        <span class="text-xs font-bold px-2.5 py-1 bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 rounded-lg border border-slate-300 dark:border-slate-600">
                                             Total {{ $rekap->total_sesi }} Sesi
                                         </span>
                                     </div>
                                 </div>
 
                                 <div class="pt-3 border-t-2 border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs text-slate-600 dark:text-slate-300">
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-1.5 font-semibold">
                                         <span title="Hadir">H: <strong class="text-emerald-900 dark:text-emerald-300 font-extrabold">{{ $rekap->total_hadir }}</strong></span>
                                         <span>&bull;</span>
                                         <span title="Izin">I: <strong class="text-blue-900 dark:text-blue-300 font-extrabold">{{ $rekap->total_izin }}</strong></span>
                                         <span>&bull;</span>
                                         <span title="Sakit">S: <strong class="text-amber-900 dark:text-amber-300 font-extrabold">{{ $rekap->total_sakit }}</strong></span>
                                         <span>&bull;</span>
-                                        <span title="Alpa">A: <strong class="{{ $rekap->total_alpa > 0 ? 'text-red-900 dark:text-red-300 font-extrabold' : 'text-slate-700 dark:text-slate-300 font-bold' }}">{{ $rekap->total_alpa }}</strong></span>
+                                        <span title="Alpa">A: <strong class="{{ $rekap->total_alpa > 0 ? 'text-red-900 dark:text-red-300 font-extrabold' : 'text-slate-700 dark:text-slate-300' }}">{{ $rekap->total_alpa }}</strong></span>
                                     </div>
                                     <span class="text-emerald-700 dark:text-emerald-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5 font-bold text-xs">
-                                        Lihat detail
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6l-6 6"/></svg>
+                                        Detail &rarr;
                                     </span>
                                 </div>
                             </a>
@@ -161,124 +198,125 @@
 
             {{-- KONTEN TAB 2: SEMUA RIWAYAT --}}
             <div x-show="tab === 'semua'" class="space-y-4">
-                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-xs border-2 border-slate-300 dark:border-slate-600 overflow-hidden">
-                    <div class="p-5 sm:p-6 text-slate-900 dark:text-white">
-                        <h3 class="text-lg font-bold mb-4">Riwayat Kehadiran</h3>
-                        
-                        <form method="GET" action="{{ route('siswa.riwayat') }}" class="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
-                            <input type="hidden" name="tab" value="semua">
-                            <div class="w-full min-w-0">
-                                <x-input-label for="periode" value="Periode" class="text-slate-800 dark:text-slate-200 font-semibold" />
-                                <x-ui.select id="periode" name="periode" wrapper-class="mt-1">
-                                    <option value="semua" {{ $filterPeriodeValue === 'semua' ? 'selected' : '' }}>Semua Periode</option>
-                                    @foreach($daftarPeriode as $item)
-                                        <option value="{{ $item['value'] }}" {{ $filterPeriodeValue === $item['value'] ? 'selected' : '' }}>
-                                            {{ $item['label'] }}
-                                        </option>
-                                    @endforeach
-                                </x-ui.select>
-                            </div>
-                            <div class="w-full min-w-0">
-                                <x-input-label for="bulan" value="Bulan" class="text-slate-800 dark:text-slate-200 font-semibold" />
-                                <x-ui.bulan-select
-                                    id="bulan"
-                                    name="bulan"
-                                    wrapper-class="mt-1"
-                                    :tahun-ajaran="$selectedPeriode['tahun_ajaran'] ?? ($activePeriode['tahun_ajaran'] ?? null)"
-                                    :semester="$selectedPeriode['semester'] ?? ($activePeriode['semester'] ?? null)"
-                                    :selected="request('bulan')"
-                                />
-                            </div>
-                            <div class="w-full min-w-0">
-                                <x-input-label for="tanggal" value="Tanggal" class="text-slate-800 dark:text-slate-200 font-semibold" />
-                                <input id="tanggal" name="tanggal" type="date" class="mt-1 block w-full text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium rounded-lg border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20" value="{{ request('tanggal') }}" />
-                            </div>
-                            <div class="w-full min-w-0">
-                                <x-input-label for="mapel_id" value="Mata Pelajaran" class="text-slate-800 dark:text-slate-200 font-semibold" />
-                                <x-ui.select id="mapel_id" name="mapel_id" wrapper-class="mt-1">
-                                    <option value="">Semua Mapel</option>
-                                    @foreach($mapels as $mapel)
-                                        <option value="{{ $mapel->id }}" {{ (string) request('mapel_id') === (string) $mapel->id ? 'selected' : '' }}>
-                                            {{ $mapel->nama }}
-                                        </option>
-                                    @endforeach
-                                </x-ui.select>
-                            </div>
-                            <div class="w-full min-w-0">
-                                <x-input-label for="status" value="Status" class="text-slate-800 dark:text-slate-200 font-semibold" />
-                                <x-ui.select id="status" name="status" wrapper-class="mt-1">
-                                    <option value="">Semua Status</option>
-                                    @foreach(['hadir' => 'Hadir', 'izin' => 'Izin', 'sakit' => 'Sakit', 'alpa' => 'Alpa'] as $sVal => $sLbl)
-                                        <option value="{{ $sVal }}" {{ request('status') === $sVal ? 'selected' : '' }}>
-                                            {{ $sLbl }}
-                                        </option>
-                                    @endforeach
-                                </x-ui.select>
-                            </div>
-                            <div class="flex items-center gap-2 w-full min-w-0">
-                                <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-slate-950 font-bold py-2.5 px-4 rounded-lg text-xs uppercase tracking-wider min-h-[44px] transition shadow-xs flex items-center justify-center">
-                                    Filter
-                                </button>
-                                @if(request('tanggal') || request('bulan') || request('mapel_id') || request('status') || request('periode') || request('tahun_ajaran') || request('semester'))
-                                    <a href="{{ route('siswa.riwayat', ['tab' => 'semua']) }}" class="w-full border-2 border-slate-400 dark:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold py-2.5 px-3 rounded-lg text-xs uppercase tracking-wider min-h-[44px] flex items-center justify-center transition shadow-xs">
-                                        Reset
-                                    </a>
-                                @endif
-                            </div>
-                        </form>
-
-                        {{-- Header Ringkas Jumlah Catatan --}}
-                        <div class="mb-4 flex items-center justify-between text-sm text-slate-700 dark:text-slate-200">
-                            <span class="font-bold">
-                                Menampilkan {{ $riwayat->total() }} catatan {{ request('status') ? strtolower(request('status')) : 'kehadiran' }}
-                            </span>
+                {{-- Filter Panel Semua Riwayat (Lipat di Mobile, Inline di Desktop) --}}
+                <x-ui.filter-panel :action="route('siswa.riwayat')" :active-filters="$activeFilters" :reset-url="route('siswa.riwayat', ['tab' => 'semua'])">
+                    <input type="hidden" name="tab" value="semua">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+                        {{-- Periode --}}
+                        <div>
+                            <x-input-label for="periode" value="Periode" class="text-slate-800 dark:text-slate-200 font-semibold mb-1" />
+                            <x-ui.select id="periode" name="periode">
+                                <option value="semua" {{ $filterPeriodeValue === 'semua' ? 'selected' : '' }}>Semua Periode</option>
+                                @foreach($daftarPeriode as $item)
+                                    <option value="{{ $item['value'] }}" {{ $filterPeriodeValue === $item['value'] ? 'selected' : '' }}>
+                                        {{ $item['label'] }}
+                                    </option>
+                                @endforeach
+                            </x-ui.select>
                         </div>
 
-                        @if($riwayat->isEmpty())
-                            <x-ui.empty-state
-                                title="Tidak ada riwayat kehadiran"
-                                description="Belum ada catatan kehadiran yang sesuai dengan filter pencarian pada periode ini."
+                        {{-- Bulan --}}
+                        <div>
+                            <x-input-label for="bulan" value="Bulan" class="text-slate-800 dark:text-slate-200 font-semibold mb-1" />
+                            <x-ui.bulan-select
+                                id="bulan"
+                                name="bulan"
+                                :tahun-ajaran="$selectedPeriode['tahun_ajaran'] ?? ($activePeriode['tahun_ajaran'] ?? null)"
+                                :semester="$selectedPeriode['semester'] ?? ($activePeriode['semester'] ?? null)"
+                                :selected="request('bulan')"
                             />
-                        @else
-                            <div class="overflow-x-auto rounded-xl border-2 border-slate-300 dark:border-slate-600">
-                                <table class="w-full responsive-stack-table border-collapse">
-                                    <thead class="bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-400 dark:border-slate-500 text-slate-900 dark:text-slate-100">
-                                        <tr>
-                                            <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Tanggal</th>
-                                            <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Mata Pelajaran</th>
-                                            <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Guru</th>
-                                            <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Status</th>
-                                            <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Keterangan</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y-2 divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-900">
-                                        @foreach($riwayat as $item)
-                                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
-                                                <td class="px-6 py-4 font-bold text-slate-900 dark:text-slate-100 tabular-nums" data-label="Tanggal">
-                                                    {{ \Illuminate\Support\Carbon::parse($item->sesiAbsensi->tanggal)->format('d/m/Y') }}
-                                                </td>
-                                                <td class="px-6 py-4 font-bold text-slate-900 dark:text-slate-100" data-label="Mata Pelajaran">
-                                                    {{ $item->sesiAbsensi->jadwal->mapel->nama }}
-                                                </td>
-                                                <td class="px-6 py-4 font-semibold text-slate-700 dark:text-slate-200" data-label="Guru">
-                                                    {{ $item->sesiAbsensi->jadwal->guru->user->name }}
-                                                </td>
-                                                <td class="px-6 py-4" data-label="Status">
-                                                    <x-ui.status-badge :status="$item->status" />
-                                                </td>
-                                                <td class="px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-300" data-label="Keterangan">
-                                                    {{ $item->keterangan ?? '-' }}
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="mt-6">
-                                {{ $riwayat->links() }}
-                            </div>
-                        @endif
+                        </div>
+
+                        {{-- Tanggal --}}
+                        <div>
+                            <x-input-label for="tanggal" value="Tanggal" class="text-slate-800 dark:text-slate-200 font-semibold mb-1" />
+                            <input id="tanggal"
+                                   name="tanggal"
+                                   type="date"
+                                   class="block w-full text-base sm:text-xs min-h-[44px] py-2 px-3 font-medium rounded-xl border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 dark:[color-scheme:dark] focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 shadow-xs"
+                                   value="{{ request('tanggal') }}" />
+                        </div>
+
+                        {{-- Mata Pelajaran --}}
+                        <div>
+                            <x-input-label for="mapel_id" value="Mata Pelajaran" class="text-slate-800 dark:text-slate-200 font-semibold mb-1" />
+                            <x-ui.select id="mapel_id" name="mapel_id">
+                                <option value="">Semua Mapel</option>
+                                @foreach($mapels as $mapel)
+                                    <option value="{{ $mapel->id }}" {{ (string) request('mapel_id') === (string) $mapel->id ? 'selected' : '' }}>
+                                        {{ $mapel->nama }}
+                                    </option>
+                                @endforeach
+                            </x-ui.select>
+                        </div>
+
+                        {{-- Status Kehadiran --}}
+                        <div>
+                            <x-input-label for="status" value="Status Kehadiran" class="text-slate-800 dark:text-slate-200 font-semibold mb-1" />
+                            <x-ui.select id="status" name="status">
+                                <option value="">Semua Status</option>
+                                @foreach(['hadir' => 'Hadir', 'izin' => 'Izin', 'sakit' => 'Sakit', 'alpa' => 'Alpa'] as $sVal => $sLbl)
+                                    <option value="{{ $sVal }}" {{ request('status') === $sVal ? 'selected' : '' }}>
+                                        {{ $sLbl }}
+                                    </option>
+                                @endforeach
+                            </x-ui.select>
+                        </div>
                     </div>
+                </x-ui.filter-panel>
+
+                {{-- Header Ringkas Jumlah Catatan --}}
+                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-xs border-2 border-slate-300 dark:border-slate-600 p-4">
+                    <div class="flex items-center justify-between text-sm text-slate-700 dark:text-slate-200 mb-3">
+                        <span class="font-bold">
+                            Menampilkan {{ $riwayat->total() }} catatan {{ request('status') ? strtolower(request('status')) : 'kehadiran' }}
+                        </span>
+                    </div>
+
+                    @if($riwayat->isEmpty())
+                        <x-ui.empty-state
+                            title="Tidak ada riwayat kehadiran"
+                            description="Belum ada catatan kehadiran yang sesuai dengan filter pencarian pada periode ini."
+                        />
+                    @else
+                        <div class="overflow-x-auto rounded-xl border-2 border-slate-300 dark:border-slate-600">
+                            <table class="w-full responsive-stack-table border-collapse">
+                                <thead class="bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-400 dark:border-slate-500 text-slate-900 dark:text-slate-100">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Tanggal</th>
+                                        <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Mata Pelajaran</th>
+                                        <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Guru</th>
+                                        <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Status</th>
+                                        <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y-2 divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-900">
+                                    @foreach($riwayat as $item)
+                                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
+                                            <td class="px-6 py-4 font-bold text-slate-900 dark:text-slate-100 tabular-nums" data-label="Tanggal">
+                                                {{ \Illuminate\Support\Carbon::parse($item->sesiAbsensi->tanggal)->format('d/m/Y') }}
+                                            </td>
+                                            <td class="px-6 py-4 font-bold text-slate-900 dark:text-white" data-label="Mata Pelajaran">
+                                                {{ $item->sesiAbsensi->jadwal->mapel->nama }}
+                                            </td>
+                                            <td class="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300" data-label="Guru">
+                                                {{ $item->sesiAbsensi->jadwal->guru->user->name }}
+                                            </td>
+                                            <td class="px-6 py-4" data-label="Status">
+                                                <x-ui.status-badge :status="$item->status" />
+                                            </td>
+                                            <td class="px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-300" data-label="Keterangan">
+                                                {{ $item->keterangan ?? '-' }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4">
+                            {{ $riwayat->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
 

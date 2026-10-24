@@ -370,7 +370,72 @@ class Ui
     }
 
     /**
-     * Normalisasi string atau enum StatusKehadiran.
+     * Mengembalikan daftar link bilah navigasi bawah (bottom-nav) untuk role guru dan siswa.
+     * Sebagai sumber kebenaran tunggal untuk x-ui.bottom-nav.
+     *
+     * @return array<int, array{route: string, label: string, icon: string, pattern: string}>
+     */
+    public static function bottomNavLinks(string $role): array
+    {
+        return match ($role) {
+            'guru' => [
+                [
+                    'route' => 'guru.dashboard',
+                    'label' => 'Dashboard',
+                    'icon' => 'layout-grid',
+                    'pattern' => 'guru.dashboard',
+                ],
+                [
+                    'route' => 'guru.jadwal',
+                    'label' => 'Jadwal',
+                    'icon' => 'calendar',
+                    'pattern' => 'guru.jadwal*',
+                ],
+                [
+                    'route' => 'guru.koreksi-absensi',
+                    'label' => 'Absensi',
+                    'icon' => 'calendar-check',
+                    'pattern' => 'guru.koreksi-absensi*',
+                ],
+                [
+                    'route' => 'guru.riwayat',
+                    'label' => 'Riwayat',
+                    'icon' => 'history',
+                    'pattern' => 'guru.riwayat*|guru.laporan.*',
+                ],
+            ],
+            'siswa' => [
+                [
+                    'route' => 'siswa.dashboard',
+                    'label' => 'Dashboard',
+                    'icon' => 'layout-grid',
+                    'pattern' => 'siswa.dashboard',
+                ],
+                [
+                    'route' => 'siswa.jadwal',
+                    'label' => 'Jadwal',
+                    'icon' => 'calendar',
+                    'pattern' => 'siswa.jadwal*',
+                ],
+                [
+                    'route' => 'siswa.mapel',
+                    'label' => 'Mapel',
+                    'icon' => 'book',
+                    'pattern' => 'siswa.mapel*',
+                ],
+                [
+                    'route' => 'siswa.riwayat',
+                    'label' => 'Riwayat',
+                    'icon' => 'history',
+                    'pattern' => 'siswa.riwayat*',
+                ],
+            ],
+            default => [],
+        };
+    }
+
+    /**
+     * Normalisasi nilai status kehadiran (Enum, string case-insensitive, atau singkatan) ke bentuk baku.
      */
     private static function normalizeStatus(StatusKehadiran|string|null $status): string
     {
