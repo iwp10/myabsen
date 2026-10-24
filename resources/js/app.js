@@ -1,4 +1,3 @@
-import './bootstrap';
 
 import Alpine from 'alpinejs';
 import { pilihanMassal } from './pilihan-massal';

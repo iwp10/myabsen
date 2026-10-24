@@ -10,7 +10,6 @@ use App\Models\Mapel;
 use App\Models\SesiAbsensi;
 use App\Models\Siswa;
 use App\Models\User;
-use App\Support\KelasMapel;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -434,57 +433,6 @@ class AbsensiService
             ],
             'daftarPeriodeMapel' => $daftarPeriodeMapel,
         ];
-    }
-
-    /**
-     * Mendapatkan riwayat sesi untuk guru.
-     */
-    public function getRiwayatSesi(int $userId, array $filters = [])
-    {
-        $guru = Guru::where('user_id', $userId)->first();
-        if (! $guru) {
-            return collect();
-        }
-
-        $activePeriode = $this->getActivePeriode();
-
-        $query = SesiAbsensi::with(['jadwal.kelas', 'jadwal.mapel', 'detailAbsensi'])
-            ->whereHas('jadwal', function ($q) use ($guru, $filters, $activePeriode) {
-                $q->where('guru_id', $guru->id);
-                if ($activePeriode['tahun_ajaran']) {
-                    $q->where('tahun_ajaran', $activePeriode['tahun_ajaran'])
-                        ->where('semester', $activePeriode['semester']);
-                }
-                if (! empty($filters['kelas_mapel'])) {
-                    $parsed = KelasMapel::parse($filters['kelas_mapel']);
-                    if ($parsed) {
-                        $q->where('kelas_id', $parsed['kelas_id'])->where('mapel_id', $parsed['mapel_id']);
-                    }
-                }
-                if (! empty($filters['hari']) && is_array($filters['hari'])) {
-                    $q->whereIn('hari', $filters['hari']);
-                }
-            });
-
-        if (! empty($filters['tanggal_awal'])) {
-            $query->where('tanggal', '>=', $filters['tanggal_awal']);
-        }
-        if (! empty($filters['tanggal_akhir'])) {
-            $query->where('tanggal', '<=', $filters['tanggal_akhir']);
-        }
-        if (! empty($filters['bulan'])) {
-            $parts = explode('-', $filters['bulan']);
-            if (count($parts) === 2) {
-                $query->whereYear('tanggal', $parts[0])
-                    ->whereMonth('tanggal', $parts[1]);
-            }
-        }
-
-        return $query->orderBy('tanggal', 'desc')
-            ->orderBy(Jadwal::select('jam_mulai')
-                ->whereColumn('jadwal.id', 'sesi_absensi.jadwal_id')
-                ->limit(1), 'desc')
-            ->get();
     }
 
     /**

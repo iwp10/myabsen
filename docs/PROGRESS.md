@@ -203,6 +203,7 @@ Tulis satu baris per catatan dengan format: `tanggal | fase | catatan`.
 2026-10-11 | 12 | feat: perbaikan ukuran ikon eksplisit seluruh aplikasi (x-ui.icon, penegakan R5) dan standarisasi filter bulan siswa via x-ui.bulan-select berbasis periode (seluruh 348 test PASS).
 2026-10-11 | 12 | fix: perbaikan bug checkbox pilih-semua terbalik (modul murni pilihanMassal, x-ui.pilih-semua, x-ui.pilih-baris, test JS node:test) dan tabrakan header periode/dropdown di HP (x-ui.select, flex-wrap + badge whitespace-nowrap, penegakan R6; seluruh test PASS).
 2026-10-24 | 4,11 | fix: pembersihan penanda konflik merge Git yang tertinggal dari commit 1e18dd7 pada view riwayat detail guru (resources/views/guru/riwayat_detail.blade.php), pemulihan struktur tunggal thead tabel matriks desktop dan kartu mobile, serta penambahan penegak otomatis TanpaPenandaKonflikTest.
+2026-10-24 | 7,11 | chore: pembersihan hasil audit (pencabutan axios dan dependensi yatim follow-redirects, pencabutan laravel/sail dan symfony/yaml via composer, eliminasi method tak terpakai AbsensiService::getRiwayatSesi, pembersihan tests/Unit/ExampleTest.php, konfigurasi SESSION_SECURE_COOKIE & komentar produksi di .env.example, penambahan FormAdminSmokeTest & EnvExampleTest; audit composer: 0 advisories, npm audit: dari 8 kerentanan turun menjadi 3 moderate (PostCSS/Tailwind v3), bundle JS terpangkas dari 108.46 kB menjadi 56.65 kB).
 
 ## Backlog teknis (belum dikerjakan)
 Tugas pemeliharaan dan perbaikan teknis yang perlu dikerjakan pada fase berikutnya:
