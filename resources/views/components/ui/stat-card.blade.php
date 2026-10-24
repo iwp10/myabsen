@@ -55,8 +55,9 @@
     </div>
 
     @if($href)
-        <div class="mt-3 pt-2 border-t-2 border-slate-200 dark:border-slate-700 flex items-center justify-end text-xs font-semibold text-emerald-700 dark:text-emerald-400 group-hover:translate-x-0.5 motion-safe:transition-transform">
-            <span>Lihat rincian &rarr;</span>
+        <div class="mt-3 pt-2 border-t-2 border-slate-200 dark:border-slate-700 flex items-center justify-end gap-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400 group-hover:translate-x-0.5 motion-safe:transition-transform">
+            <span>Lihat rincian</span>
+            <x-ui.icon name="arrow-right" size="sm" class="w-3.5 h-3.5" aria-hidden="true" />
         </div>
     @endif
 </{{ $tag }}>

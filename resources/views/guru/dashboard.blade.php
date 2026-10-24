@@ -24,11 +24,11 @@
                 <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/20 text-white mb-2">
-                            SMK Mandiri 02 Balaraja &bull; Portal Guru
+                            SMK Mandiri 02 Balaraja • Portal Guru
                         </span>
                         <h1 class="text-2xl font-bold tracking-tight text-white">Halo, {{ Auth::user()->name }}!</h1>
                         <p class="text-white text-sm mt-1">
-                            Selamat datang di Dashboard Guru MyAbsen &bull; NIP: <span class="font-semibold text-white">{{ Auth::user()->guru?->nip ?? '-' }}</span>
+                            Selamat datang di Dashboard Guru MyAbsen • NIP: <span class="font-semibold text-white">{{ Auth::user()->guru?->nip ?? '-' }}</span>
                         </p>
                     </div>
                     <div class="sm:text-right flex-shrink-0">
@@ -64,7 +64,7 @@
                         </p>
                     </div>
                     <div class="mt-3 pt-2 border-t-2 border-slate-200 dark:border-slate-700 flex items-center justify-end text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                        <span>Lihat daftar &rarr;</span>
+                        <span>Lihat daftar →</span>
                     </div>
                 </div>
 
@@ -90,7 +90,7 @@
                         </p>
                     </div>
                     <div class="mt-3 pt-2 border-t-2 border-slate-200 dark:border-slate-700 flex items-center justify-end text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                        <span>Lihat daftar &rarr;</span>
+                        <span>Lihat daftar →</span>
                     </div>
                 </div>
 
@@ -139,7 +139,7 @@
                     </div>
                     @if(($pengingatBelumDiabsen['total'] ?? 0) > 0)
                         <a href="{{ route('guru.koreksi-absensi') }}" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 inline-flex items-center gap-1 self-start sm:self-auto">
-                            Lihat semua &rarr;
+                            Lihat semua →
                         </a>
                     @endif
                 </div>
@@ -163,7 +163,7 @@
                                 <div class="text-xs text-slate-700 dark:text-slate-300 mt-0.5 flex items-center justify-between">
                                     <span>Kelas: {{ $item->kelas_nama }}</span>
                                     <span class="text-emerald-700 dark:text-emerald-400 font-semibold group-hover:translate-x-0.5 transition-transform text-[11px]">
-                                        Absen &rarr;
+                                        Absen →
                                     </span>
                                 </div>
                             </a>
@@ -330,7 +330,7 @@
                         Daftar Kelas yang Diajar
                     </h3>
                     <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-                        Periode Aktif: {{ $activePeriode['tahun_ajaran'] ?? '-' }} &bull; Semester {{ $activePeriode['semester'] ?? '-' }}
+                        Periode Aktif: {{ $activePeriode['tahun_ajaran'] ?? '-' }} • Semester {{ $activePeriode['semester'] ?? '-' }}
                     </p>
                 </div>
                 <button type="button" @click="$dispatch('close-modal', 'modal-daftar-kelas')" class="text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Tutup">
@@ -347,11 +347,11 @@
                                 {{ $item['nama'] }}
                             </h4>
                             <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-                                Jurusan: {{ $item['jurusan'] }} &bull; {{ $item['jumlah_jadwal'] }} jadwal mengajar
+                                Jurusan: {{ $item['jurusan'] }} • {{ $item['jumlah_jadwal'] }} jadwal mengajar
                             </p>
                         </div>
                         <span class="inline-flex items-center text-xs font-semibold text-emerald-700 dark:text-emerald-400 group-hover:translate-x-0.5 transition-transform gap-1">
-                            Buka Jadwal &rarr;
+                            Buka Jadwal →
                         </span>
                     </a>
                 @empty
@@ -380,7 +380,7 @@
                         Daftar Mata Pelajaran yang Diampu
                     </h3>
                     <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-                        Periode Aktif: {{ $activePeriode['tahun_ajaran'] ?? '-' }} &bull; Semester {{ $activePeriode['semester'] ?? '-' }}
+                        Periode Aktif: {{ $activePeriode['tahun_ajaran'] ?? '-' }} • Semester {{ $activePeriode['semester'] ?? '-' }}
                     </p>
                 </div>
                 <button type="button" @click="$dispatch('close-modal', 'modal-daftar-mapel')" class="text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 min-h-[44px] min-w-[44px] flex items-center justify-center" aria-label="Tutup">
@@ -404,11 +404,11 @@
                                 @endif
                             </div>
                             <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-                                {{ $item['jumlah_jadwal'] }} jadwal &bull; {{ $item['jumlah_kelas'] }} kelas
+                                {{ $item['jumlah_jadwal'] }} jadwal • {{ $item['jumlah_kelas'] }} kelas
                             </p>
                         </div>
                         <span class="inline-flex items-center text-xs font-semibold text-indigo-700 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform gap-1">
-                            Buka Jadwal &rarr;
+                            Buka Jadwal →
                         </span>
                     </a>
                 @empty

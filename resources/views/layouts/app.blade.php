@@ -34,25 +34,20 @@
             <!-- Area Konten Utama -->
             <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
                 <!-- Topbar Header -->
-                <header class="sticky top-0 z-30 flex-shrink-0 flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-900 border-b-2 border-slate-300 dark:border-slate-700 shadow-xs">
-                    <div class="flex items-center gap-3 min-w-0">
+                <header class="sticky top-0 z-30 flex-shrink-0 flex items-center justify-between h-16 px-3 sm:px-6 lg:px-8 bg-white dark:bg-slate-900 border-b-2 border-slate-300 dark:border-slate-700 shadow-xs">
+                    <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 mr-2">
                         <!-- Tombol Hamburger Mobile -->
-                        <button @click="sidebarOpen = true" type="button" class="lg:hidden p-2 -ml-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500/50" aria-label="Buka Menu">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                                <path d="M4 6l16 0" />
-                                <path d="M4 12l16 0" />
-                                <path d="M4 18l16 0" />
-                            </svg>
+                        <button @click="sidebarOpen = true" type="button" class="lg:hidden p-2 -ml-1 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500/50 shrink-0" aria-label="Buka Menu">
+                            <x-ui.icon name="menu" size="md" />
                         </button>
 
                         <!-- Heading / Title Halaman -->
                         @isset($header)
-                            <div class="truncate">
+                            <div class="truncate flex-1 min-w-0">
                                 {{ $header }}
                             </div>
                         @else
-                            <h2 class="font-semibold text-xl text-slate-900 dark:text-white leading-tight truncate">
+                            <h2 class="font-semibold text-lg sm:text-xl text-slate-900 dark:text-white leading-tight truncate">
                                 MyAbsen
                             </h2>
                         @endisset
@@ -76,12 +71,9 @@
                         <!-- User Profile Dropdown -->
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
-                                <button class="inline-flex items-center min-h-[44px] px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-lg text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500/50 transition">
-                                    <span class="max-w-[120px] sm:max-w-none truncate">{{ Auth::user()->name }}</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ms-1.5 h-4 w-4">
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                                        <path d="M6 9l6 6l6 -6" />
-                                    </svg>
+                                <button class="inline-flex items-center min-h-[44px] px-2.5 sm:px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-lg text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500/50 transition">
+                                    <span class="max-w-[70px] sm:max-w-[120px] lg:max-w-none truncate">{{ Auth::user()->name }}</span>
+                                    <x-ui.icon name="chevron-down" size="sm" class="ms-1" />
                                 </button>
                             </x-slot>
 
@@ -108,11 +100,19 @@
                 </header>
 
                 <!-- Page Content -->
-                <main class="flex-1 px-4 sm:px-0">
+                @php
+                    $isGuruOrSiswa = auth()->check() && in_array(auth()->user()->role, ['guru', 'siswa'], true);
+                    $isFormAbsensi = request()->routeIs('guru.absensi.*');
+                    $hideBottomNav = View::hasSection('hide_bottom_nav') || (isset($hideBottomNav) && $hideBottomNav) || $isFormAbsensi;
+                @endphp
+                <main class="flex-1 px-4 sm:px-0 {{ ($isGuruOrSiswa && ! $hideBottomNav) ? 'pb-24 md:pb-0' : '' }}">
                     {{ $slot }}
                 </main>
             </div>
         </div>
+
+        <!-- Bilah Navigasi Bawah Mobile (Role Guru & Siswa) -->
+        <x-ui.bottom-nav :hide="$hideBottomNav" />
         
         <!-- Global Confirm Modal -->
         <x-confirm-modal />

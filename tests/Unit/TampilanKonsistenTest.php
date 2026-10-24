@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Enums\StatusKehadiran;
 use App\Support\Ui;
+use Illuminate\Support\Facades\Blade;
 use Tests\TestCase;
 
 class TampilanKonsistenTest extends TestCase
@@ -39,6 +40,14 @@ class TampilanKonsistenTest extends TestCase
             'resources/views/components/ui/file-input.blade.php',
             'resources/views/components/ui/icon.blade.php',
             'resources/views/components/ui/bulan-select.blade.php',
+            'resources/views/components/ui/bottom-nav.blade.php',
+            'resources/views/components/ui/filter-panel.blade.php',
+            'resources/views/components/ui/segmented-status.blade.php',
+            'resources/views/components/ui/ringkasan-sticky.blade.php',
+            'resources/views/components/ui/bottom-nav.blade.php',
+            'resources/views/components/ui/filter-panel.blade.php',
+            'resources/views/components/ui/segmented-status.blade.php',
+            'resources/views/components/ui/ringkasan-sticky.blade.php',
             'resources/views/profile/edit.blade.php',
             'resources/views/profile/partials/update-password-form.blade.php',
             'resources/views/errors/403.blade.php',
@@ -727,5 +736,219 @@ class TampilanKonsistenTest extends TestCase
 
         // Pastikan tidak ada blok hidden md:table atau sejenisnya yang menduplikasi baris
         $this->assertDoesNotMatchRegularExpression('/hidden\s+md:table/i', $content, 'Pelanggaran R8: Ditemukan teknik menyembunyikan tabel/kartu secara terpisah (hidden md:table).');
+    }
+
+    /**
+     * R9: x-ui.bottom-nav hanya muncul untuk guru dan siswa; tab dan route-nya sama dengan menu sidebar peran itu;
+     * aria-label dan aria-current ada; tidak muncul di form absensi dan tidak untuk admin.
+     */
+    public function test_r9_bottom_nav_guru_dan_siswa_konsisten(): void
+    {
+        // 1. Admin tidak memiliki tab navigasi bawah
+        $adminTabs = Ui::bottomNavLinks('admin');
+        $this->assertEmpty($adminTabs, 'Pelanggaran R9: Admin tidak boleh memiliki tab bottom-nav.');
+
+        // 2. Daftar tab guru dan siswa dari Ui::bottomNavLinks
+        $guruTabs = Ui::bottomNavLinks('guru');
+        $this->assertCount(4, $guruTabs, 'Pelanggaran R9: Guru harus memiliki 4 tab bottom-nav.');
+        $guruRoutes = array_column($guruTabs, 'route');
+        $this->assertEquals(['guru.dashboard', 'guru.jadwal', 'guru.koreksi-absensi', 'guru.riwayat'], $guruRoutes);
+
+        $siswaTabs = Ui::bottomNavLinks('siswa');
+        $this->assertCount(4, $siswaTabs, 'Pelanggaran R9: Siswa harus memiliki 4 tab bottom-nav.');
+        $siswaRoutes = array_column($siswaTabs, 'route');
+        $this->assertEquals(['siswa.dashboard', 'siswa.jadwal', 'siswa.mapel', 'siswa.riwayat'], $siswaRoutes);
+
+        // 3. Tab dan route sinkron dengan sidebar peran itu di layouts/navigation.blade.php
+        $base = dirname(__DIR__, 2);
+        $navPath = $base.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, 'resources/views/layouts/navigation.blade.php');
+        $this->assertFileExists($navPath);
+        $navContent = file_get_contents($navPath);
+
+        foreach ($guruRoutes as $route) {
+            $isFound = str_contains($navContent, $route) || ($route === 'guru.dashboard' && str_contains($navContent, "Auth::user()->role . '.dashboard'"));
+            $this->assertTrue($isFound, "Pelanggaran R9: Route guru '{$route}' pada bottom-nav tidak ditemukan di sidebar navigation.blade.php");
+        }
+        foreach ($siswaRoutes as $route) {
+            $isFound = str_contains($navContent, $route) || ($route === 'siswa.dashboard' && str_contains($navContent, "Auth::user()->role . '.dashboard'"));
+            $this->assertTrue($isFound, "Pelanggaran R9: Route siswa '{$route}' pada bottom-nav tidak ditemukan di sidebar navigation.blade.php");
+        }
+
+        // 4. Periksa komponen x-ui.bottom-nav
+        $bottomNavPath = $base.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, 'resources/views/components/ui/bottom-nav.blade.php');
+        $this->assertFileExists($bottomNavPath);
+        $bottomNavContent = file_get_contents($bottomNavPath);
+
+        $this->assertStringContainsString('aria-label="Navigasi bawah mobile"', $bottomNavContent);
+        $this->assertStringContainsString('aria-current="page"', $bottomNavContent);
+        $this->assertStringContainsString('<x-ui.icon', $bottomNavContent);
+        $this->assertStringContainsString('md:hidden', $bottomNavContent);
+
+        // 5. Periksa integrasi di layouts/app.blade.php
+        $appPath = $base.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, 'resources/views/layouts/app.blade.php');
+        $this->assertFileExists($appPath);
+        $appContent = file_get_contents($appPath);
+
+        $this->assertStringContainsString('<x-ui.bottom-nav', $appContent);
+        $this->assertTrue(str_contains($appContent, "['guru', 'siswa']") || str_contains($appContent, '[\'guru\', \'siswa\']'));
+        $this->assertStringContainsString('$hideBottomNav', $appContent);
+    }
+
+    /**
+     * R10: Setiap halaman daftar guru dan siswa yang punya filter memakai x-ui.filter-panel
+     * dan nama parameter filter tidak berubah.
+     */
+    public function test_r10_filter_panel_guru_dan_siswa(): void
+    {
+        $base = dirname(__DIR__, 2);
+        $filterPages = [
+            'resources/views/guru/jadwal.blade.php' => ['kelas_id', 'mapel_id', 'hari'],
+            'resources/views/guru/riwayat.blade.php' => ['periode', 'q'],
+            'resources/views/siswa/jadwal.blade.php' => ['hari', 'mapel_id'],
+            'resources/views/siswa/riwayat.blade.php' => ['periode', 'bulan', 'tanggal', 'mapel_id', 'status'],
+        ];
+
+        foreach ($filterPages as $rel => $expectedParams) {
+            $path = $base.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $rel);
+            $this->assertFileExists($path, "File {$rel} tidak ditemukan");
+            $content = file_get_contents($path);
+
+            // Wajib memakai x-ui.filter-panel
+            $this->assertStringContainsString('<x-ui.filter-panel', $content, "Pelanggaran R10: {$rel} tidak memakai <x-ui.filter-panel>");
+
+            // Parameter filter tidak boleh diubah namanya
+            foreach ($expectedParams as $param) {
+                $hasParam = str_contains($content, "name=\"{$param}\"")
+                    || str_contains($content, "'{$param}'")
+                    || str_contains($content, "\"{$param}\"");
+                $this->assertTrue($hasParam, "Pelanggaran R10: Parameter filter '{$param}' tidak ditemukan pada {$rel}");
+            }
+        }
+    }
+
+    /**
+     * R11: Tidak ada entitas HTML (&rarr;, &bull;, dsb.) di dalam interpolasi Blade {{ ... }}
+     * atau di dalam string prop komponen Blade (label="...", title="...", placeholder="...", dsb.).
+     */
+    public function test_r11_larangan_entitas_html_dalam_blade_interpolation_dan_prop(): void
+    {
+        $base = dirname(__DIR__, 2);
+        $viewsPath = $base.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, 'resources/views');
+
+        $dir = new \RecursiveDirectoryIterator($viewsPath);
+        $ite = new \RecursiveIteratorIterator($dir);
+        $files = new \RegexIterator($ite, '/\.blade\.php$/');
+
+        $violations = [];
+
+        foreach ($files as $file) {
+            $content = file_get_contents($file->getRealPath());
+            $relPath = str_replace($base.DIRECTORY_SEPARATOR, '', $file->getRealPath());
+
+            // 1. Cek di dalam interpolasi {{ ... }}
+            if (preg_match_all('/\{\{\s*(.*?)\s*\}\}/s', $content, $matches)) {
+                foreach ($matches[1] as $expr) {
+                    if (preg_match('/&(?:[a-zA-Z]+|#\d+);/', $expr, $entityMatch)) {
+                        $violations[] = "[{$relPath}] Entitas dalam {{ }}: {$entityMatch[0]} di ekspresi: {$expr}";
+                    }
+                }
+            }
+
+            // 2. Cek di dalam prop komponen Blade <x-... (label="...", title="...", placeholder="...", dsb.)
+            if (preg_match_all('/<x-[\w\.\-]+(?:\s+[\w\-:]+(?:="[^"]*"|=\'[^\']*\'|))*?\s*\/?>/s', $content, $compMatches)) {
+                foreach ($compMatches[0] as $compTag) {
+                    if (preg_match_all('/(?:label|title|placeholder|text|heading|message|description)="([^"]*)"/i', $compTag, $propMatches)) {
+                        foreach ($propMatches[1] as $propVal) {
+                            if (preg_match('/&(?:[a-zA-Z]+|#\d+);/', $propVal, $entityMatch)) {
+                                $violations[] = "[{$relPath}] Entitas dalam prop komponen: {$entityMatch[0]} di tag: {$compTag}";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $this->assertEmpty(
+            $violations,
+            "Pelanggaran R11 (Entitas HTML di {{ }} atau prop komponen):\n".implode("\n", $violations)
+        );
+    }
+
+    /**
+     * Memastikan seluruh nama ikon yang dipakai di resources/views terdaftar di x-ui.icon,
+     * dan melempar exception di environment testing jika nama ikon tidak dikenal.
+     */
+    public function test_x_ui_icon_peta_ikon_lengkap_dan_perilaku_lingkungan(): void
+    {
+        $base = dirname(__DIR__, 2);
+        $iconPath = $base.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, 'resources/views/components/ui/icon.blade.php');
+        $this->assertFileExists($iconPath);
+        $iconContent = file_get_contents($iconPath);
+
+        // Ambil daftar ikon yang didukung dari icon.blade.php
+        preg_match('/\$supportedIcons\s*=\s*\[(.*?)\];/s', $iconContent, $suppMatches);
+        preg_match_all('/\'([a-z0-9\-]+)\'/', $suppMatches[1] ?? '', $allSupp);
+        $supportedIcons = $allSupp[1] ?? [];
+
+        $this->assertNotEmpty($supportedIcons, 'Daftar $supportedIcons tidak boleh kosong');
+
+        // Pindai semua penggunaan <x-ui.icon name="..."
+        $viewsPath = $base.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, 'resources/views');
+        $dir = new \RecursiveDirectoryIterator($viewsPath);
+        $ite = new \RecursiveIteratorIterator($dir);
+        $files = new \RegexIterator($ite, '/\.blade\.php$/');
+
+        $unsupported = [];
+        foreach ($files as $file) {
+            if ($file->getFilename() === 'icon.blade.php') {
+                continue;
+            }
+            $content = file_get_contents($file->getRealPath());
+            if (preg_match_all('/<x-ui\.icon\s+[^>]*name=[\'"]([a-z0-9\-]+)[\'"]/i', $content, $matches)) {
+                foreach ($matches[1] as $name) {
+                    if (! in_array($name, $supportedIcons, true)) {
+                        $unsupported[$name][] = str_replace($base.DIRECTORY_SEPARATOR, '', $file->getRealPath());
+                    }
+                }
+            }
+        }
+
+        $this->assertEmpty($unsupported, 'Ditemukan nama ikon yang belum terdaftar di x-ui.icon: '.json_encode($unsupported));
+
+        // Uji exception di testing
+        try {
+            Blade::render('<x-ui.icon name="ikon-fiktif-tak-dikenal" />');
+            $this->fail('Harus melempar exception ketika nama ikon tidak dikenal di testing');
+        } catch (\Throwable $e) {
+            $hasInvalidArgument = false;
+            $curr = $e;
+            while ($curr) {
+                if ($curr instanceof \InvalidArgumentException) {
+                    $hasInvalidArgument = true;
+                    break;
+                }
+                $curr = $curr->getPrevious();
+            }
+            $this->assertTrue($hasInvalidArgument, 'Exception chain harus memuat InvalidArgumentException');
+            $this->assertStringContainsString('ikon-fiktif-tak-dikenal', $e->getMessage());
+        }
+    }
+
+    /**
+     * Menguji bahwa x-ui.icon pada mode produksi merender ikon cadangan netral (lingkaran)
+     * dan tidak melempar exception atau memutus halaman.
+     */
+    public function test_x_ui_icon_merender_fallback_pada_lingkungan_produksi(): void
+    {
+        $origEnv = app()->environment();
+        app()->detectEnvironment(fn () => 'production');
+
+        try {
+            $rendered = Blade::render('<x-ui.icon name="ikon-fiktif-tak-dikenal" />');
+            $this->assertStringContainsString('<circle cx="12" cy="12" r="9"', $rendered);
+            $this->assertStringContainsString('<svg', $rendered);
+        } finally {
+            app()->detectEnvironment(fn () => $origEnv);
+        }
     }
 }

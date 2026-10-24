@@ -189,6 +189,28 @@
         display: none !important;
     }
 
+    /* Sel yang mengambil lebar penuh tanpa label pseudo di mobile */
+    .responsive-stack-table td.stack-full,
+    table.responsive-stack-table td.stack-full {
+        display: block !important;
+        width: 100% !important;
+        text-align: left !important;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+    .responsive-stack-table td.stack-full::before,
+    table.responsive-stack-table td.stack-full::before {
+        content: none !important;
+        display: none !important;
+    }
+
+    /* Sel yang disembunyikan di mobile (misal nomor urut) */
+    .responsive-stack-table td.stack-hidden-mobile,
+    table.responsive-stack-table td.stack-hidden-mobile {
+        display: none !important;
+    }
+
     /* Empty state dalam tabel */
     .responsive-stack-table td[colspan],
     table.responsive-stack-table td[colspan] {

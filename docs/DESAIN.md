@@ -255,5 +255,219 @@ Semua pasangan warna teks dan elemen UI di atas **100% LULUS** standar WCAG AA (
    - **R7 (Tabel Bertumpuk & Data-Label)**: Memastikan setiap tag `<table>` di halaman index master data admin dibungkus oleh `x-ui.table` dan seluruh elemen `<td>` memiliki atribut `data-label` untuk representasi kartu mobile.
    - **R8 (Pencegahan Duplikasi Baris Checkbox)**: Memastikan tidak ada pengulangan markup daftar ganda antara mobile dan desktop yang memicu duplikasi elemen `<x-ui.pilih-baris>`.
 
+---
+
+## 7. Pola Pengalaman Mobile Guru dan Siswa (Layar < 768px: 320px – 412px)
+
+1. **Prinsip Zona Jempol & Satu Tangan (Thumb Zone)**:
+   - Aksi-aksi utama diletakkan pada zona bawah layar yang terjangkau jempol satu tangan secara alami tanpa regangan jari.
+   - Form absensi guru menggunakan bilah tombol Simpan melekat di dasar layar (`sticky bottom-0`) dengan padding aman perangkat (`pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]`), membentang penuh di mobile.
+   - Satu aksi utama yang jelas per kartu (misalnya tombol "Absen Sekarang &rarr;" atau "Koreksi Absensi &rarr;" berukuran tinggi minimal 44px di bagian bawah kartu jadwal).
+
+2. **Bilah Navigasi Bawah Mobile (`x-ui.bottom-nav`)**:
+   - **Hanya Tampil di Bawah Breakpoint md (< 768px)**: Tidak mengganggu tata letak desktop (`hidden md:hidden`).
+   - **Hanya untuk Role Guru dan Siswa**: Pengguna admin tetap memakai sidebar drawer untuk mengelola ragam master data sekolah.
+   - **Daftar Tab Terpusat (`Ui::bottomNavLinks($role)`)**:
+     - **Guru**: Dashboard (`guru.dashboard`), Jadwal (`guru.jadwal`), Absensi (`guru.koreksi-absensi`), Riwayat (`guru.riwayat`).
+     - **Siswa**: Dashboard (`siswa.dashboard`), Jadwal (`siswa.jadwal`), Mapel (`siswa.mapel`), Riwayat (`siswa.riwayat`).
+     - Seluruh nama route dan tab sinkron 100% dengan rute menu sidebar peran bersangkutan di `navigation.blade.php`.
+   - **Spesifikasi Aksesibilitas & Tampilan**:
+     - Ikon `x-ui.icon` ukuran `md` di atas label teks 11px–12px, tinggi minimal bilah 56px, target ketuk minimal 44px.
+     - Indikator tab aktif tegas: latar tint `bg-emerald-50/80 dark:bg-emerald-500/10`, garis atas tebal `border-t-2 border-emerald-600 dark:border-emerald-400`, teks tebal, dan atribut `aria-current="page"`.
+     - Bilah berlatar opak dengan `backdrop-blur-md`, garis pembatas `border-t-2 border-slate-300 dark:border-slate-700`, dan menghormati `safe-area-inset-bottom`.
+     - Konten utama halaman di layout `app.blade.php` diberikan padding bawah kompensasi `pb-24 md:pb-0` agar kartu atau konten data terbawah tidak tertutup bilah navigasi.
+     - Menu lengkap, ubah Profil, dan tombol Keluar tetap diakses melalui drawer sidebar di topbar.
+   - **Penanganan Khusus Form Absensi**:
+     - Bilah navigasi bawah **DISEMBUNYIKAN SECARA OTOMATIS** pada halaman form absensi guru (`guru.absensi.*`) melalui penanda `$hideBottomNav` agar tidak tumpang tindih dengan bilah tombol Simpan melekat.
+
+3. **Panel Filter Terlipat Mobile (`x-ui.filter-panel`)**:
+   - Pada layar mobile (< md), formulir filter yang biasanya memakan 300–400px tinggi layar pertama diringkas menjadi satu bilah kontrol kompak:
+     - Tombol pemicu "Filter & Penyaringan" dengan target ketuk minimal 44px dan lencana jumlah filter aktif.
+     - Panel filter lipat interaktif Alpine (`open`, `x-cloak`, mendukung penutupan via tombol silang, tombol Escape, dan ketuk di luar).
+     - Tombol Terapkan dan tombol Reset membentang penuh di dasar panel.
+     - Deretan **chip filter aktif** yang bisa dihapus secara mandiri (masing-masing chip membawa tautan URL yang membersihkan filter bersangkutan).
+   - Di layar desktop (`md:` ke atas), panel otomatis tampil inline terbuka secara horizontal dan serasi dengan desain desktop yang ada.
+   - **Progressive Enhancement**: Dilengkapi blok `<noscript>` sehingga bila JavaScript peramban dinonaktifkan, panel filter tetap terbuka dan formulir tetap 100% dapat difungsikan.
+
+4. **Segmented Status Radio Form Absensi (`x-ui.segmented-status`)**:
+   - Pilihan status kehadiran siswa dirancang khusus untuk kenyamanan ketukan jempol di layar sempit:
+     - 4 tombol besar berjejer (`grid grid-cols-4 gap-1.5`) dengan label singkatan tegas **H** (Hadir), **I** (Izin), **S** (Sakit), **A** (Alpa) dan ikon pendukung.
+     - Tinggi tombol minimal 44px, memenuhi standar target ketukan WCAG.
+     - Status terpilih: warna solid berkontras tinggi + indikator centang visual.
+     - Status tidak terpilih: garis tebal `border-2` dengan latar tint lembut.
+     - Dibangun di atas elemen `<input type="radio">` standar (`sr-only`) dengan nama atribut `siswa[{id}][status]` dan nilai persis (`hadir`, `izin`, `sakit`, `alpa`) sehingga formulir tetap terkirim secara native dan ramah pembaca layar (`<fieldset>` + `<legend class="sr-only">`).
+   - Kolom isian keterangan (alasan izin/sakit/alpa) terlipat otomatis dan hanya muncul ketika status siswa diubah dari Hadir ke status non-hadir.
+
+5. **Ringkasan Melekat & Aksi Semua Hadir (`x-ui.ringkasan-sticky`)**:
+   - Bilah ringkasan rekapitulasi melekat di atas daftar siswa (`sticky top-16 z-20`) saat pengguna menggulir daftar nama siswa yang panjang.
+   - Menampilkan jumlah siswa Hadir, Izin, Sakit, Alpa serta total siswa secara real-time melalui Alpine.js (`resources/js/absensi-form.js`).
+   - Dilengkapi tombol cepat **"Semua Hadir"** berukuran target sentuh 44px yang mengubah pilihan seluruh siswa menjadi Hadir di sisi klien dalam satu ketukan tanpa mengubah data server sebelum tombol Simpan ditekan.
+
+6. **Accordion Per Hari pada Jadwal Mengajar & Koreksi**:
+   - Halaman jadwal guru, jadwal & koreksi absensi, serta jadwal pelajaran siswa dikelompokkan per hari/tanggal.
+   - **Hari ini** selalu dalam keadaan terbuka bawaan (*expanded*) dan ditandai badge tegas `Hari ini`.
+   - Hari atau tanggal lain dalam keadaan terlipat rapi untuk menghemat ruang vertikal layar HP, dan dapat dibuka/tutup dengan ketukan tombol header min 44px.
+   - Jika pengguna menerapkan filter (misal memilih mapel atau kelas tertentu), seluruh hari yang memuat hasil filter otomatis terbuka penuh.
+
+7. **Skala Jarak, Tipografi, & Bebas Geser Horizontal**:
+   - Mengikuti skala jarak kelipatan 4: padding kartu `p-4 sm:p-5`, jarak antar kartu `gap-3 sm:gap-4`.
+   - Judul halaman konsisten: `text-xl font-bold text-slate-900 dark:text-white` dengan deskripsi sekunder di bawahnya.
+   - Teks isi kartu minimal 16px di form input (bebas zoom iOS) dan tidak ada teks di bawah 12px (teks terkecil 12px/11px untuk meta sekunder).
+   - Seluruh kontainer kartu dan teks menggunakan pemutusan kata (`break-words`) sehingga **tidak ada pergeseran horizontal (horizontal scroll) pada layar 320px sampai 412px**, kecuali tabel matriks pertemuan desktop pada breakpoint `md:` ke atas.
+
+8. **Penegak Otomatis R9 & R10 (`TampilanKonsistenTest`)**:
+   - **R9**: Menjamin bilah navigasi bawah `x-ui.bottom-nav` hanya muncul untuk guru dan siswa, sinkron dengan rute sidebar, memiliki `aria-current="page"`, disembunyikan pada form absensi, dan tidak muncul untuk admin.
+   - **R10**: Menjamin setiap halaman berfilter guru dan siswa menggunakan komponen `<x-ui.filter-panel>` tanpa mengubah nama parameter filter query string.
+
+
+
+
+---
+
+## 5. Pola Halaman Galat & Profil dalam Cakupan Penegak Desain
+
+1. **Halaman Galat Berdiri Sendiri & Wajib Berbahasa Indonesia (403, 404, 419, 500, 503)**:
+   - Menggunakan struktur dokumen HTML utuh yang berdiri sendiri (`<!DOCTYPE html>`, tanpa layout app).
+   - Seluruh teks judul, pesan penjelas, dan tombol aksi **WAJIB menggunakan Bahasa Indonesia awam yang ramah pengguna**:
+     - **403**: Judul "Akses Ditolak", penjelasan "Anda tidak memiliki izin untuk membuka halaman ini. Jika Anda merasa ini keliru, hubungi admin sekolah."
+     - **503**: Judul "Sistem Sedang Dalam Pemeliharaan", penjelasan "MyAbsen sedang diperbarui. Silakan coba lagi beberapa saat lagi."
+     - Dilarang menampilkan teks bawaan bahasa Inggris ("Forbidden", "THIS ACTION IS UNAUTHORIZED", "Service Unavailable").
+   - Halaman **503 HARUS berdiri sendiri secara mutlak**: tanpa Auth, tanpa session, tanpa `@csrf`, tanpa query database, dan memuat gaya cadangan inline (*fallback style*) agar tampilan tetap terpusat dan terbaca jelas meskipun berkas CSS Vite gagal dimuat. Tombol aksi menyediakan "Muat Ulang" (`location.reload()`) dan tautan ke alamat beranda.
+   - Halaman **403 menyediakan navigasi peran cerdas**: pengguna terautentikasi diarahkan dengan tombol "Kembali ke Dashboard" menuju dashboard role-nya masing-masing (`admin.dashboard`, `guru.dashboard`, `siswa.dashboard`), sedangkan tamu diarahkan dengan tombol "Ke Halaman Login".
+   - Tata visual konsisten dengan halaman galat lainnya: kartu elevated di tengah layar (`max-w-md w-full`), lingkaran ikon tinted dengan ikon berukuran eksplisit (`x-ui.icon` ukuran `lg`), tipografi tegas, dan garis bingkai `border-2`.
+2. **Penyelarasan Halaman Profil & Ganti Password**:
+   - Kartu profil dibungkus kontainer kartu elevated `bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl shadow-sm p-4 sm:p-6 lg:p-8`.
+   - Menggunakan komponen input terstandarisasi (`x-text-input`) dengan `border-2 border-slate-400 dark:border-slate-500`, tinggi minimal 44px, ukuran teks 16px (mencegah zoom iOS), dan fokus ring emerald.
+   - Komponen label (`x-input-label`) diselaraskan ke `font-semibold text-slate-800 dark:text-slate-200` dan tombol simpan (`x-primary-button`) menggunakan token primer emerald.
+3. **Perluasan Cakupan Penegak Desain Otomatis (`TampilanKonsistenTest`)**:
+   - Seluruh berkas di `resources/views/profile/**` (`edit.blade.php`, `partials/update-password-form.blade.php`), halaman galat kustom `resources/views/errors/403.blade.php`, `503.blade.php`, serta komponen Blade Breeze pendukung (`text-input`, `input-label`, `input-error`, `dropdown`, `dropdown-link`, `modal`) dimasukkan ke dalam cakupan penegak desain otomatis (R1 sampai R6).
+   - Penegakan ketat meliputi: semua utilitas warna wajib berpasangan `dark:`, bebas teks redup, bebas class dinamis, dan seluruh elemen `<svg>` wajib memiliki ukuran eksplisit.
+
+---
+
+## 6. Pola Mobile Master Data Admin & Tabel-Menjadi-Kartu Satu Markup (Tahap 2A)
+
+1. **Pola Satu Markup Tabel-Menjadi-Kartu (`.responsive-stack-table`)**:
+   - Menghindari duplikasi markup DOM: SATU elemen `<table>` otomatis beradaptasi menjadi tabel standar di desktop (`md:` ke atas) dan menjadi susunan kartu bertumpuk di layar HP (< 768px).
+   - `thead tr` di HP disembunyikan secara visual (`position: absolute; top: -9999px; left: -9999px; overflow: hidden;`) tanpa menghilangkannya dari pohon aksesibilitas pembaca layar (screen reader).
+   - Setiap elemen `<td>` wajib memiliki atribut `data-label="..."` yang ditampilkan melalui pseudo-elemen `::before` sebagai label kecil kapital berkontras tinggi (`text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400`).
+   - **Elemen Khusus Kartu**:
+     - `.stack-title`: Diterapkan pada sel pertama (nama/judul utama). Tampil menonjol sebagai judul kartu (`text-base font-bold text-slate-900 dark:text-slate-100`) tanpa label `::before`.
+     - `.stack-actions`: Diterapkan pada sel kolom aksi. Di HP, sel ini otomatis berada di dasar kartu, dibatasi garis pemisah `border-t-2 border-slate-200 dark:border-slate-700`, dengan tombol aksi membentang atau berjarak nyaman dengan target ketuk minimal 44x44px.
+     - `.stack-checkbox`: Diterapkan pada kolom seleksi massal. Menempatkan checkbox di pojok kartu dengan target sentuh aman (`min-h-[44px] min-w-[44px]`).
+   - Kartu di HP memiliki bingkai tegas `border-2 border-slate-300 dark:border-slate-600`, sudut membulat `rounded-xl`, berbayang elevasi `shadow-sm dark:bg-slate-800 dark:shadow-md dark:shadow-black/40`, dengan `word-break: break-word` agar teks panjang tidak pernah meluber melewati 320px.
+
+2. **Komponen Pembungkus Terpadu (`x-ui.table`)**:
+   - Pada layar desktop (`md:`), `x-ui.table` membungkus elemen tabel dengan kontainer `overflow-x-auto border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-xl shadow-sm`.
+   - Pada layar mobile (< 768px), styling kontainer luar desktop dilepas sehingga kartu-kartu individu tampil bersih tanpa kotak ganda yang membingungkan pengguna.
+
+3. **Bilah Header & Filter Mobile (`x-ui.page-header` & `x-ui.filter-bar`)**:
+   - `x-ui.page-header`: Pada layar HP, judul halaman dan deskripsi berada di atas, sedangkan tombol aksi (seperti "Tambah Siswa" atau "Import Siswa") membentang penuh di bawahnya dengan urutan wajar. Pada `md:` ke atas, tombol aksi kembali berdampingan di sisi kanan.
+   - `x-ui.filter-bar`: Mengadopsi tata letak fleksibel 1 kolom di HP (`grid grid-cols-1 md:grid-cols-*`). Kotak pencarian membentang penuh, seluruh dropdown menggunakan komponen `<x-ui.select>` dengan target sentuh minimal 44px, dan tombol Cari serta Reset membentang penuh di mobile.
+
+4. **Formulir Tambah & Ubah Mobile (Create & Edit)**:
+   - Form mengadopsi susunan 1 kolom di HP (`grid-cols-1`, dengan opsi `md:grid-cols-2` hanya di desktop jika diperlukan).
+   - Label selalu diletakkan di atas input dengan teks tegas (`text-slate-800 dark:text-slate-200`).
+   - Seluruh elemen input, select, dan textarea memenuhi aturan aksesibilitas: teks minimal 16px (mencegah zoom paksa iOS Safari) dan tinggi minimal 44px.
+   - Tombol Simpan dan Batal disusun berdampingan dengan ukuran target sentuh nyaman di layar sentuh.
+
+5. **Pilihan Massal & Bilah Aksi Melekat (Kelola Siswa)**:
+   - Di mobile, disediakan bilah kecil `x-ui.pilih-semua` di atas susunan kartu untuk mempermudah pemilihan seluruh data pada halaman aktif.
+   - Bilah aksi massal melayang di bawah layar (`fixed bottom-0` atau `sticky bottom-0`) dengan padding aman (*safe-area-inset-bottom*). Kontainer daftar diberikan padding bawah ekstra (`pb-24`) agar kartu data paling bawah tidak pernah tertutup oleh bilah aksi mengambang.
+   - Tetap menjamin SATU checkbox baris per data (tidak ada duplikasi DOM).
+
+6. **Pewarnaan Kolom Jadwal Terpusat (`Ui::badgeHari`, `Ui::badgeSemester`)**:
+   - Seluruh pewarnaan hari (Senin s.d. Sabtu) dan semester (Ganjil/Genap) dipusatkan melalui method helper `App\Support\Ui`. Dilarang menuliskan logika warna hari atau semester secara inline berulang-ulang di view.
+   - Di kartu mobile, hari dan jam pelajaran ditampilkan sebagai judul utama kartu, sementara kelas, mapel, dan guru tersaji sebagai baris berlabel yang rapi dan mudah dibaca.
+
+7. **Perluasan Penegak Desain Otomatis (`TampilanKonsistenTest`)**:
+   - **R1 - R6**: Diperluas ke seluruh 18 view master data admin (`admin/siswa/**`, `admin/guru/**`, `admin/kelas/**`, `admin/mapel/**`, `admin/jurusan/**`, `admin/jadwal/**`).
+   - **R7 (Tabel Bertumpuk & Data-Label)**: Memastikan setiap tag `<table>` di halaman index master data admin dibungkus oleh `x-ui.table` dan seluruh elemen `<td>` memiliki atribut `data-label` untuk representasi kartu mobile.
+   - **R8 (Pencegahan Duplikasi Baris Checkbox)**: Memastikan tidak ada pengulangan markup daftar ganda antara mobile dan desktop yang memicu duplikasi elemen `<x-ui.pilih-baris>`.
+
+---
+
+## 7. Pola Pengalaman Mobile Guru dan Siswa (Layar < 768px: 320px – 412px)
+
+1. **Prinsip Zona Jempol & Satu Tangan (Thumb Zone)**:
+   - Aksi-aksi utama diletakkan pada zona bawah layar yang terjangkau jempol satu tangan secara alami tanpa regangan jari.
+   - Form absensi guru menggunakan bilah tombol Simpan melekat di dasar layar (`sticky bottom-0`) dengan padding aman perangkat (`pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]`), membentang penuh di mobile.
+   - Satu aksi utama yang jelas per kartu (misalnya tombol "Absen Sekarang &rarr;" atau "Koreksi Absensi &rarr;" berukuran tinggi minimal 44px di bagian bawah kartu jadwal).
+
+2. **Bilah Navigasi Bawah Mobile (`x-ui.bottom-nav`)**:
+   - **Hanya Tampil di Bawah Breakpoint md (< 768px)**: Tidak mengganggu tata letak desktop (`hidden md:hidden`).
+   - **Hanya untuk Role Guru dan Siswa**: Pengguna admin tetap memakai sidebar drawer untuk mengelola ragam master data sekolah.
+   - **Daftar Tab Terpusat (`Ui::bottomNavLinks($role)`)**:
+     - **Guru**: Dashboard (`guru.dashboard`), Jadwal (`guru.jadwal`), Absensi (`guru.koreksi-absensi`), Riwayat (`guru.riwayat`).
+     - **Siswa**: Dashboard (`siswa.dashboard`), Jadwal (`siswa.jadwal`), Mapel (`siswa.mapel`), Riwayat (`siswa.riwayat`).
+     - Seluruh nama route dan tab sinkron 100% dengan rute menu sidebar peran bersangkutan di `navigation.blade.php`.
+   - **Spesifikasi Aksesibilitas & Tampilan**:
+     - Ikon `x-ui.icon` ukuran `md` di atas label teks 11px–12px, tinggi minimal bilah 56px, target ketuk minimal 44px.
+     - Indikator tab aktif tegas: latar tint `bg-emerald-50/80 dark:bg-emerald-500/10`, garis atas tebal `border-t-2 border-emerald-600 dark:border-emerald-400`, teks tebal, dan atribut `aria-current="page"`.
+     - Bilah berlatar opak dengan `backdrop-blur-md`, garis pembatas `border-t-2 border-slate-300 dark:border-slate-700`, dan menghormati `safe-area-inset-bottom`.
+     - Konten utama halaman di layout `app.blade.php` diberikan padding bawah kompensasi `pb-24 md:pb-0` agar kartu atau konten data terbawah tidak tertutup bilah navigasi.
+     - Menu lengkap, ubah Profil, dan tombol Keluar tetap diakses melalui drawer sidebar di topbar.
+   - **Penanganan Khusus Form Absensi**:
+     - Bilah navigasi bawah **DISEMBUNYIKAN SECARA OTOMATIS** pada halaman form absensi guru (`guru.absensi.*`) melalui penanda `$hideBottomNav` agar tidak tumpang tindih dengan bilah tombol Simpan melekat.
+
+3. **Panel Filter Terlipat Mobile (`x-ui.filter-panel`)**:
+   - Pada layar mobile (< md), formulir filter yang biasanya memakan 300–400px tinggi layar pertama diringkas menjadi satu bilah kontrol kompak:
+     - Tombol pemicu "Filter & Penyaringan" dengan target ketuk minimal 44px dan lencana jumlah filter aktif.
+     - Panel filter lipat interaktif Alpine (`open`, `x-cloak`, mendukung penutupan via tombol silang, tombol Escape, dan ketuk di luar).
+     - Tombol Terapkan dan tombol Reset membentang penuh di dasar panel.
+     - Deretan **chip filter aktif** yang bisa dihapus secara mandiri (masing-masing chip membawa tautan URL yang membersihkan filter bersangkutan).
+   - Di layar desktop (`md:` ke atas), panel otomatis tampil inline terbuka secara horizontal dan serasi dengan desain desktop yang ada.
+   - **Progressive Enhancement**: Dilengkapi blok `<noscript>` sehingga bila JavaScript peramban dinonaktifkan, panel filter tetap terbuka dan formulir tetap 100% dapat difungsikan.
+
+4. **Segmented Status Radio Form Absensi (`x-ui.segmented-status`)**:
+   - Pilihan status kehadiran siswa pada kontrol input form absensi **SELALU memakai KATA PENUH**: **"Hadir"**, **"Izin"**, **"Sakit"**, **"Alpa"** (singkatan H, I, S, A HANYA diizinkan pada tabel matriks riwayat absensi).
+   - Susunan tombol status: ikon status di atas, label kata penuh di bawah (`text-sm font-bold`, tidak terbelah), tinggi tombol minimal 48px (`min-h-[48px]`), memenuhi standar target ketukan WCAG.
+   - Tata letak responsif: `grid grid-cols-2 min-[360px]:grid-cols-4 gap-2`.
+   - Status terpilih: latar solid berkontras tinggi + indikator centang visual + teks kontras jelas.
+   - Status belum terpilih: garis tegas `border-2` dengan latar tint lembut per status kehadiran.
+   - Dibangun di atas elemen `<input type="radio">` standar (`sr-only`) dengan nama atribut `siswa[{id}][status]` dan nilai persis (`hadir`, `izin`, `sakit`, `alpa`) sehingga formulir tetap terkirim secara native dan ramah pembaca layar (`<fieldset>` + `<legend class="sr-only">`).
+   - Kolom isian keterangan (alasan izin/sakit/alpa) terlipat otomatis dan muncul ketika status siswa dipilih selain Hadir, serta mempertahankan nilai jika pengguna berpindah status bolak-balik.
+
+5. **Ringkasan Melekat & Aksi Semua Hadir (`x-ui.ringkasan-sticky`)**:
+   - Bilah ringkasan rekapitulasi melekat di atas daftar siswa (`sticky top-16 z-20`) saat pengguna menggulir daftar nama siswa yang panjang.
+   - Ubin kompak berlabel kata penuh ("Hadir", "Izin", "Sakit", "Alpa") dengan angka besar (`text-base sm:text-lg tabular-nums`), label teks minimal 12px (`text-xs font-bold uppercase tracking-wider`).
+   - Tata letak responsif: `grid grid-cols-2 min-[360px]:grid-cols-4 gap-1.5 sm:gap-2`. Tinggi total hemat ruang vertikal (< 20% tinggi layar).
+   - Menampilkan jumlah siswa Hadir, Izin, Sakit, Alpa serta total siswa secara real-time melalui Alpine.js (`resources/js/absensi-form.js`).
+   - Dilengkapi tombol cepat **"Semua Hadir"** berukuran target sentuh minimal 44px yang mengubah pilihan seluruh siswa menjadi Hadir di sisi klien dalam satu ketukan tanpa mengubah data server sebelum tombol Simpan ditekan.
+
+6. **Accordion Per Hari pada Jadwal Mengajar & Koreksi**:
+   - Halaman jadwal guru, jadwal & koreksi absensi, serta jadwal pelajaran siswa dikelompokkan per hari/tanggal.
+   - **Hari ini** selalu dalam keadaan terbuka bawaan (*expanded*) dan ditandai badge tegas `Hari ini`.
+   - Hari atau tanggal lain dalam keadaan terlipat rapi untuk menghemat ruang vertikal layar HP, dan dapat dibuka/tutup dengan ketukan tombol header min 44px.
+   - Jika pengguna menerapkan filter (misal memilih mapel atau kelas tertentu), seluruh hari yang memuat hasil filter otomatis terbuka penuh.
+
+7. **Skala Jarak, Tipografi, & Bebas Geser Horizontal**:
+   - Mengikuti skala jarak kelipatan 4: padding kartu `p-4 sm:p-5`, jarak antar kartu `gap-3 sm:gap-4`.
+   - Judul halaman konsisten: `text-xl font-bold text-slate-900 dark:text-white` dengan deskripsi sekunder di bawahnya.
+   - Teks isi kartu minimal 16px di form input (bebas zoom iOS) dan tidak ada teks di bawah 12px (teks terkecil 12px/11px untuk meta sekunder).
+   - Seluruh kontainer kartu dan teks menggunakan pemutusan kata (`break-words`) sehingga **tidak ada pergeseran horizontal (horizontal scroll) pada layar 320px sampai 412px**, kecuali tabel matriks pertemuan desktop pada breakpoint `md:` ke atas.
+
+8. **Tombol Kembali Terstandar (`x-ui.back-button`)**:
+   - Digunakan seragam pada seluruh halaman turunan guru (absensi, riwayat detail) dan siswa (riwayat per mapel).
+   - Target sentuh minimal 44x44px, border token `border-2 border-slate-300 dark:border-slate-600`, ikon `arrow-left` (`size="md"`), `aria-label="Kembali"`, dan ring fokus aksesibel `focus-visible:ring-4 focus-visible:ring-emerald-500/50`.
+   - Menghubungkan ke route tujuan yang tepat dengan membawa serta parameter filter/periode aktif.
+
+9. **Pustaka Ikon `x-ui.icon` & Penanganan Galat Lingkungan**:
+   - Mendukung seluruh ikon Tabler outline (viewBox 0 0 24 24, stroke currentColor, stroke-width 2): `arrow-left`, `arrow-right`, `chevron-left`, `chevron-right`, `chevron-down`, `menu`, `check`, `x`, `info`, `plus`, `clock`, `calendar`, `calendar-check`, `history`, `book`, `search`, `filter`, `user`, `layout-grid`, `file-text`, `chart-bar`.
+   - **Lingkungan local & testing**: Melempar `InvalidArgumentException` jika nama ikon tidak terdaftar pada `$supportedIcons` dan slot kosong, mencegah regresi kotak kosong / typo ikon di antarmuka.
+   - **Lingkungan production**: Merender ikon cadangan netral (lingkaran `<circle>`) berukuran identik agar tidak memutus rendering halaman pengguna.
+
+10. **Larangan Entitas HTML pada Interpolasi Blade & Prop Komponen (R11)**:
+    - Dilarang menuliskan entitas HTML (`&rarr;`, `&bull;`, `&times;`, `&amp;`, dsb.) di dalam interpolasi Blade `{{ ... }}` atau string prop komponen (`label="..."`, `title="..."`, dll.).
+    - Blade interpolation mengeksekusi `htmlspecialchars()` yang menyebabkan *double-escaping* (misalnya `&rarr;` menjadi `&amp;rarr;`). Ditambah utilitas Tailwind `uppercase`, karakter ter-render menjadi literal `&RARR;` yang merusak tampilan.
+    - Solusi baku: Gunakan karakter Unicode langsung (`→`, `•`, `×`, `…`, `&`) pada teks Blade, atau sematkan komponen `<x-ui.icon name="arrow-right" size="sm" aria-hidden="true" />`.
+
+11. **Penegak Otomatis R9, R10, & R11 (`TampilanKonsistenTest`)**:
+    - **R9**: Menjamin bilah navigasi bawah `x-ui.bottom-nav` hanya muncul untuk guru dan siswa, sinkron dengan rute sidebar, memiliki `aria-current="page"`, disembunyikan pada form absensi, dan tidak muncul untuk admin.
+    - **R10**: Menjamin setiap halaman berfilter guru dan siswa menggunakan komponen `<x-ui.filter-panel>` tanpa mengubah nama parameter filter query string.
+    - **R11**: Menjamin tidak ada entitas HTML di dalam interpolasi Blade `{{ ... }}` dan string prop komponen di seluruh berkas `.blade.php`.
+    - **Uji Ikon**: Memastikan setiap ikon yang dipanggil di views terdaftar di `$supportedIcons`, melempar exception saat testing, dan merender fallback di produksi.
+
+
 
 

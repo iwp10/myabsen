@@ -5,8 +5,8 @@
         </h2>
     </x-slot>
 
-    <div class="py-6 sm:py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    <div class="py-4 sm:py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-6">
 
             @if (session('status') || session('success'))
                 <x-alert type="success" :autoDismiss="true">
@@ -14,34 +14,113 @@
                 </x-alert>
             @endif
 
-            <!-- Banner Sambutan & Identitas -->
-            <div class="bg-blue-600 dark:bg-blue-700 rounded-2xl p-6 text-white shadow-md relative overflow-hidden" style="background-color: #2563eb;">
-                <div class="absolute -right-8 -bottom-10 opacity-10 pointer-events-none">
-                    <svg class="w-56 h-56 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
-                    </svg>
-                </div>
-                <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <!-- Banner Sapaan & Identitas Siswa Kompak -->
+            <div class="bg-blue-600 dark:bg-blue-700 rounded-2xl p-4 sm:p-6 text-white shadow-md relative overflow-hidden border-2 border-blue-700 dark:border-blue-600">
+                <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/20 text-white mb-2">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/20 text-white mb-1.5">
                             SMK Mandiri 02 Balaraja
                         </span>
-                        <h1 class="text-2xl font-bold tracking-tight text-white">Halo, {{ Auth::user()->name }}!</h1>
-                        <p class="text-white text-sm mt-1">
-                            Kelas: <span class="font-semibold text-white">{{ Auth::user()->siswa?->kelas?->nama ?? '-' }}</span> &bull; 
-                            NIS: <span class="font-semibold text-white">{{ Auth::user()->siswa?->nis ?? Auth::user()->username }}</span>
+                        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Halo, {{ Auth::user()->name }}!</h1>
+                        <p class="text-white/90 text-xs sm:text-sm mt-0.5">
+                            Kelas: <strong class="text-white font-semibold">{{ Auth::user()->siswa?->kelas?->nama ?? '-' }}</strong> &bull;
+                            NIS: <strong class="text-white font-semibold">{{ Auth::user()->siswa?->nis ?? Auth::user()->username }}</strong>
                         </p>
                     </div>
-                    <div class="sm:text-right flex-shrink-0">
-                        <span class="text-xs text-white block uppercase font-medium tracking-wider">Tanggal Hari Ini</span>
-                        <span class="text-sm font-semibold text-white">
+                    <div class="flex items-center justify-between sm:flex-col sm:items-end pt-2 sm:pt-0 border-t border-white/20 sm:border-0">
+                        <span class="text-xs text-white/80 uppercase font-medium tracking-wider">Tanggal Hari Ini</span>
+                        <span class="text-xs sm:text-sm font-bold text-white">
                             {{ \Illuminate\Support\Carbon::now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
                         </span>
                     </div>
                 </div>
             </div>
 
-            <!-- Ringkasan & Breakdown Kehadiran Transparan -->
+            <!-- 1. JADWAL & STATUS HARI INI (TAMPIL DI PALING ATAS PADA LAYAR PERTAMA) -->
+            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-xs border-2 border-slate-300 dark:border-slate-600 overflow-hidden">
+                <div class="p-4 sm:p-5 border-b-2 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 flex items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <x-ui.icon name="calendar" size="md" class="text-emerald-700 dark:text-emerald-400" />
+                            <span>Jadwal &amp; Status Hari Ini</span>
+                        </h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                            Status absensi per mata pelajaran pada hari ini ({{ \Illuminate\Support\Carbon::now()->locale('id')->isoFormat('dddd') }})
+                        </p>
+                    </div>
+                    <span class="text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 px-2.5 py-1 rounded-lg">
+                        {{ $statusHariIni->count() }} Mapel
+                    </span>
+                </div>
+
+                <div class="p-4 sm:p-5">
+                    @if($statusHariIni->isEmpty())
+                        <div class="py-8 text-center">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 mb-3 border border-slate-300 dark:border-slate-600">
+                                <x-ui.icon name="clock" size="lg" />
+                            </div>
+                            <p class="text-base font-bold text-slate-900 dark:text-white">Tidak ada jadwal mata pelajaran hari ini</p>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">Anda tidak memiliki jadwal pembelajaran yang perlu diabsen untuk hari ini.</p>
+                        </div>
+                    @else
+                        {{-- Kartu Mobile (< md) --}}
+                        <div class="md:hidden space-y-3">
+                            @foreach($statusHariIni as $item)
+                                <div class="bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl p-4 shadow-xs dark:shadow-lg dark:shadow-black/40 dark:ring-1 dark:ring-white/5 space-y-2">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="text-xs font-mono font-bold bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 py-1 px-2.5 rounded-md">
+                                            {{ substr($item['jadwal']->jam_mulai, 0, 5) }} - {{ substr($item['jadwal']->jam_selesai, 0, 5) }} WIB
+                                        </span>
+                                        <x-ui.status-badge :status="$item['status_value']" />
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-base text-slate-900 dark:text-white leading-snug">
+                                            {{ $item['jadwal']->mapel->nama }}
+                                        </h4>
+                                        <p class="text-xs font-medium text-slate-600 dark:text-slate-300 mt-0.5">
+                                            Guru: <strong class="text-slate-800 dark:text-slate-200">{{ $item['jadwal']->guru->user->name }}</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Tabel Desktop (>= md) --}}
+                        <div class="hidden md:block overflow-x-auto rounded-lg border-2 border-slate-300 dark:border-slate-600">
+                            <table class="min-w-full divide-y-2 divide-slate-200 dark:divide-slate-700">
+                                <thead class="bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-400 dark:border-slate-500">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Jam</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Mata Pelajaran</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Guru</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Status Kehadiran</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white dark:bg-slate-900 divide-y-2 divide-slate-200 dark:divide-slate-700">
+                                    @foreach($statusHariIni as $item)
+                                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-slate-100 font-medium tabular-nums">
+                                                {{ substr($item['jadwal']->jam_mulai, 0, 5) }} - {{ substr($item['jadwal']->jam_selesai, 0, 5) }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-white font-semibold">
+                                                {{ $item['jadwal']->mapel->nama }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-300">
+                                                {{ $item['jadwal']->guru->user->name }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                <x-ui.status-badge :status="$item['status_value']" />
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- 2. RINGKASAN & BREAKDOWN KEHADIRAN (PERSENTASE MENONJOL & 4 KARTU 2 KOLOM DI HP) -->
             @php
                 $persentase = $ringkasanKehadiran['persentase'] ?? 0;
                 $totalSesi = $ringkasanKehadiran['total_sesi'] ?? 0;
@@ -51,23 +130,17 @@
             <div class="space-y-3">
                 <div class="flex items-center justify-between">
                     <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-emerald-600 dark:text-emerald-400">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                            <path d="M3 12m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
-                            <path d="M9 8m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
-                            <path d="M15 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
-                            <path d="M4 20l14 0" />
-                        </svg>
-                        Rincian & Persentase Kehadiran
+                        <x-ui.icon name="chart-bar" size="md" class="text-emerald-700 dark:text-emerald-400" />
+                        <span>Rincian &amp; Persentase Kehadiran</span>
                     </h3>
-                    <a href="{{ route('siswa.riwayat') }}" class="text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:underline flex items-center gap-1">
-                        Lihat Riwayat Lengkap &rarr;
+                    <a href="{{ route('siswa.riwayat') }}" class="text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:underline flex items-center gap-1 min-h-[44px]">
+                        <span>Lihat Riwayat Lengkap &rarr;</span>
                     </a>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                    <!-- Kartu Persentase Utama -->
-                    <div class="lg:col-span-4 bg-white dark:bg-slate-900 rounded-xl p-5 shadow-xs border-2 border-slate-300 dark:border-slate-600 flex flex-col justify-between">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4">
+                    <!-- Kartu Persentase Utama Menonjol -->
+                    <div class="lg:col-span-4 bg-white dark:bg-slate-900 rounded-xl p-4 sm:p-5 shadow-xs border-2 border-slate-300 dark:border-slate-600 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
@@ -103,19 +176,14 @@
 
                         <!-- Keterangan Rumus Transparan -->
                         <div class="mt-4 pt-3 border-t-2 border-slate-200 dark:border-slate-700 text-[11px] text-slate-600 dark:text-slate-300 flex items-start gap-1.5">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                                <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
-                                <path d="M12 9h.01" />
-                                <path d="M11 12h1v4h1" />
-                            </svg>
+                            <x-ui.icon name="info" size="sm" class="text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
                             <span>
-                                Rumus: <span class="font-bold text-slate-900 dark:text-slate-100">((Hadir + Izin + Sakit) / Total Pertemuan) &times; 100</span>. Kategori Alpa adalah satu-satunya yang mengurangi persentase.
+                                Rumus: <span class="font-bold text-slate-900 dark:text-slate-100">((Hadir + Izin + Sakit) / Total Pertemuan) &times; 100</span>. Kategori Alpa mengurangi persentase.
                             </span>
                         </div>
                     </div>
 
-                    <!-- 4 Grid Cards Breakdown Transparan (2 Kolom di HP) -->
+                    <!-- 4 Kartu Breakdown (2 Kolom di HP) -->
                     <div class="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                         <!-- Total Hadir -->
                         <x-ui.stat-card
@@ -127,7 +195,7 @@
                             aria-label="Lihat rincian riwayat hadir: {{ $ringkasanKehadiran['total_hadir'] }} pertemuan"
                         >
                             <x-slot:iconSlot>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-emerald-700 dark:text-emerald-300" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4" /><path d="M15 19l2 2l4 -4" /></svg>
+                                <x-ui.icon name="check" size="lg" class="text-emerald-700 dark:text-emerald-300" />
                             </x-slot:iconSlot>
                         </x-ui.stat-card>
 
@@ -141,7 +209,7 @@
                             aria-label="Lihat rincian riwayat izin: {{ $ringkasanKehadiran['total_izin'] }} pertemuan"
                         >
                             <x-slot:iconSlot>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-700 dark:text-blue-300" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 17h6" /><path d="M9 13h6" /></svg>
+                                <x-ui.icon name="info" size="lg" class="text-blue-700 dark:text-blue-300" />
                             </x-slot:iconSlot>
                         </x-ui.stat-card>
 
@@ -155,7 +223,7 @@
                             aria-label="Lihat rincian riwayat sakit: {{ $ringkasanKehadiran['total_sakit'] }} pertemuan"
                         >
                             <x-slot:iconSlot>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-amber-700 dark:text-amber-300" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12h4.5l1.5 -6l4 12l2 -9l1.5 3h4.5" /></svg>
+                                <x-ui.icon name="plus" size="lg" class="text-amber-700 dark:text-amber-300" />
                             </x-slot:iconSlot>
                         </x-ui.stat-card>
 
@@ -169,96 +237,19 @@
                             aria-label="Lihat rincian riwayat alpa: {{ $ringkasanKehadiran['total_alpa'] }} pertemuan"
                         >
                             <x-slot:iconSlot>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-700 dark:text-red-300" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" /><path d="M12 16h.01" /></svg>
+                                <x-ui.icon name="x" size="lg" class="text-red-700 dark:text-red-300" />
                             </x-slot:iconSlot>
                         </x-ui.stat-card>
                     </div>
                 </div>
             </div>
 
-            <!-- Jadwal & Status Hari Ini -->
-            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-xs border-2 border-slate-300 dark:border-slate-600 overflow-hidden">
-                <div class="p-5 border-b-2 border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                    <div>
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-emerald-600 dark:text-emerald-400">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                                <path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
-                                <path d="M16 3l0 4" />
-                                <path d="M8 3l0 4" />
-                                <path d="M4 11l16 0" />
-                            </svg>
-                            Jadwal & Status Hari Ini
-                        </h3>
-                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-                            Status absensi per mata pelajaran pada hari ini
-                        </p>
-                    </div>
-                    <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 px-2.5 py-1 rounded-md">
-                        {{ \Illuminate\Support\Carbon::now()->locale('id')->isoFormat('dddd') }}
-                    </span>
-                </div>
-
-                <div class="p-5">
-                    @if($statusHariIni->isEmpty())
-                        <div class="py-10 text-center">
-                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 mb-3 border border-slate-300 dark:border-slate-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                                    <path d="M19.823 19.824a2 2 0 0 1 -1.823 1.176h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 1.175 -1.823m3.825 -.177h9a2 2 0 0 1 2 2v9" />
-                                    <path d="M16 3v4" />
-                                    <path d="M8 3v1" />
-                                    <path d="M4 11h7m4 0h5" />
-                                    <path d="M3 3l18 18" />
-                                </svg>
-                            </div>
-                            <p class="text-base font-bold text-slate-900 dark:text-white">Tidak ada jadwal mata pelajaran hari ini</p>
-                            <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">Anda tidak memiliki jadwal pembelajaran yang perlu diabsen untuk hari ini.</p>
-                        </div>
-                    @else
-                        <div class="overflow-x-auto rounded-lg border-2 border-slate-300 dark:border-slate-600">
-                            <table class="min-w-full divide-y-2 divide-slate-200 dark:divide-slate-700">
-                                <thead class="bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-400 dark:border-slate-500">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Jam</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Mata Pelajaran</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Guru</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Status Kehadiran</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white dark:bg-slate-900 divide-y-2 divide-slate-200 dark:divide-slate-700">
-                                    @foreach($statusHariIni as $item)
-                                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-slate-100 font-medium tabular-nums">
-                                                {{ substr($item['jadwal']->jam_mulai, 0, 5) }} - {{ substr($item['jadwal']->jam_selesai, 0, 5) }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-white font-semibold">
-                                                {{ $item['jadwal']->mapel->nama }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-300">
-                                                {{ $item['jadwal']->guru->user->name }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                                <x-ui.status-badge :status="$item['status_value']" />
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
-                </div>
-            </div>
-
             <!-- Tombol Aksi Tambahan -->
             <div class="flex justify-end pt-2">
-                <a href="{{ route('siswa.riwayat') }}" class="inline-flex items-center px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-slate-950 rounded-lg font-bold text-xs uppercase tracking-wider transition ease-in-out duration-150 shadow-xs gap-2 min-h-[44px]">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                        <path d="M12 8l0 4l2 2" />
-                        <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" />
-                    </svg>
-                    Lihat Riwayat & Persentase per Mapel
+                <a href="{{ route('siswa.riwayat') }}"
+                   class="inline-flex items-center justify-center px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-slate-950 rounded-xl font-bold text-xs uppercase tracking-wider transition shadow-xs gap-2 min-h-[44px]">
+                    <x-ui.icon name="history" size="sm" />
+                    <span>Lihat Riwayat &amp; Persentase per Mapel</span>
                 </a>
             </div>
 
