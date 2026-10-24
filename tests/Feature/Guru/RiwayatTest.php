@@ -392,3 +392,56 @@ test('AB-08: dua guru mengajar kelas-mapel yang sama pada periode aktif, jadwal 
     ]));
     $response404->assertStatus(404);
 });
+
+test('halaman detail riwayat guru bebas penanda konflik, memuat tepat satu thead pada tabel matriks, dan nama setiap siswa tampil tepat satu kali di desktop dan satu kali di kartu HP', function () {
+    // Buat 2 siswa di kelas 1
+    $siswaUser1 = User::factory()->create(['name' => 'Ahmad Santoso', 'role' => 'siswa']);
+    $siswa1 = Siswa::create(['user_id' => $siswaUser1->id, 'nis' => '1001', 'kelas_id' => $this->kelas1->id]);
+
+    $siswaUser2 = User::factory()->create(['name' => 'Budi Pratama', 'role' => 'siswa']);
+    $siswa2 = Siswa::create(['user_id' => $siswaUser2->id, 'nis' => '1002', 'kelas_id' => $this->kelas1->id]);
+
+    // Buat sesi absensi
+    $sesi = SesiAbsensi::create([
+        'jadwal_id' => $this->jadwal1->id,
+        'tanggal' => '2026-08-03',
+        'diabsen_oleh' => $this->guruUser1->id,
+    ]);
+    DetailAbsensi::create(['sesi_absensi_id' => $sesi->id, 'siswa_id' => $siswa1->id, 'status' => 'hadir']);
+    DetailAbsensi::create(['sesi_absensi_id' => $sesi->id, 'siswa_id' => $siswa2->id, 'status' => 'izin']);
+
+    $response = $this->actingAs($this->guruUser1)->get(route('guru.riwayat.detail', [
+        'kelas' => $this->kelas1->id,
+        'mapel' => $this->mapel1->id,
+    ]));
+
+    $response->assertStatus(200);
+
+    $html = $response->getContent();
+
+    // 1. TIDAK memuat teks "<<<<<<<" atau ">>>>>>>" atau "=======" di HTML
+    $buka = '<'.'<'.'<'.'<'.'<<<';
+    $tutup = '>'.'>'.'>'.'>'.'/>>>';
+    $pemisah = '='.'='.'='.'='.'===';
+
+    expect($html)->not->toContain($buka)
+        ->not->toContain($tutup)
+        ->not->toContain($pemisah);
+
+    // 2. Memuat tepat satu elemen thead pada tabel matriks desktop
+    preg_match_all('/<thead\b[^>]*>/i', $html, $matchesThead);
+    expect($matchesThead[0])->toHaveCount(1);
+
+    // 3. Nama setiap siswa tampil di tabel desktop tepat satu kali serta di daftar kartu HP tepat satu kali
+    expect($html)->toContain('class="md:hidden');
+    expect($html)->toContain('class="hidden md:block');
+
+    [$sebelumDesktop, $bagianDesktop] = explode('class="hidden md:block', $html, 2);
+    $bagianHp = $sebelumDesktop;
+
+    foreach (['Ahmad Santoso', 'Budi Pratama'] as $namaSiswa) {
+        expect(substr_count($bagianHp, $namaSiswa))->toBe(1);
+        expect(substr_count($bagianDesktop, $namaSiswa))->toBe(1);
+        expect(substr_count($html, $namaSiswa))->toBe(2);
+    }
+});
