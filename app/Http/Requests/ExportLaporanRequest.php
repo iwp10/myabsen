@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Jadwal;
+use App\Models\Kelas;
 use App\Support\KelasMapel;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -64,7 +65,16 @@ class ExportLaporanRequest extends FormRequest
     {
         return [
             'jurusan_id' => ['nullable', 'integer', 'exists:jurusan,id'], // Untuk Admin
-            'kelas_id' => ['nullable', 'integer', 'exists:kelas,id'], // Untuk Admin
+            'kelas_id' => [
+                'nullable', 'integer', 'exists:kelas,id', // Untuk Admin
+                function ($attribute, $value, $fail) {
+                    // Guard: kelas wajib milik jurusan yang dipilih, agar ekspor tidak kosong tanpa penjelasan
+                    if ($value && $this->filled('jurusan_id')
+                        && (string) Kelas::whereKey($value)->value('jurusan_id') !== (string) $this->input('jurusan_id')) {
+                        $fail('Kelas yang dipilih tidak termasuk jurusan yang dipilih.');
+                    }
+                },
+            ],
             'mapel_id' => ['nullable', 'integer', 'exists:mapel,id'], // Untuk Admin
             'kelas_mapel' => ['nullable', 'string', 'regex:/^[1-9]\d*-[1-9]\d*$/'],
             'bulan' => ['nullable', 'date_format:Y-m'],

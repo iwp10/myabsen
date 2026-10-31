@@ -18,6 +18,12 @@
          }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-6">
 
+            @if (session('status') || session('success'))
+                <x-alert type="success" :autoDismiss="true">
+                    {{ session('status') ?: session('success') }}
+                </x-alert>
+            @endif
+
             <!-- Banner Header Kompak -->
             <div class="bg-emerald-700 dark:bg-emerald-800 rounded-2xl p-4 sm:p-6 text-white shadow-md relative overflow-hidden border-2 border-emerald-800 dark:border-emerald-700">
                 <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -116,7 +122,7 @@
                                             </div>
 
                                             <!-- Tombol Aksi Lebar Penuh min 44px -->
-                                            <a href="{{ route('guru.absensi.show', ['jadwal' => $jadwal->id, 'tanggal' => $jadwal->tanggal_target]) }}"
+                                            <a href="{{ route('guru.absensi.show', ['jadwal' => $jadwal->id, 'tanggal' => $jadwal->tanggal_target, 'dari' => 'koreksi']) }}"
                                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] rounded-xl font-bold text-xs uppercase tracking-wider transition shadow-xs {{ $jadwal->status_absensi === 'Sudah diabsen' ? 'bg-white hover:bg-slate-100 text-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-white border-2 border-slate-300 dark:border-slate-500' : 'bg-emerald-700 hover:bg-emerald-800 text-white dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-slate-950' }}">
                                                 <span>{{ $jadwal->status_absensi === 'Sudah diabsen' ? 'Koreksi Absensi' : 'Isi Susulan' }}</span>
                                                 <x-ui.icon name="arrow-right" size="sm" aria-hidden="true" />

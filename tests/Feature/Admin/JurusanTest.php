@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Jurusan;
+use App\Models\Kelas;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -110,5 +111,20 @@ class JurusanTest extends TestCase
         $jurusans = $response->viewData('jurusans');
         $this->assertCount(10, $jurusans);
         $this->assertEquals(15, $jurusans->total());
+    }
+
+    public function test_jurusan_dengan_kelas_terhapus_tidak_bisa_dihapus()
+    {
+        // AB-05: kelas soft delete beserta siswa dan riwayatnya tidak boleh ikut terhapus permanen lewat FK cascade
+        $jurusan = Jurusan::factory()->create();
+        $kelas = Kelas::factory()->create(['jurusan_id' => $jurusan->id]);
+        $kelas->delete();
+
+        $response = $this->actingAs($this->admin)->delete(route('admin.jurusan.destroy', $jurusan));
+
+        $response->assertRedirect(route('admin.jurusan.index'));
+        $response->assertSessionHas('error', 'Jurusan tidak bisa dihapus karena masih memiliki kelas (termasuk kelas di menu Data Terhapus).');
+        $this->assertDatabaseHas('jurusan', ['id' => $jurusan->id]);
+        $this->assertDatabaseHas('kelas', ['id' => $kelas->id]);
     }
 }

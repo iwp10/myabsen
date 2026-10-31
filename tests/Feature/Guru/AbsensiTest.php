@@ -336,7 +336,10 @@ test('AB-03: admin bisa koreksi tanggal 30 hari lalu, tetapi tidak masa depan', 
             $this->siswa1->id => ['status' => 'hadir'],
         ],
     ]);
-    $responseStore->assertRedirect(route('guru.dashboard'));
+    $responseStore->assertRedirect(route('admin.koreksi-absensi.index', [
+        'tanggal' => '2026-08-22',
+        'kelas_id' => $this->kelas->id,
+    ]));
 
     $this->assertDatabaseHas('sesi_absensi', [
         'jadwal_id' => $this->jadwal->id,
@@ -726,4 +729,96 @@ test('AB-03: menu jadwal & koreksi absensi muncul di sidebar guru tepat setelah 
 
 afterEach(function () {
     Carbon::setTestNow(); // Reset time
+});
+
+test('admin kembali ke Koreksi Absensi (bukan 403) setelah simpan, dan tombol Kembali/Batal sesuai role', function () {
+    Carbon::setTestNow('2026-09-21 08:00:00'); // Senin
+
+    $urlKoreksi = route('admin.koreksi-absensi.index', ['tanggal' => '2026-09-14', 'kelas_id' => $this->kelas->id]);
+
+    // Form admin menautkan Kembali/Batal ke Koreksi Absensi, bukan dashboard guru
+    $this->actingAs($this->adminUser)
+        ->get(route('guru.absensi.show', ['jadwal' => $this->jadwal->id, 'tanggal' => '2026-09-14']))
+        ->assertStatus(200)
+        ->assertSee($urlKoreksi)
+        ->assertDontSee(route('guru.dashboard'));
+
+    // Simpan lalu ikuti redirect: halaman yang dibuka admin harus 200
+    $this->actingAs($this->adminUser)
+        ->followingRedirects()
+        ->post(route('guru.absensi.store', $this->jadwal->id), [
+            'tanggal' => '2026-09-14',
+            'siswa' => [
+                $this->siswa1->id => ['status' => 'hadir'],
+                $this->siswa2->id => ['status' => 'hadir'],
+            ],
+        ])
+        ->assertStatus(200)
+        ->assertSee('Data absensi berhasil disimpan.');
+
+    // Guru tetap kembali ke dashboard guru
+    $this->actingAs($this->guruUser)
+        ->get(route('guru.absensi.show', $this->jadwal->id))
+        ->assertStatus(200)
+        ->assertSee(route('guru.dashboard'));
+});
+
+test('guru kembali ke halaman asal (Jadwal & Koreksi / Jadwal Mengajar) setelah simpan, bukan dashboard', function () {
+    Carbon::setTestNow('2026-09-21 08:00:00'); // Senin
+
+    $dataSimpan = [
+        'tanggal' => '2026-09-21',
+        'siswa' => [
+            $this->siswa1->id => ['status' => 'hadir'],
+            $this->siswa2->id => ['status' => 'hadir'],
+        ],
+    ];
+
+    // Dari menu Jadwal & Koreksi Absensi
+    $this->actingAs($this->guruUser)
+        ->get(route('guru.absensi.show', ['jadwal' => $this->jadwal->id, 'tanggal' => '2026-09-21', 'dari' => 'koreksi']))
+        ->assertStatus(200)
+        ->assertSee(route('guru.koreksi-absensi'))
+        ->assertSee('name="dari" value="koreksi"', false);
+
+    $this->actingAs($this->guruUser)
+        ->post(route('guru.absensi.store', $this->jadwal->id), $dataSimpan + ['dari' => 'koreksi'])
+        ->assertRedirect(route('guru.koreksi-absensi'));
+
+    $this->actingAs($this->guruUser)
+        ->followingRedirects()
+        ->post(route('guru.absensi.store', $this->jadwal->id), $dataSimpan + ['dari' => 'koreksi'])
+        ->assertStatus(200)
+        ->assertSee('Data absensi berhasil disimpan.');
+
+    // Dari menu Jadwal Mengajar
+    $this->actingAs($this->guruUser)
+        ->post(route('guru.absensi.store', $this->jadwal->id), $dataSimpan + ['dari' => 'jadwal'])
+        ->assertRedirect(route('guru.jadwal'));
+
+    $this->actingAs($this->guruUser)
+        ->followingRedirects()
+        ->post(route('guru.absensi.store', $this->jadwal->id), $dataSimpan + ['dari' => 'jadwal'])
+        ->assertStatus(200)
+        ->assertSee('Data absensi berhasil disimpan.');
+
+    // Tanpa asal tetap ke dashboard; nilai asing (open redirect) ditolak validasi
+    $this->actingAs($this->guruUser)
+        ->post(route('guru.absensi.store', $this->jadwal->id), $dataSimpan)
+        ->assertRedirect(route('guru.dashboard'));
+
+    $this->actingAs($this->guruUser)
+        ->post(route('guru.absensi.store', $this->jadwal->id), $dataSimpan + ['dari' => 'https://contoh.com'])
+        ->assertSessionHasErrors('dari');
+});
+
+test('memilih status atau mengisi keterangan tidak menggulung halaman luar (sr-only punya induk relative)', function () {
+    Carbon::setTestNow('2026-09-21 08:00:00'); // Senin
+
+    $this->actingAs($this->guruUser)
+        ->get(route('guru.absensi.show', $this->jadwal->id))
+        ->assertStatus(200)
+        // Radio/label sr-only (absolute) wajib punya induk relative agar fokusnya tidak menggulung halaman luar
+        ->assertSee('<fieldset class="relative w-full">', false)
+        ->assertSee('x-cloak class="relative pt-1"', false);
 });

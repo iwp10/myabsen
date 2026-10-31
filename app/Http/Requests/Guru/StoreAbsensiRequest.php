@@ -80,6 +80,7 @@ class StoreAbsensiRequest extends FormRequest
                 },
             ],
             'catatan' => ['nullable', 'string', 'max:255'],
+            'dari' => ['nullable', 'in:dashboard,jadwal,koreksi'],
             'siswa' => ['nullable', 'array'],
             // Validasi kunci array (id siswa) harus merupakan bagian dari siswa kelas ini
             'siswa.*' => [

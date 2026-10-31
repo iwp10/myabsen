@@ -42,11 +42,15 @@
                         </div>
                     </div>
                     
-                    <form action="{{ route('admin.laporan.export') }}" method="GET" class="space-y-4 max-w-lg">
-                        
+                    <form action="{{ route('admin.laporan.export') }}" method="GET" class="space-y-4 max-w-lg"
+                          x-data="{ jurusanId: '{{ old('jurusan_id', request('jurusan_id')) }}' }">
+
                         <div>
                             <x-input-label for="jurusan_id" :value="__('Jurusan (Opsional)')" />
-                            <select id="jurusan_id" name="jurusan_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                            {{-- Kelas yang tidak sesuai jurusan dikunci; pilihan kelas yang tidak cocok direset --}}
+                            <select id="jurusan_id" name="jurusan_id" x-model="jurusanId"
+                                    @change="$nextTick(() => { if ($refs.kelas.selectedOptions[0]?.disabled) $refs.kelas.value = '' })"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                 <option value="">-- Semua Jurusan --</option>
                                 @foreach($jurusan as $j)
                                     <option value="{{ $j->id }}" {{ (string) old('jurusan_id', request('jurusan_id')) === (string) $j->id ? 'selected' : '' }}>
@@ -58,10 +62,13 @@
 
                         <div>
                             <x-input-label for="kelas_id" :value="__('Kelas (Opsional)')" />
-                            <select id="kelas_id" name="kelas_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                            <select id="kelas_id" name="kelas_id" x-ref="kelas" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                 <option value="">-- Semua Kelas --</option>
                                 @foreach($kelas as $k)
-                                    <option value="{{ $k->id }}" {{ (string) old('kelas_id', request('kelas_id')) === (string) $k->id ? 'selected' : '' }}>
+                                    <option value="{{ $k->id }}"
+                                            x-show="!jurusanId || jurusanId === '{{ $k->jurusan_id }}'"
+                                            :disabled="jurusanId && jurusanId !== '{{ $k->jurusan_id }}'"
+                                            {{ (string) old('kelas_id', request('kelas_id')) === (string) $k->id ? 'selected' : '' }}>
                                         {{ $k->nama }}
                                     </option>
                                 @endforeach

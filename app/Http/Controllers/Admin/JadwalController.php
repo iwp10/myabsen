@@ -86,12 +86,15 @@ class JadwalController extends Controller
                 $q->where('jam_mulai', '<=', $time);
             })
             ->when($search, function ($query) use ($search) {
-                $query->whereHas('kelas', function ($q) use ($search) {
-                    $q->where('nama', 'like', "%{$search}%");
-                })->orWhereHas('mapel', function ($q) use ($search) {
-                    $q->where('nama', 'like', "%{$search}%");
-                })->orWhereHas('guru.user', function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%");
+                // Dibungkus satu grup agar OR tidak lepas dari filter periode, hari, kelas, dsb.
+                $query->where(function ($query) use ($search) {
+                    $query->whereHas('kelas', function ($q) use ($search) {
+                        $q->where('nama', 'like', "%{$search}%");
+                    })->orWhereHas('mapel', function ($q) use ($search) {
+                        $q->where('nama', 'like', "%{$search}%");
+                    })->orWhereHas('guru.user', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
                 });
             })
             ->orderByRaw("CASE hari 

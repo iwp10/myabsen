@@ -442,3 +442,19 @@ test('AB-05: impor siswa dengan NIS milik siswa terhapus memuat pesan yang menol
     $importError = session('error');
     expect($importError)->toContain('Data Terhapus')->toContain('Siswa Impor Trashed');
 });
+
+test('Keamanan: pesan galat pemulihan arsip meng-escape nama data (tidak ada XSS)', function () {
+    $jurusan = Jurusan::factory()->create();
+    $kelas = Kelas::factory()->create(['jurusan_id' => $jurusan->id, 'nama' => '<script>alert(1)</script>']);
+    $siswa = Siswa::factory()->create(['kelas_id' => $kelas->id]);
+    $kelas->delete();
+    $siswa->delete();
+
+    $response = $this->actingAs($this->admin)
+        ->followingRedirects()
+        ->post(route('admin.arsip.pulihkan', ['jenis' => 'siswa', 'id' => $siswa->id]));
+
+    $response->assertStatus(200);
+    $response->assertDontSee('<script>alert(1)</script>', false);
+    $response->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false);
+});

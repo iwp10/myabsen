@@ -177,3 +177,21 @@ test('AB-06: nilai parameter filter tidak valid memberi error validasi bukan 500
     $responseKelas = $this->actingAs($this->admin)->get(route('admin.jadwal.index', ['kelas_id' => 999999]));
     $responseKelas->assertSessionHasErrors(['kelas_id']);
 });
+
+test('AB-06: pencarian tetap terikat filter hari dan periode (OR tidak lepas dari filter)', function () {
+    // "Guru Dua" mengajar j2 (selasa, Ganjil) dan j3 (rabu, Genap)
+    $response = $this->actingAs($this->admin)->get(route('admin.jadwal.index', [
+        'search' => 'Guru Dua',
+        'hari' => 'selasa',
+    ]));
+    $response->assertStatus(200);
+    expect($response->viewData('jadwals')->pluck('id')->all())->toBe([$this->j2->id]);
+
+    // "Matematika" ada di j1 (Ganjil) dan j3 (Genap); filter periode harus tetap berlaku
+    $response = $this->actingAs($this->admin)->get(route('admin.jadwal.index', [
+        'search' => 'Matematika',
+        'periode' => '2026/2027|Ganjil',
+    ]));
+    $response->assertStatus(200);
+    expect($response->viewData('jadwals')->pluck('id')->all())->toBe([$this->j1->id]);
+});

@@ -4,7 +4,8 @@
     'selected' => 'hadir',
 ])
 
-<fieldset class="w-full">
+{{-- relative: radio sr-only (absolute) tetap di dalam area scroll; tanpa ini fokus radio ikut menggulung halaman luar --}}
+<fieldset class="relative w-full">
     <legend class="sr-only">Status kehadiran untuk {{ $siswaNama ?: 'siswa #' . $siswaId }}</legend>
     <div class="grid grid-cols-2 min-[360px]:grid-cols-4 gap-2">
         {{-- Tombol Hadir --}}

@@ -17,6 +17,7 @@ use App\Services\AbsensiService;
 use App\Services\LaporanService;
 use App\Services\PeriodeService;
 use App\Support\KelasMapel;
+use App\Support\Ui;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -100,6 +101,7 @@ class AbsensiController extends Controller
             'sesi' => $formData['sesi'],
             'detailExisting' => $formData['detailExisting'],
             'tanggalBolehDikoreksi' => $tanggalBolehDikoreksi,
+            'dari' => $request->validated('dari'),
         ]);
     }
 
@@ -125,7 +127,8 @@ class AbsensiController extends Controller
             $request->user()->id
         );
 
-        return redirect()->route('guru.dashboard')->with('status', 'Data absensi berhasil disimpan.');
+        return redirect()->to(Ui::urlKembaliAbsensi($request->user()->role, $jadwal, $tanggal, $request->validated('dari')))
+            ->with('status', 'Data absensi berhasil disimpan.');
     }
 
     /**

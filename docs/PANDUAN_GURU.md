@@ -49,7 +49,7 @@ Pengisian absensi dilakukan pada setiap jam pelajaran yang sedang Bapak/Ibu ampu
    - **Menuliskan Alasan / Keterangan:** Bila Anda memilih Izin, Sakit, atau Alpa, ketikkan alasan singkat pada kolom isian di bawah nama siswa (contoh: *"Dispensasi lomba futsal"*, *"Demam tinggi"*, dsb).
    - **Catatan Sesi (Opsional):** Di bagian atas lembar absensi, Anda dapat menuliskan materi bahasan atau catatan kejadian di kelas (contoh: *"Materi Bab 3 tuntas, suasana kelas kondusif"*).
 4. Klik tombol hijau **Simpan Absensi** pada bilah tombol yang melekat di bagian bawah layar ponsel Anda.
-5. Muncul pemberitahuan berwarna hijau bahwa data absensi berhasil disimpan.
+5. Muncul pemberitahuan berwarna hijau bahwa data absensi berhasil disimpan. Anda dikembalikan ke halaman tempat Anda membuka form (Dashboard, **Jadwal Mengajar**, atau **Jadwal & Koreksi Absensi**), sehingga bisa langsung melanjutkan absensi susulan berikutnya.
 
 [GAMBAR: Tampilan pengisian absensi dengan pilihan kata penuh dan tombol simpan melekat]
 

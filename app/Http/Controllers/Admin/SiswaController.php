@@ -136,7 +136,7 @@ class SiswaController extends Controller
         }
 
         return redirect()->route('admin.siswa.index')
-            ->with('error', $result['pesan']);
+            ->with('error', e($result['pesan']));
     }
 
     public function resetPassword(Siswa $siswa)
@@ -295,7 +295,7 @@ class SiswaController extends Controller
             $failures = $e->failures();
             $errors = [];
             foreach ($failures as $failure) {
-                $errors[] = 'Baris '.$failure->row().': '.implode(', ', $failure->errors());
+                $errors[] = e('Baris '.$failure->row().': '.implode(', ', $failure->errors()));
             }
 
             return back()->with('error', 'Gagal impor:<br>'.implode('<br>', $errors));

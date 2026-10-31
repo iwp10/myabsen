@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center gap-2 sm:gap-3 min-w-0">
-            <x-ui.back-button :href="route('guru.dashboard')" />
+            <x-ui.back-button :href="\App\Support\Ui::urlKembaliAbsensi(Auth::user()->role, $jadwal, $tanggal, $dari)" />
             <div class="min-w-0 flex-1">
                 <h2 class="font-bold text-base sm:text-xl text-slate-900 dark:text-white leading-tight truncate">
                     Absensi: {{ $jadwal->mapel->nama }} - {{ $jadwal->kelas->nama }}
@@ -19,7 +19,7 @@
             <!-- Tombol Kembali & Header Kompak -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div class="flex items-center gap-3">
-                    <x-ui.back-button :href="route('guru.dashboard')" />
+                    <x-ui.back-button :href="\App\Support\Ui::urlKembaliAbsensi(Auth::user()->role, $jadwal, $tanggal, $dari)" />
                     <div>
                         <h3 class="font-extrabold text-lg sm:text-2xl text-slate-900 dark:text-white leading-tight">
                             {{ $jadwal->mapel->nama }}
@@ -103,6 +103,7 @@
             <form method="POST" action="{{ route('guru.absensi.store', $jadwal->id) }}" id="form-absensi">
                 @csrf
                 <input type="hidden" name="tanggal" value="{{ $tanggal->toDateString() }}">
+                <input type="hidden" name="dari" value="{{ $dari }}">
 
                 <!-- Catatan Sesi -->
                 <div class="bg-white dark:bg-slate-900 rounded-xl shadow-xs border-2 border-slate-300 dark:border-slate-600 overflow-hidden mb-4 sm:mb-6">
@@ -194,7 +195,7 @@
                                                 <x-ui.segmented-status :siswa-id="$siswa->id" :siswa-nama="$siswa->user->name" :selected="$defaultStatus" />
 
                                                 {{-- Input Keterangan Jika Bukan Hadir --}}
-                                                <div x-show="students[{{ $siswa->id }}]?.status !== 'hadir'" x-cloak class="pt-1">
+                                                <div x-show="students[{{ $siswa->id }}]?.status !== 'hadir'" x-cloak class="relative pt-1">
                                                     <label for="keterangan_{{ $siswa->id }}" class="sr-only">Alasan izin, sakit, atau alpa untuk {{ $siswa->user->name }}</label>
                                                     <input type="text"
                                                            id="keterangan_{{ $siswa->id }}"
@@ -222,7 +223,7 @@
                             <span class="text-red-700 dark:text-red-400 font-bold" x-text="(summary.alpa || 0) + ' Alpa'"></span>
                         </div>
                         <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end">
-                            <a href="{{ route('guru.dashboard') }}"
+                            <a href="{{ \App\Support\Ui::urlKembaliAbsensi(Auth::user()->role, $jadwal, $tanggal, $dari) }}"
                                class="inline-flex justify-center items-center px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-500 rounded-xl font-bold text-xs text-slate-900 dark:text-slate-100 uppercase tracking-widest shadow-xs hover:bg-slate-100 dark:hover:bg-slate-700 min-h-[44px] transition">
                                 Batal
                             </a>

@@ -471,3 +471,31 @@ test('filter bulan valid menghasilkan unduhan excel dan pdf', function () {
     $resPdf->assertStatus(200);
     $resPdf->assertHeader('content-type', 'application/pdf');
 });
+
+test('guard laporan admin: kelas yang tidak sesuai jurusan ditolak, kelas yang sesuai tetap bisa diekspor', function () {
+    Excel::fake();
+    $jurusanLain = Jurusan::factory()->create();
+
+    // Kombinasi salah: jurusan lain + kelas milik jurusan berbeda
+    $this->actingAs($this->admin)
+        ->from(route('admin.laporan.index'))
+        ->get(route('admin.laporan.export', ['jurusan_id' => $jurusanLain->id, 'kelas_id' => $this->kelas->id]))
+        ->assertRedirect(route('admin.laporan.index'))
+        ->assertSessionHasErrors(['kelas_id' => 'Kelas yang dipilih tidak termasuk jurusan yang dipilih.']);
+
+    // Kombinasi benar tetap lolos
+    $this->actingAs($this->admin)
+        ->get(route('admin.laporan.export', [
+            'jurusan_id' => $this->kelas->jurusan_id,
+            'kelas_id' => $this->kelas->id,
+            'tahun_ajaran' => '2026/2027',
+            'semester' => 'Ganjil',
+        ]))
+        ->assertStatus(200)
+        ->assertSessionHasNoErrors();
+
+    // Dropdown kelas menyaring berdasarkan jurusan terpilih
+    $this->actingAs($this->admin)
+        ->get(route('admin.laporan.index'))
+        ->assertSee("x-show=\"!jurusanId || jurusanId === '{$this->kelas->jurusan_id}'\"", false);
+});

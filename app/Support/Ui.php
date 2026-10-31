@@ -3,6 +3,8 @@
 namespace App\Support;
 
 use App\Enums\StatusKehadiran;
+use App\Models\Jadwal;
+use Carbon\Carbon;
 
 class Ui
 {
@@ -367,6 +369,27 @@ class Ui
         }
 
         return $daftar;
+    }
+
+    /**
+     * URL tujuan kembali dari form absensi (tombol Kembali, Batal, dan redirect setelah simpan).
+     * Admin kembali ke Koreksi Absensi pada tanggal dan kelas yang sama, guru ke halaman asal
+     * ($dari: dashboard, jadwal, atau koreksi; nilai lain jatuh ke dashboard).
+     */
+    public static function urlKembaliAbsensi(string $role, Jadwal $jadwal, Carbon|string $tanggal, ?string $dari = null): string
+    {
+        if ($role === 'admin') {
+            return route('admin.koreksi-absensi.index', [
+                'tanggal' => Carbon::parse($tanggal)->toDateString(),
+                'kelas_id' => $jadwal->kelas_id,
+            ]);
+        }
+
+        return match ($dari) {
+            'jadwal' => route('guru.jadwal'),
+            'koreksi' => route('guru.koreksi-absensi'),
+            default => route('guru.dashboard'),
+        };
     }
 
     /**

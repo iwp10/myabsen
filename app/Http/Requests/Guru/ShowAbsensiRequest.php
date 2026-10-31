@@ -63,6 +63,8 @@ class ShowAbsensiRequest extends FormRequest
                     }
                 },
             ],
+            // Halaman asal guru, untuk tombol Kembali/Batal dan redirect setelah simpan
+            'dari' => ['nullable', 'in:dashboard,jadwal,koreksi'],
         ];
     }
 

@@ -152,6 +152,7 @@ Pada setiap tabel data master (Jurusan, Kelas, Mata Pelajaran, Guru, Siswa, Jadw
 Aplikasi MyAbsen menerapkan perlindungan data ketat agar rekam jejak kehadiran siswa tidak hilang tanpa sengaja:
 - **Data yang Belum Pernah Dipakai Absensi:** Jika siswa, guru, kelas, atau mapel belum pernah memiliki catatan absensi sama sekali, data akan dihapus permanen dari sistem.
 - **Data yang Sudah Memiliki Riwayat Absensi:** Jika data sudah pernah tercatat dalam sesi absensi lampau, sistem **tidak menghapus data secara permanen**. Data tersebut dipindahkan ke arsip (**Data Terhapus**), akunnya dinonaktifkan sehingga tidak bisa masuk ke aplikasi, dan namanya pada rekaman absensi lama diberi tanda **(nonaktif)**. Anda dapat memulihkan kembali data ini kapan saja melalui menu **Data Terhapus**.
+- **Jurusan:** Jurusan hanya bisa dihapus jika tidak memiliki kelas sama sekali, termasuk kelas yang ada di menu **Data Terhapus**. Ini mencegah riwayat absensi kelas yang diarsipkan ikut terhapus permanen.
 
 ### Reset Password Pengguna (Guru / Siswa)
 Jika ada guru atau siswa yang lupa kata sandinya:
@@ -198,7 +199,7 @@ Laporan absensi digunakan untuk merekap kehadiran siswa dalam jangka waktu terte
 1. Klik menu **Laporan** pada bilah samping.
 2. Tentukan saringan data sesuai kebutuhan Anda:
    - **Jurusan (Opsional)**: Pilih jurusan tertentu atau biarkan `-- Semua Jurusan --`.
-   - **Kelas (Opsional)**: Pilih kelas tertentu atau biarkan `-- Semua Kelas --`.
+   - **Kelas (Opsional)**: Pilih kelas tertentu atau biarkan `-- Semua Kelas --`. Jika jurusan sudah dipilih, daftar kelas hanya menampilkan kelas milik jurusan tersebut. Kombinasi yang tidak sesuai ditolak dengan pesan *"Kelas yang dipilih tidak termasuk jurusan yang dipilih."*
    - **Mata Pelajaran (Opsional)**: Pilih mapel tertentu atau biarkan `-- Semua Mata Pelajaran --`.
    - **Bulan**: Pilih bulan tertentu jika ingin merekap bulanan (contoh: `2026-10`). Kosongkan jika ingin merekap satu semester penuh.
    - **Tahun Ajaran** dan **Semester**: Pilih periode yang ingin direkap (otomatis terisi periode aktif).
@@ -246,7 +247,7 @@ Menu **Koreksi Absensi** digunakan saat terdapat kesalahan pencatatan status ole
    - Jika sesi **belum pernah diabsen**: Kartu menampilkan lencana kuning `Belum diabsen` dan tombol biru bertuliskan **Isi Absensi**.
 6. Klik tombol **Koreksi Absensi** atau **Isi Absensi** tersebut untuk membuka lembar absensi kelas.
 7. Sesuaikan status siswa (pilih Hadir, Izin, Sakit, atau Alpa) dan lengkapi catatan keterangan jika ada.
-8. Klik tombol **Simpan Koreksi** (atau **Simpan Absensi**) pada bilah yang melekat di bawah layar. Perubahan akan langsung tersimpan ke riwayat siswa.
+8. Klik tombol **Simpan Koreksi** (atau **Simpan Absensi**) pada bilah yang melekat di bawah layar. Perubahan akan langsung tersimpan ke riwayat siswa, lalu Anda dikembalikan ke halaman **Koreksi Absensi** pada tanggal dan kelas yang sama dengan pesan "Data absensi berhasil disimpan."
 
 [GAMBAR: Halaman Koreksi Absensi dengan filter tanggal dan daftar kartu jadwal]
 

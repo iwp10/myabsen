@@ -55,9 +55,10 @@ class JurusanController extends Controller
     public function destroy(Jurusan $jurusan)
     {
         // Check if there are classes associated with this jurusan
-        if ($jurusan->kelas()->exists()) {
+        // Kelas terhapus ikut dihitung: FK cascade akan menghapus permanen kelas, siswa, dan riwayat absensinya (AB-05).
+        if ($jurusan->kelas()->withTrashed()->exists()) {
             return redirect()->route('admin.jurusan.index')
-                ->with('error', 'Jurusan tidak bisa dihapus karena masih memiliki kelas.');
+                ->with('error', 'Jurusan tidak bisa dihapus karena masih memiliki kelas (termasuk kelas di menu Data Terhapus).');
         }
 
         $jurusan->delete();

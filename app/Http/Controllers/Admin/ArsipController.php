@@ -34,7 +34,7 @@ class ArsipController extends Controller
         if (! $result['success']) {
             return redirect()
                 ->route('admin.arsip.index', ['jenis' => $jenis])
-                ->with('error', $result['message']);
+                ->with('error', e($result['message']));
         }
 
         return redirect()
