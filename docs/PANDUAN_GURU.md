@@ -40,7 +40,9 @@ Pengisian absensi dilakukan pada setiap jam pelajaran yang sedang Bapak/Ibu ampu
 1. Buka menu **Dashboard** (atau menu **Jadwal**).
 2. Pada jadwal mengajar hari ini, klik tombol **Isi Absensi** (atau tombol **Absensi**).
 3. Formulir absensi siswa akan terbuka:
-   - **Tombol Cepat "Semua Hadir":** Jika seluruh siswa di kelas hadir lengkap, klik tombol hijau **Semua Hadir** di bagian atas. Seluruh pilihan status siswa seketika berubah menjadi Hadir.
+   - **Tombol Cepat "Semua Hadir":** Jika seluruh siswa di kelas hadir lengkap, klik tombol hijau **Semua Hadir** di bilah ringkasan atas. Seluruh pilihan status siswa seketika berubah menjadi Hadir tanpa dialog konfirmasi.
+   - **Tombol Cepat "Semua Alpa":** Jika satu kelas berhalangan hadir atau kosong tanpa keterangan sah, klik tombol merah **Semua Alpa** di samping tombol Semua Hadir. Sistem menampilkan panel konfirmasi di tempat: *"Ubah {n} siswa menjadi Alpa?"*. Klik **Ya, Semua Alpa** untuk menyetujui, atau klik **Batal** (atau tekan tombol `Esc` / ketuk di luar panel) untuk membatalkan.
+   - **Penting Dipahami (Penyimpanan Permanen):** Tindakan massal ("Semua Hadir" maupun "Semua Alpa") hanya bekerja di tampilan layar. Data kehadiran baru **resmi tersimpan permanen ke sistem setelah Anda menekan tombol Simpan Absensi / Simpan Koreksi** di bagian bawah layar. Isian keterangan yang sudah pernah diketikkan juga tidak akan terhapus oleh kedua tindakan massal ini.
    - **Mengubah Status per Siswa:** Bila ada siswa yang berhalangan hadir, ketuk tombol status bertuliskan kata penuh pada baris nama siswa tersebut:
      - Ketuk **Hadir** (warna hijau) bila siswa hadir.
      - Ketuk **Izin** (warna biru) bila siswa memiliki surat izin atau izin resmi sekolah.

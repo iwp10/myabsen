@@ -28,13 +28,14 @@ export function hitungRingkasan(students) {
 }
 
 /**
- * Mengeset seluruh status siswa menjadi 'hadir' di sisi klien,
+ * Mengeset status seluruh siswa menjadi status tertentu ('hadir' atau 'alpa') di sisi klien,
  * dengan tetap mempertahankan keterangan yang sudah pernah diketik.
  *
  * @param {Record<string|number, { status: string, keterangan?: string }>} students
+ * @param {'hadir'|'izin'|'sakit'|'alpa'} [status='hadir']
  * @returns {Record<string|number, { status: string, keterangan?: string }>}
  */
-export function setSemuaHadir(students) {
+export function setSemuaStatus(students, status = 'hadir') {
     if (!students || typeof students !== 'object') {
         return {};
     }
@@ -43,12 +44,34 @@ export function setSemuaHadir(students) {
     for (const id in students) {
         if (Object.prototype.hasOwnProperty.call(students, id)) {
             updated[id] = {
-                status: 'hadir',
+                status: status,
                 keterangan: students[id]?.keterangan || ''
             };
         }
     }
     return updated;
+}
+
+/**
+ * Mengeset seluruh status siswa menjadi 'hadir' di sisi klien,
+ * dengan tetap mempertahankan keterangan yang sudah pernah diketik.
+ *
+ * @param {Record<string|number, { status: string, keterangan?: string }>} students
+ * @returns {Record<string|number, { status: string, keterangan?: string }>}
+ */
+export function setSemuaHadir(students) {
+    return setSemuaStatus(students, 'hadir');
+}
+
+/**
+ * Mengeset seluruh status siswa menjadi 'alpa' di sisi klien,
+ * dengan tetap mempertahankan keterangan yang sudah pernah diketik.
+ *
+ * @param {Record<string|number, { status: string, keterangan?: string }>} students
+ * @returns {Record<string|number, { status: string, keterangan?: string }>}
+ */
+export function setSemuaAlpa(students) {
+    return setSemuaStatus(students, 'alpa');
 }
 
 /**

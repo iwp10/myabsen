@@ -59,7 +59,7 @@ Menu pada sidebar Guru (dan 4 tab bilah navigasi bawah di HP):
 3. **Jadwal & Koreksi Absensi:** Mengakses jadwal mengajar dan mengoreksi/mengisi susulan absensi dalam jendela **7 hari terakhir** (hari ini s.d. H-6 yang harinya cocok) berbasis accordion per hari.
 4. **Riwayat Absensi:** Meninjau riwayat kehadiran dalam format dua tingkat: kartu Kelas-Mapel pada periode terpilih dan tabel matriks pertemuan (P1..Pn) dengan penanda kehadiran rendah ("Perlu perhatian") bagi siswa di bawah ambang batas, serta ekspor rekapitulasi kelas yang diampu ke format Excel multi-sheet.
 
-Form Absensi Guru dirancang khusus untuk kenyamanan layar sentuh: seluruh siswa default **Hadir**, kontrol status pilihan kata penuh (**Hadir**, **Izin**, **Sakit**, **Alpa**), bilah ringkasan sticky dan tombol cepat "Semua Hadir", input keterangan kondisional saat non-Hadir, tombol kembali terstandar, dan tombol Simpan melekat di dasar layar (*sticky bottom-0*).
+Form Absensi Guru dirancang khusus untuk kenyamanan layar sentuh: seluruh siswa default **Hadir**, kontrol status pilihan kata penuh (**Hadir**, **Izin**, **Sakit**, **Alpa**), bilah ringkasan sticky dan tindakan cepat massal "Semua Hadir" serta "Semua Alpa" (didukung panel konfirmasi dua langkah di tempat yang menyebut jumlah siswa terdampak), input keterangan kondisional saat non-Hadir, tombol kembali terstandar, dan tombol Simpan melekat di dasar layar (*sticky bottom-0*).
 
 ### Siswa (Read-Only)
 Menu pada sidebar Siswa (dan 4 tab bilah navigasi bawah di HP):
@@ -253,13 +253,13 @@ MyAbsen dilengkapi pengujian otomatis menyeluruh untuk menjamin keandalan aturan
    ```bash
    php artisan test
    ```
-   *Status saat ini:* **392 test lulus (2627 assertions)**. Pengujian ini berjalan secara otomatis di database MySQL `myabsen_test` (sesuai konfigurasi `phpunit.xml`) sehingga tidak mengganggu data di database utama `myabsen`.
+   *Status saat ini:* **400 test lulus (2691 assertions)**. Pengujian ini berjalan secara otomatis di database MySQL `myabsen_test` (sesuai konfigurasi `phpunit.xml`) sehingga tidak mengganggu data di database utama `myabsen`.
 
 2. **Pengujian Logika JavaScript (Node.js test runner bawaan):**
    ```bash
    npm run test:js
    ```
-   *Status saat ini:* **14 unit test lulus (0 gagal)** untuk menguji modul logika presentasi murni (`pilihan-massal.js` dan `absensi-form.js`). Wajib dijalankan saat menyentuh berkas di `resources/js`.
+   *Status saat ini:* **18 unit test lulus (0 gagal)** untuk menguji modul logika presentasi murni (`pilihan-massal.js` dan `absensi-form.js`). Wajib dijalankan saat menyentuh berkas di `resources/js`.
 
 ---
 
@@ -267,8 +267,8 @@ MyAbsen dilengkapi pengujian otomatis menyeluruh untuk menjamin keandalan aturan
 
 | Perintah | Deskripsi |
 |---|---|
-| `php artisan test` | Menjalankan seluruh test suite otomatis (392 test PHP). |
-| `npm run test:js` | Menjalankan unit test modul JavaScript murni (14 test JS). |
+| `php artisan test` | Menjalankan seluruh test suite otomatis (400 test PHP). |
+| `npm run test:js` | Menjalankan unit test modul JavaScript murni (18 test JS). |
 | `php vendor/bin/pint` | Merapikan format kode PHP (Laravel Pint). **Wajib dijalankan sebelum commit.** |
 | `php artisan migrate:fresh --seed` | Menghapus seluruh tabel dan mengulang instalasi database demo (Hanya untuk lokal/dev!). |
 | `php artisan config:clear` | Membersihkan cache konfigurasi (jalankan setiap kali mengubah file `.env`). |

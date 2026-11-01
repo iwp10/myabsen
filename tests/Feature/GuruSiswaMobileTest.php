@@ -137,8 +137,10 @@ class GuruSiswaMobileTest extends TestCase
         // 2. Memuat input keterangan
         $response->assertSee('siswa['.$this->siswa->id.'][keterangan]', false);
 
-        // 3. Memuat tombol "Semua Hadir"
+        // 3. Memuat tombol aksi massal "Semua Hadir" dan "Semua Alpa" serta konfirmasi
         $response->assertSee('Semua Hadir');
+        $response->assertSee('Semua Alpa');
+        $response->assertSee('Ya, Semua Alpa');
 
         // 4. Memuat tombol simpan sticky dan tombol Batal
         $response->assertSee('sticky bottom-0', false);

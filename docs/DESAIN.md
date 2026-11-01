@@ -306,12 +306,15 @@ Semua pasangan warna teks dan elemen UI di atas **100% LULUS** standar WCAG AA (
    - Dibangun di atas elemen `<input type="radio">` standar (`sr-only`) dengan nama atribut `siswa[{id}][status]` dan nilai persis (`hadir`, `izin`, `sakit`, `alpa`) sehingga formulir tetap terkirim secara native dan ramah pembaca layar (`<fieldset>` + `<legend class="sr-only">`).
    - Kolom isian keterangan (alasan izin/sakit/alpa) terlipat otomatis dan muncul ketika status siswa dipilih selain Hadir, serta mempertahankan nilai jika pengguna berpindah status bolak-balik.
 
-5. **Ringkasan Melekat & Aksi Semua Hadir (`x-ui.ringkasan-sticky`)**:
+5. **Ringkasan Melekat & Aksi Semua Hadir / Semua Alpa (`x-ui.ringkasan-sticky`)**:
    - Bilah ringkasan rekapitulasi melekat di atas daftar siswa (`sticky top-16 z-20`) saat pengguna menggulir daftar nama siswa yang panjang.
    - Ubin kompak berlabel kata penuh ("Hadir", "Izin", "Sakit", "Alpa") dengan angka besar (`text-base sm:text-lg tabular-nums`), label teks minimal 12px (`text-xs font-bold uppercase tracking-wider`).
    - Tata letak responsif: `grid grid-cols-2 min-[360px]:grid-cols-4 gap-1.5 sm:gap-2`. Tinggi total hemat ruang vertikal (< 20% tinggi layar).
    - Menampilkan jumlah siswa Hadir, Izin, Sakit, Alpa serta total siswa secara real-time melalui Alpine.js (`resources/js/absensi-form.js`).
-   - Dilengkapi tombol cepat **"Semua Hadir"** berukuran target sentuh minimal 44px yang mengubah pilihan seluruh siswa menjadi Hadir di sisi klien dalam satu ketukan tanpa mengubah data server sebelum tombol Simpan ditekan.
+   - Dilengkapi tombol cepat tindakan massal:
+     - **"Semua Hadir"**: gaya primer emerald lembut (`bg-emerald-50 dark:bg-emerald-500/15 border-emerald-500 dark:border-emerald-400 text-emerald-950 dark:text-emerald-300`), target sentuh minimal 44px, mengubah status seluruh siswa menjadi Hadir seketika di sisi klien.
+     - **"Semua Alpa"**: gaya bahaya sekunder (`bg-red-50 dark:bg-red-500/15 border-red-500 dark:border-red-400 text-red-950 dark:text-red-300`), target sentuh minimal 44px, memicu panel konfirmasi dua langkah di tempat *"Ubah {n} siswa menjadi Alpa?"* dengan tombol *"Ya, Semua Alpa"* dan *"Batal"*. Panel mendukung penutupan via tombol Esc dan ketuk di luar, pemindahan fokus ramah keyboard, dan pengumuman perubahan via `aria-live="polite"`.
+   - Tindakan massal murni bekerja di memori sisi klien tanpa menghapus keterangan yang sudah ada, dan perubahan baru tersimpan permanen ke server setelah tombol Simpan ditekan.
 
 6. **Accordion Per Hari pada Jadwal Mengajar & Koreksi**:
    - Halaman jadwal guru, jadwal & koreksi absensi, serta jadwal pelajaran siswa dikelompokkan per hari/tanggal.

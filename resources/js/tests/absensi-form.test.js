@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { hitungRingkasan, setSemuaHadir, ubahStatusSiswa } from '../absensi-form.js';
+import {
+    hitungRingkasan,
+    setSemuaStatus,
+    setSemuaHadir,
+    setSemuaAlpa,
+    ubahStatusSiswa
+} from '../absensi-form.js';
 
 test('1. hitungRingkasan menghitung jumlah H, I, S, A dan total siswa dengan benar', () => {
     const students = {
@@ -51,7 +57,103 @@ test('3. setSemuaHadir mengubah seluruh status menjadi hadir dan mempertahankan 
     assert.equal(summary.total, 3);
 });
 
-test('4. ubahStatusSiswa mengubah status siswa tertentu tanpa mempengaruhi siswa lain', () => {
+test('4. setSemuaStatus("alpa") dan setSemuaAlpa mengubah seluruh siswa menjadi alpa dan ringkasan benar', () => {
+    const students = {
+        1: { status: 'hadir', keterangan: '' },
+        2: { status: 'izin', keterangan: 'Acara dinas keluarga' },
+        3: { status: 'sakit', keterangan: 'Radang' },
+    };
+
+    const hasil = setSemuaStatus(students, 'alpa');
+
+    assert.equal(hasil[1].status, 'alpa');
+    assert.equal(hasil[2].status, 'alpa');
+    assert.equal(hasil[2].keterangan, 'Acara dinas keluarga'); // Keterangan tidak hilang
+    assert.equal(hasil[3].status, 'alpa');
+    assert.equal(hasil[3].keterangan, 'Radang');
+
+    const summary = hitungRingkasan(hasil);
+    assert.equal(summary.alpa, 3);
+    assert.equal(summary.hadir, 0);
+    assert.equal(summary.izin, 0);
+    assert.equal(summary.sakit, 0);
+    assert.equal(summary.total, 3);
+
+    // Pengujian melalui pembungkus setSemuaAlpa
+    const hasilWrapper = setSemuaAlpa(students);
+    assert.deepEqual(hasilWrapper, hasil);
+});
+
+test('5. setSemuaStatus("hadir") berperilaku identik dengan setSemuaHadir dan mempertahankan keterangan', () => {
+    const students = {
+        1: { status: 'alpa', keterangan: 'Tanpa surat' },
+        2: { status: 'sakit', keterangan: 'Pusing' },
+    };
+
+    const viaStatus = setSemuaStatus(students, 'hadir');
+    const viaHadir = setSemuaHadir(students);
+
+    assert.deepEqual(viaStatus, viaHadir);
+    assert.equal(viaStatus[1].status, 'hadir');
+    assert.equal(viaStatus[1].keterangan, 'Tanpa surat');
+    assert.equal(viaStatus[2].status, 'hadir');
+    assert.equal(viaStatus[2].keterangan, 'Pusing');
+
+    const summary = hitungRingkasan(viaStatus);
+    assert.equal(summary.hadir, 2);
+    assert.equal(summary.alpa, 0);
+});
+
+test('6. setSemuaStatus dan setSemuaAlpa menangani data kosong atau tidak valid dengan aman', () => {
+    assert.deepEqual(setSemuaStatus({}, 'alpa'), {});
+    assert.deepEqual(setSemuaStatus(null, 'alpa'), {});
+    assert.deepEqual(setSemuaStatus(undefined, 'alpa'), {});
+    assert.deepEqual(setSemuaAlpa({}), {});
+    assert.deepEqual(setSemuaAlpa(null), {});
+    assert.deepEqual(setSemuaAlpa(undefined), {});
+});
+
+test('7. cakupan setSemuaStatus mencakup seluruh siswa dalam kelas (Langkah 0a), tidak terpengaruh filter pencarian', () => {
+    // Simulasi daftar 4 siswa di kelas
+    const students = {
+        101: { status: 'hadir', keterangan: '' },
+        102: { status: 'hadir', keterangan: '' },
+        103: { status: 'izin', keterangan: 'Izin lomba' },
+        104: { status: 'hadir', keterangan: '' },
+    };
+
+    // Simulasi pencarian hanya menampilkan siswa 103 (3 siswa lain disembunyikan di UI)
+    const searchQuery = '103';
+    const idTerlihat = Object.keys(students).filter(id => id.includes(searchQuery));
+    assert.equal(idTerlihat.length, 1);
+
+    // Tindakan massal tetap memengaruhi seluruh siswa dalam daftar kelas sesuai Langkah 0a
+    const hasilAlpa = setSemuaStatus(students, 'alpa');
+    assert.equal(Object.keys(hasilAlpa).length, 4);
+    assert.equal(hasilAlpa[101].status, 'alpa');
+    assert.equal(hasilAlpa[102].status, 'alpa');
+    assert.equal(hasilAlpa[103].status, 'alpa');
+    assert.equal(hasilAlpa[103].keterangan, 'Izin lomba'); // Keterangan tetap utuh
+    assert.equal(hasilAlpa[104].status, 'alpa');
+
+    const summaryAlpa = hitungRingkasan(hasilAlpa);
+    assert.equal(summaryAlpa.alpa, 4);
+    assert.equal(summaryAlpa.hadir, 0);
+
+    // Begitu pula saat dikembalikan ke Hadir
+    const hasilHadir = setSemuaStatus(hasilAlpa, 'hadir');
+    assert.equal(hasilHadir[101].status, 'hadir');
+    assert.equal(hasilHadir[102].status, 'hadir');
+    assert.equal(hasilHadir[103].status, 'hadir');
+    assert.equal(hasilHadir[103].keterangan, 'Izin lomba');
+    assert.equal(hasilHadir[104].status, 'hadir');
+
+    const summaryHadir = hitungRingkasan(hasilHadir);
+    assert.equal(summaryHadir.hadir, 4);
+    assert.equal(summaryHadir.alpa, 0);
+});
+
+test('8. ubahStatusSiswa mengubah status siswa tertentu tanpa mempengaruhi siswa lain', () => {
     const students = {
         1: { status: 'hadir', keterangan: '' },
         2: { status: 'hadir', keterangan: '' }

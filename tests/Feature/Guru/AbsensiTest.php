@@ -822,3 +822,31 @@ test('memilih status atau mengisi keterangan tidak menggulung halaman luar (sr-o
         ->assertSee('<fieldset class="relative w-full">', false)
         ->assertSee('x-cloak class="relative pt-1"', false);
 });
+
+test('halaman absensi memuat tombol Semua Hadir dan Semua Alpa, panel konfirmasi, dan 4 radio per siswa', function () {
+    Carbon::setTestNow('2026-09-21 08:00:00'); // Senin
+
+    $response = $this->actingAs($this->guruUser)
+        ->get(route('guru.absensi.show', $this->jadwal->id));
+
+    $response->assertStatus(200);
+
+    // Memuat tombol aksi massal "Semua Hadir" dan "Semua Alpa"
+    $response->assertSee('Semua Hadir');
+    $response->assertSee('Semua Alpa');
+
+    // Memuat teks panel konfirmasi dua langkah
+    $response->assertSee('siswa menjadi Alpa?');
+    $response->assertSee('Ya, Semua Alpa');
+    $response->assertSee('Batal');
+
+    // Memuat tepat 4 radio per siswa (hadir, izin, sakit, alpa) dengan format name dan value yang sama
+    foreach ([$this->siswa1, $this->siswa2] as $siswa) {
+        $response->assertSee('name="siswa['.$siswa->id.'][status]"', false);
+        $response->assertSee('value="hadir"', false);
+        $response->assertSee('value="izin"', false);
+        $response->assertSee('value="sakit"', false);
+        $response->assertSee('value="alpa"', false);
+        $response->assertSee('name="siswa['.$siswa->id.'][keterangan]"', false);
+    }
+});
