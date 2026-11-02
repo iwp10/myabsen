@@ -263,11 +263,49 @@
             return {
                 students: initialStudents,
                 searchQuery: '',
-                setSemuaHadir() {
+                konfirmasiAlpa: false,
+                pesanPengumuman: '',
+
+                bukaKonfirmasiAlpa() {
+                    if (this.summary.total === 0) return;
+                    this.konfirmasiAlpa = true;
+                    this.$nextTick(() => {
+                        this.$refs.btnKonfirmasiYa?.focus();
+                    });
+                },
+
+                tutupKonfirmasiAlpa() {
+                    this.konfirmasiAlpa = false;
+                    this.$nextTick(() => {
+                        this.$refs.btnSemuaAlpa?.focus();
+                    });
+                },
+
+                setSemuaStatus(status) {
                     for (const id in this.students) {
-                        this.students[id].status = 'hadir';
+                        this.students[id].status = status;
+                    }
+                    const jumlah = this.summary.total;
+                    if (status === 'alpa') {
+                        this.pesanPengumuman = (jumlah || 0) + ' siswa diubah menjadi Alpa';
+                    } else if (status === 'hadir') {
+                        this.pesanPengumuman = (jumlah || 0) + ' siswa diubah menjadi Hadir';
                     }
                 },
+
+                setSemuaHadir() {
+                    this.setSemuaStatus('hadir');
+                },
+
+                setSemuaAlpa() {
+                    this.setSemuaStatus('alpa');
+                },
+
+                eksekusiSemuaAlpa() {
+                    this.setSemuaAlpa();
+                    this.tutupKonfirmasiAlpa();
+                },
+
                 get summary() {
                     const counts = { hadir: 0, izin: 0, sakit: 0, alpa: 0, total: 0 };
                     for (const id in this.students) {
