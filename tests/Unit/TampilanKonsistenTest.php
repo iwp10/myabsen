@@ -955,4 +955,95 @@ class TampilanKonsistenTest extends TestCase
             app()->detectEnvironment(fn () => $origEnv);
         }
     }
+
+    /**
+     * R12: Aturan Filter Responsif & Aksesibilitas Layar:
+     * 1. Tombol filter pada x-ui.filter-panel tidak memuat token kelas tunggal 'hidden' dan tidak ber-x-cloak.
+     * 2. Form panel filter tidak berisi duplikasi field (setiap name="..." unik dalam satu form).
+     * 3. Tidak ada media query 'orientation' di CSS proyek (hanya lebar breakpoint yang menentukan).
+     */
+    public function test_r12_aturan_filter_responsif_dan_aksesibilitas_layar(): void
+    {
+        $base = dirname(__DIR__, 2);
+
+        // 1. Periksa komponen x-ui.filter-panel
+        $panelPath = $base.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'components'.DIRECTORY_SEPARATOR.'ui'.DIRECTORY_SEPARATOR.'filter-panel.blade.php';
+        $this->assertFileExists($panelPath);
+        $panelContent = file_get_contents($panelPath);
+
+        // Tombol filter mobile tidak boleh memiliki atribut x-cloak
+        preg_match('/<button\b[^>]*@click="open\s*=\s*!open"[^>]*>/i', $panelContent, $btnMatch);
+        $this->assertNotEmpty($btnMatch, 'Komponen filter-panel harus memiliki tombol toggle open');
+        $btnTag = $btnMatch[0];
+
+        $this->assertDoesNotMatchRegularExpression(
+            '/\bx-cloak\b/i',
+            $btnTag,
+            'Tombol filter mobile tidak boleh memiliki atribut x-cloak'
+        );
+
+        // Tombol toggle tidak boleh memiliki token kelas tunggal 'hidden'
+        if (preg_match('/class=[\'"]([^\'"]*)[\'"]/i', $btnTag, $classMatch)) {
+            $classes = preg_split('/\s+/', trim($classMatch[1]));
+            $this->assertNotContains(
+                'hidden',
+                $classes,
+                'Tombol filter mobile tidak boleh memiliki kelas tunggal hidden'
+            );
+        }
+
+        // Kontainer terluar filter-panel tidak boleh memiliki x-cloak
+        preg_match('/<div\b[^>]*x-data="{[^}]*open[^}]*}"[^>]*>/i', $panelContent, $outerDivMatch);
+        $this->assertNotEmpty($outerDivMatch, 'Kontainer luar x-data open harus ada');
+        $this->assertDoesNotMatchRegularExpression(
+            '/\bx-cloak\b/i',
+            $outerDivMatch[0],
+            'Kontainer terluar x-ui.filter-panel tidak boleh memiliki x-cloak'
+        );
+
+        // 2. Periksa bahwa view yang menggunakan filter-panel tidak menduplikasi input field
+        $filterViews = [
+            'resources/views/guru/jadwal.blade.php',
+            'resources/views/guru/riwayat.blade.php',
+            'resources/views/guru/riwayat_detail.blade.php',
+            'resources/views/siswa/jadwal.blade.php',
+            'resources/views/siswa/riwayat.blade.php',
+        ];
+
+        foreach ($filterViews as $relView) {
+            $viewPath = $base.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relView);
+            $this->assertFileExists($viewPath);
+            $content = file_get_contents($viewPath);
+
+            // Ekstrak blok formulir / filter-panel
+            preg_match_all('/<x-ui\.filter-panel\b.*?<\/x-ui\.filter-panel>/is', $content, $panels);
+            foreach ($panels[0] as $idx => $panelHtml) {
+                // Cari semua input, select, textarea dengan atribut name="..."
+                preg_match_all('/<(?:input|select|textarea)\b[^>]*\bname=[\'"]([^\'"]+)[\'"]/i', $panelHtml, $namedFields);
+                $fieldNames = $namedFields[1] ?? [];
+                $counts = array_count_values($fieldNames);
+                foreach ($counts as $name => $occurences) {
+                    $this->assertEquals(
+                        1,
+                        $occurences,
+                        "Field '{$name}' muncul {$occurences} kali pada {$relView} (panel ke-".($idx + 1).'). Form tidak boleh menduplikasi field.'
+                    );
+                }
+            }
+        }
+
+        // 3. Periksa seluruh CSS di resources/css tidak memiliki media query orientation
+        $cssDir = $base.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'css';
+        $cssFiles = glob($cssDir.DIRECTORY_SEPARATOR.'*.css');
+        $this->assertNotEmpty($cssFiles, 'Harus ada file CSS di resources/css');
+
+        foreach ($cssFiles as $cssFile) {
+            $cssContent = file_get_contents($cssFile);
+            $this->assertDoesNotMatchRegularExpression(
+                '/\(\s*orientation\s*:\s*(?:portrait|landscape)\s*\)/i',
+                $cssContent,
+                'Dilarang menggunakan media query orientation pada CSS: '.basename($cssFile)
+            );
+        }
+    }
 }

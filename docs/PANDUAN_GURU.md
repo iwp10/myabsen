@@ -79,10 +79,10 @@ Bapak/Ibu guru dapat memperbaiki kesalahan pengisian data kehadiran secara mandi
 Bapak/Ibu guru dapat melihat perkembangan kedisiplinan siswa di setiap kelas yang diajar:
 
 1. Buka menu **Riwayat Absensi** (pada bilah navigasi ponsel berlabel **Riwayat**).
-2. Tentukan **Periode Tahun Ajaran** pada kotak pilihan di bagian atas (bawaan adalah periode aktif).
-3. Anda dapat mencari kelas tertentu lewat kolom **Cari Kelas atau Mapel**.
+2. Tentukan **Periode Tahun Ajaran** pada kotak pilihan di bagian atas (bawaan adalah periode aktif). Pada layar HP (portrait maupun landscape), ketuk tombol **Filter & Penyaringan** untuk membuka panel pemilihan periode dan filter tambahan.
+3. Anda dapat mencari kelas tertentu lewat kolom **Cari Kelas atau Mapel** yang selalu tersedia di bagian atas tanpa perlu membuka panel filter.
 4. Klik kartu kelas yang ingin diperiksa untuk membuka halaman detail riwayat pertemuan:
-   - **Bilah Pencarian Siswa:** Ketikkan nama atau NIS pada kotak pencarian untuk melihat rekam jejak satu siswa tertentu.
+   - **Bilah Pencarian Siswa:** Ketikkan nama atau NIS pada kotak pencarian yang selalu terlihat di atas tabel/kartu untuk menyaring satu siswa tertentu secara cepat.
    - **Lencana "Perlu Perhatian":** Siswa yang persentase kehadirannya berada di bawah 75% otomatis ditandai dengan lencana merah **Perlu perhatian** agar Bapak/Ibu guru atau wali kelas dapat segera memberikan pembinaan.
    - **Matriks Kotak Pertemuan:** Setiap pertemuan (P1, P2, P3, ...) ditampilkan dengan tanggal dan warna status siswa.
    - **Unduh Lembar Kerja Excel:** Klik tombol hijau **Export Excel (Seluruh Siswa)** untuk mengunduh berkas rekapan lengkap dalam format spreadsheet (.xlsx).

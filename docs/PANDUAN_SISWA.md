@@ -60,7 +60,8 @@ Untuk melihat apakah absensi dan surat izinmu sudah tercatat dengan benar:
    - Klik tombol **Lihat Detail →** pada mapel yang ingin kamu periksa untuk melihat tanggal setiap pertemuan dan status kehadiranmu pada pertemuan tersebut.
 3. Pilih tab **Semua Riwayat**:
    - Menampilkan seluruh catatan absensi dari pertemuan pertama hingga sekarang secara berurutan.
-   - Kamu bisa menyaring catatan berdasarkan **Bulan** atau memilih **Status** tertentu (misalnya hanya ingin melihat tanggal-tanggal saat kamu berstatus Izin atau Sakit).
+   - Pada layar HP (mode portrait maupun landscape), ketuk tombol **Filter & Penyaringan** untuk membuka opsi penyaringan berdasarkan **Periode**, **Bulan**, **Tanggal**, **Mata Pelajaran**, atau **Status Kehadiran** (misalnya hanya ingin melihat tanggal-tanggal saat kamu berstatus Izin atau Sakit), lalu ketuk **Terapkan Filter**.
+   - Filter yang aktif akan tampil sebagai lencana (chip) di atas tabel yang dapat kamu batalkan kapan saja dengan mengetuk ikon silang (×).
 
 [GAMBAR: Halaman riwayat kehadiran siswa per mata pelajaran dan riwayat pertemuan]
 

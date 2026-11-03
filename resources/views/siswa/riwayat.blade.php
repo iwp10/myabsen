@@ -6,38 +6,47 @@
     </x-slot>
 
     @php
+        // Siapkan chip filter aktif untuk tab Per Mata Pelajaran
+        $activeFiltersPerMapel = [];
+        if (request()->filled('periode') && request('periode') !== 'semua') {
+            $activeFiltersPerMapel['periode'] = [
+                'label' => 'Periode: ' . ($selectedPeriode['tahun_ajaran'] ?? '') . ' Sem ' . ($selectedPeriode['semester'] ?? ''),
+                'clear_url' => route('siswa.riwayat', ['tab' => 'per_mapel']),
+            ];
+        }
+
         // Siapkan chip filter aktif untuk tab Semua Riwayat
         $activeFilters = [];
         if (request()->filled('periode') && request('periode') !== 'semua') {
             $activeFilters['periode'] = [
                 'label' => 'Periode: ' . ($selectedPeriode['tahun_ajaran'] ?? '') . ' Sem ' . ($selectedPeriode['semester'] ?? ''),
-                'clear_url' => route('siswa.riwayat', array_filter(request()->except('periode'))),
+                'clear_url' => route('siswa.riwayat', array_merge(['tab' => 'semua'], array_filter(request()->except('periode')))),
             ];
         }
         if (request()->filled('bulan')) {
             $namaBulan = \App\Support\Ui::namaBulanIndo((int) request('bulan'));
             $activeFilters['bulan'] = [
                 'label' => 'Bulan: ' . $namaBulan,
-                'clear_url' => route('siswa.riwayat', array_filter(request()->except('bulan'))),
+                'clear_url' => route('siswa.riwayat', array_merge(['tab' => 'semua'], array_filter(request()->except('bulan')))),
             ];
         }
         if (request()->filled('tanggal')) {
             $activeFilters['tanggal'] = [
                 'label' => 'Tanggal: ' . \Carbon\Carbon::parse(request('tanggal'))->format('d/m/Y'),
-                'clear_url' => route('siswa.riwayat', array_filter(request()->except('tanggal'))),
+                'clear_url' => route('siswa.riwayat', array_merge(['tab' => 'semua'], array_filter(request()->except('tanggal')))),
             ];
         }
         if (request()->filled('mapel_id')) {
             $mObj = $mapels->firstWhere('id', request('mapel_id'));
             $activeFilters['mapel_id'] = [
                 'label' => 'Mapel: ' . ($mObj->nama ?? request('mapel_id')),
-                'clear_url' => route('siswa.riwayat', array_filter(request()->except('mapel_id'))),
+                'clear_url' => route('siswa.riwayat', array_merge(['tab' => 'semua'], array_filter(request()->except('mapel_id')))),
             ];
         }
         if (request()->filled('status')) {
             $activeFilters['status'] = [
                 'label' => 'Status: ' . ucfirst(request('status')),
-                'clear_url' => route('siswa.riwayat', array_filter(request()->except('status'))),
+                'clear_url' => route('siswa.riwayat', array_merge(['tab' => 'semua'], array_filter(request()->except('status')))),
             ];
         }
     @endphp
@@ -47,7 +56,7 @@
 
             <!-- Banner Info Periode Dilihat & Filter Periode -->
             <div class="bg-white dark:bg-slate-900 overflow-hidden shadow-xs rounded-xl p-4 sm:p-5 border-2 border-slate-300 dark:border-slate-600">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                         <h3 class="text-lg font-bold text-slate-900 dark:text-white">
                             Riwayat Kehadiran Siswa
@@ -68,26 +77,11 @@
                             @endif
                         </div>
                     </div>
-
-                    <!-- Dropdown Periode untuk Tab Per Mapel -->
-                    <div x-show="tab === 'per_mapel'" class="w-full md:w-auto">
-                        <form method="GET" action="{{ route('siswa.riwayat') }}" class="flex items-center gap-2 w-full md:w-auto">
-                            <input type="hidden" name="tab" value="per_mapel">
-                            <label for="periode_top" class="sr-only">Pilih Periode</label>
-                            <x-ui.select id="periode_top" name="periode" onchange="this.form.submit()" wrapper-class="w-full sm:w-auto sm:min-w-[16rem]">
-                                @foreach($daftarPeriode as $item)
-                                    <option value="{{ $item['value'] }}" {{ $filterPeriodeValue === $item['value'] ? 'selected' : '' }}>
-                                        {{ $item['label'] }}
-                                    </option>
-                                @endforeach
-                            </x-ui.select>
-                        </form>
-                    </div>
                 </div>
 
                 {{-- Tab Navigasi Segmen Ramah Sentuh (Mudah diketuk & tidak terpotong di 320px) --}}
                 <div class="mt-4 pt-3 border-t-2 border-slate-200 dark:border-slate-700">
-                    <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border-2 border-slate-300 dark:border-slate-600 max-w-md">
+                    <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border-2 border-slate-300 dark:border-slate-600 max-w-md w-full">
                         <button type="button"
                                 @click="tab = 'per_mapel'"
                                 :class="tab === 'per_mapel'
@@ -122,6 +116,21 @@
 
             {{-- KONTEN TAB 1: PER MATA PELAJARAN --}}
             <div x-show="tab === 'per_mapel'" class="space-y-4">
+                {{-- Filter Panel Tab Per Mapel (Lipat di Mobile, Inline di Desktop) --}}
+                <x-ui.filter-panel :action="route('siswa.riwayat')" :active-filters="$activeFiltersPerMapel" :reset-url="route('siswa.riwayat', ['tab' => 'per_mapel'])">
+                    <input type="hidden" name="tab" value="per_mapel">
+                    <div class="w-full sm:w-72">
+                        <label for="periode_top" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Periode Tahun Ajaran</label>
+                        <x-ui.select id="periode_top" name="periode" onchange="this.form.submit()">
+                            @foreach($daftarPeriode as $item)
+                                <option value="{{ $item['value'] }}" {{ $filterPeriodeValue === $item['value'] ? 'selected' : '' }}>
+                                    {{ $item['label'] }}
+                                </option>
+                            @endforeach
+                        </x-ui.select>
+                    </div>
+                </x-ui.filter-panel>
+
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                     <h4 class="text-base font-bold text-slate-900 dark:text-white">
                         Persentase Kehadiran per Mata Pelajaran

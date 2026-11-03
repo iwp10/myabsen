@@ -28,6 +28,22 @@
                 $totalSiswa = $siswaList->count();
                 $batasRendah = (int) config('absensi.batas_kehadiran_rendah', 75);
 
+                $activeFilters = [];
+                if (!empty($search)) {
+                    $activeFilters['q'] = [
+                        'label' => 'Pencarian: ' . $search,
+                        'clear_url' => route('guru.riwayat.detail', ['kelas' => $kelas->id, 'mapel' => $mapel->id, 'periode' => $filterPeriode]),
+                    ];
+                }
+                $periodeAktifItem = collect($daftarPeriode)->firstWhere('is_aktif', true);
+                $periodeAktifVal = $periodeAktifItem['value'] ?? '';
+                if (!empty($filterPeriode) && $filterPeriode !== $periodeAktifVal) {
+                    $activeFilters['periode'] = [
+                        'label' => 'Periode: ' . $selectedPeriode['tahun_ajaran'] . ' Sem ' . $selectedPeriode['semester'],
+                        'clear_url' => route('guru.riwayat.detail', ['kelas' => $kelas->id, 'mapel' => $mapel->id]),
+                    ];
+                }
+
                 // Siapkan ringkasan per siswa
                 $siswaProcessed = [];
                 $totalHadirKelas = 0; $totalIzinKelas = 0; $totalSakitKelas = 0; $totalAlpaKelas = 0;
@@ -119,40 +135,36 @@
                 </div>
             </div>
 
-            <!-- Bilah Pencarian Siswa & Filter Periode Melekat Saat Menggulir -->
-            <div class="sticky top-16 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-3 sm:p-4 rounded-xl border-2 border-slate-300 dark:border-slate-600 shadow-md">
-                <form action="{{ route('guru.riwayat.detail', ['kelas' => $kelas->id, 'mapel' => $mapel->id]) }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
-                    <x-ui.select name="periode" wrapper-class="w-full sm:w-56">
+            <!-- Bilah Pencarian Siswa & Filter Periode Menggunakan x-ui.filter-panel -->
+            <x-ui.filter-panel :action="route('guru.riwayat.detail', ['kelas' => $kelas->id, 'mapel' => $mapel->id])"
+                               :active-filters="$activeFilters"
+                               :reset-url="route('guru.riwayat.detail', ['kelas' => $kelas->id, 'mapel' => $mapel->id])">
+                <x-slot:searchSlot>
+                    <div class="relative w-full">
+                        <label for="filter-detail-q" class="sr-only">Cari nama atau NIS siswa</label>
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-600 dark:text-slate-400">
+                            <x-ui.icon name="search" size="sm" class="w-4 h-4" />
+                        </div>
+                        <input type="text"
+                               id="filter-detail-q"
+                               name="q"
+                               value="{{ $search }}"
+                               placeholder="Cari nama atau NIS siswa..."
+                               class="block w-full pl-9 pr-3 py-2 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 rounded-xl text-base sm:text-xs min-h-[44px] font-medium shadow-xs">
+                    </div>
+                </x-slot:searchSlot>
+
+                <div class="w-full sm:w-72">
+                    <label for="filter-detail-periode" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Periode Tahun Ajaran</label>
+                    <x-ui.select id="filter-detail-periode" name="periode" onchange="this.form.submit()">
                         @foreach($daftarPeriode as $item)
                             <option value="{{ $item['value'] }}" {{ $filterPeriode === $item['value'] ? 'selected' : '' }}>
                                 {{ $item['label'] }}
                             </option>
                         @endforeach
                     </x-ui.select>
-
-                    <div class="relative flex-1">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-600 dark:text-slate-400">
-                            <x-ui.icon name="search" size="sm" class="w-4 h-4" />
-                        </div>
-                        <input type="text"
-                               name="q"
-                               value="{{ $search }}"
-                               placeholder="Cari nama atau NIS siswa..."
-                               class="w-full pl-9 pr-3 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 rounded-xl text-base sm:text-xs min-h-[44px] py-2 font-medium">
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <button type="submit" class="flex-1 sm:flex-initial bg-emerald-700 hover:bg-emerald-800 text-white dark:bg-emerald-400 dark:hover:bg-emerald-300 dark:text-slate-950 font-bold py-2 px-5 rounded-xl text-xs uppercase tracking-wider min-h-[44px] transition text-center shadow-xs">
-                            Cari
-                        </button>
-                        @if($search !== '' || (request()->filled('periode') && request('periode') !== ($activePeriode['tahun_ajaran'].'|'.$activePeriode['semester'])) || request()->filled('tahun_ajaran') || request()->filled('semester'))
-                            <a href="{{ route('guru.riwayat.detail', ['kelas' => $kelas->id, 'mapel' => $mapel->id]) }}" class="border-2 border-slate-400 dark:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold py-2 px-4 rounded-xl text-xs uppercase tracking-wider min-h-[44px] flex items-center justify-center transition shadow-xs">
-                                Reset
-                            </a>
-                        @endif
-                    </div>
-                </form>
-            </div>
+                </div>
+            </x-ui.filter-panel>
 
             <!-- Konten: Kartu Siswa di Mobile, Matriks di Desktop -->
             <div class="bg-white dark:bg-slate-900 shadow-xs rounded-xl overflow-hidden border-2 border-slate-300 dark:border-slate-600">
