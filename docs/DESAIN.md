@@ -370,3 +370,33 @@ Semua pasangan warna teks dan elemen UI di atas **100% LULUS** standar WCAG AA (
       - Status aktif jelas dan kontras: latar kartu (`bg-white dark:bg-slate-900`), border aksen tebal (`border-2 border-emerald-600 dark:border-emerald-400`), teks tebal tinted (`text-emerald-800 dark:text-emerald-300`), dan atribut aksesibilitas `aria-current="page"`.
       - Ikon Tabler eksplisit ukuran `sm` (`size="sm"`, `w-4 h-4 shrink-0`).
       - Tautan langsung ke route tujuan tanpa membawa parameter filter yang tidak relevan.
+
+13. **Aturan Aksesibilitas Filter Layar & Progressive Enhancement (R12)**:
+    - **Terjangkau di Semua Lebar Layar (320px–1024px+)**:
+      - Seluruh kontrol filter dan pencarian wajib dapat diakses pada semua resolusi layar ponsel (mode portrait maupun landscape, dari 320px, 360px, 393px, 412px, 480px, hingga breakpoint `md` 768px ke atas).
+      - Penentuan tampilan murni berbasis lebar layar (breakpoint Tailwind `md:`), **DILARANG menggunakan media query `orientation` (`orientation: portrait` atau `orientation: landscape`)** karena rotasi ponsel tidak boleh mengubah ketersediaan fungsionalitas filter.
+    - **Tombol Filter Mobile Tidak Pernah Tersembunyi**:
+      - Pada layar mobile (< md), tombol pemicu filter (`x-ui.filter-panel`):
+        - Memiliki lebar penuh (`w-full`), tinggi sentuh minimal 44px (`min-h-[44px]`), dan teks minimal 16px (atau 12px uppercase tracking-wider).
+        - Menampilkan lencana jumlah filter aktif bila ada penyaringan yang diterapkan.
+        - **TIDAK PERNAH memuat token kelas tunggal `hidden`** (hanya varian breakpoint seperti `md:hidden`) dan **TIDAK PERNAH memiliki atribut `x-cloak`**.
+      - Input pencarian teks utama (bila ada, via slot `searchSlot`) diletakkan di luar panel lipat sehingga selalu terlihat langsung oleh pengguna tanpa perlu membuka panel.
+    - **Progressive Enhancement & Anti-Flicker (CSS + Alpine)**:
+      - Panel filter hanya disembunyikan sebelum dibuka jika JavaScript aktif di peramban pengguna.
+      - Script inline `<script>document.documentElement.classList.add('js');</script>` dipasang pada elemen `<head>` layout aplikasi.
+      - CSS menyembunyikan panel filter hanya di bawah lingkup `html.js` dan layar mobile:
+        ```css
+        @media (max-width: 767px) {
+            html.js .filter-panel-content[x-cloak] {
+                display: none !important;
+            }
+        }
+        ```
+      - Tanpa JavaScript atau pada layar tablet/desktop ($\ge$ 768px), panel filter otomatis terbuka dan tampil inline tanpa bergantung pada Alpine.
+    - **Satu Formulir Tanpa Duplikasi Markup**:
+      - Satu formulir filter membungkus kontrol mobile dan desktop secara terpadu.
+      - Dilarang menduplikasi elemen input (`<input>`, `<select>`, `<textarea>`) dengan nama yang sama untuk tampilan mobile dan desktop agar query string dan nilai form tidak bentrok.
+    - **Chip Filter Aktif & Aksi Reset**:
+      - Menampilkan daftar filter yang sedang aktif di semua lebar layar.
+      - Setiap chip filter memiliki tombol silang hapus individual dengan ukuran target sentuh minimal 44x44px.
+      - Tombol "Reset Semua" tersedia saat filter aktif lebih dari 0.

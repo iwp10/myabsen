@@ -97,7 +97,7 @@
                         <h3 class="text-lg font-bold">
                             Data Terhapus: {{ $tabs[$jenis] ?? ucfirst($jenis) }}
                         </h3>
-                        <form action="{{ route('admin.arsip.index') }}" method="GET" class="flex gap-2 w-full sm:w-auto">
+                        <form action="{{ route('admin.arsip.index') }}" method="GET" class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                             <input type="hidden" name="jenis" value="{{ $jenis }}">
                             @php
                                 $placeholder = match ($jenis) {
@@ -112,15 +112,17 @@
                                    name="search"
                                    value="{{ $search }}"
                                    placeholder="{{ $placeholder }}"
-                                   class="w-full sm:w-64 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm dark:[color-scheme:dark]">
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition">
-                                Cari
-                            </button>
-                            @if ($search)
-                                <a href="{{ route('admin.arsip.index', ['jenis' => $jenis]) }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-3 rounded-md text-sm flex items-center justify-center transition">
-                                    Reset
-                                </a>
-                            @endif
+                                   class="w-full sm:w-64 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm dark:[color-scheme:dark] min-h-[44px]">
+                            <div class="flex items-center gap-2">
+                                <button type="submit" class="flex-1 sm:flex-initial bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition min-h-[44px] flex items-center justify-center">
+                                    Cari
+                                </button>
+                                @if ($search)
+                                    <a href="{{ route('admin.arsip.index', ['jenis' => $jenis]) }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-3 rounded-md text-sm flex items-center justify-center transition min-h-[44px]">
+                                        Reset
+                                    </a>
+                                @endif
+                            </div>
                         </form>
                     </div>
 

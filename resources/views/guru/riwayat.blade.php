@@ -49,32 +49,30 @@
 
             <!-- Panel Filter & Pencarian Terlipat Mobile -->
             <x-ui.filter-panel :action="route('guru.riwayat')" :active-filters="$activeFilters" :reset-url="route('guru.riwayat')">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
-                    <div>
-                        <label for="filter-riwayat-periode" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Periode Tahun Ajaran</label>
-                        <x-ui.select id="filter-riwayat-periode" name="periode">
-                            @foreach($daftarPeriode as $item)
-                                <option value="{{ $item['value'] }}" {{ $filterPeriode === $item['value'] ? 'selected' : '' }}>
-                                    {{ $item['label'] }}
-                                </option>
-                            @endforeach
-                        </x-ui.select>
-                    </div>
-
-                    <div>
-                        <label for="filter-riwayat-q" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Cari Kelas atau Mapel</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-600 dark:text-slate-400">
-                                <x-ui.icon name="search" size="sm" class="w-4 h-4" />
-                            </div>
-                            <input type="text"
-                                   id="filter-riwayat-q"
-                                   name="q"
-                                   value="{{ $search }}"
-                                   placeholder="Cari kelas atau mapel..."
-                                   class="block w-full pl-9 pr-3 py-2 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 rounded-xl text-base sm:text-xs min-h-[44px] font-medium shadow-xs">
+                <x-slot:searchSlot>
+                    <div class="relative w-full">
+                        <label for="filter-riwayat-q" class="sr-only">Cari Kelas atau Mapel</label>
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-600 dark:text-slate-400">
+                            <x-ui.icon name="search" size="sm" class="w-4 h-4" />
                         </div>
+                        <input type="text"
+                               id="filter-riwayat-q"
+                               name="q"
+                               value="{{ $search }}"
+                               placeholder="Cari kelas atau mapel..."
+                               class="block w-full pl-9 pr-3 py-2 border-2 border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 rounded-xl text-base sm:text-xs min-h-[44px] font-medium shadow-xs">
                     </div>
+                </x-slot:searchSlot>
+
+                <div class="w-full sm:w-72">
+                    <label for="filter-riwayat-periode" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Periode Tahun Ajaran</label>
+                    <x-ui.select id="filter-riwayat-periode" name="periode" onchange="this.form.submit()">
+                        @foreach($daftarPeriode as $item)
+                            <option value="{{ $item['value'] }}" {{ $filterPeriode === $item['value'] ? 'selected' : '' }}>
+                                {{ $item['label'] }}
+                            </option>
+                        @endforeach
+                    </x-ui.select>
                 </div>
             </x-ui.filter-panel>
 

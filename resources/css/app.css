@@ -2,8 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-[x-cloak] {
+/* Progressive enhancement: sembunyikan elemen x-cloak hanya jika JavaScript aktif (html.js) */
+html.js [x-cloak]:not(.filter-panel-content) {
     display: none !important;
+}
+
+/* Sembunyikan panel lipat filter di bawah breakpoint md (<768px) hanya saat JavaScript aktif */
+@media (max-width: 767px) {
+    html.js .filter-panel-content[x-cloak] {
+        display: none !important;
+    }
 }
 
 @layer base {
