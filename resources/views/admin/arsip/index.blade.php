@@ -190,7 +190,7 @@
                                             <td class="px-6 py-4 whitespace-nowrap">{{ $item->nis }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 @if ($item->kelas)
-                                                    {{ $item->kelas->nama }}
+                                                    {{ \App\Support\Ui::labelKelas($item->kelas) }}
                                                     @if ($item->kelas->trashed())
                                                         <span class="text-xs text-red-500 font-semibold">(terhapus)</span>
                                                     @endif

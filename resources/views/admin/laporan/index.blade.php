@@ -64,12 +64,13 @@
                             <x-input-label for="kelas_id" :value="__('Kelas (Opsional)')" />
                             <select id="kelas_id" name="kelas_id" x-ref="kelas" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:[color-scheme:dark] focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                 <option value="">-- Semua Kelas --</option>
-                                @foreach($kelas as $k)
+                                @foreach(\App\Support\Ui::sortKelas($kelas) as $k)
                                     <option value="{{ $k->id }}"
+                                            title="{{ \App\Support\Ui::labelKelas($k) }}"
                                             x-show="!jurusanId || jurusanId === '{{ $k->jurusan_id }}'"
                                             :disabled="jurusanId && jurusanId !== '{{ $k->jurusan_id }}'"
                                             {{ (string) old('kelas_id', request('kelas_id')) === (string) $k->id ? 'selected' : '' }}>
-                                        {{ $k->nama }}
+                                        {{ \App\Support\Ui::labelKelas($k) }}
                                     </option>
                                 @endforeach
                             </select>

@@ -199,6 +199,11 @@ Semua pasangan warna teks dan elemen UI di atas **100% LULUS** standar WCAG AA (
    - Seluruh ID selalu dinormalkan menjadi tipe string agar kompatibel dengan form array `ids[]`.
    - Sinkron dengan filter pencarian sisi klien melalui `setTersedia(idTersedia)`: baris yang tersembunyi otomatis dibuang dari array `terpilih` sehingga pengguna tidak memproses data yang tidak terlihat.
    - Mempertahankan target ketuk minimal 44px (`min-h-[44px]`), label aksesibilitas eksplisit (`aria-label`), dan token warna border/fokus sesuai desain.
+10. **Standarisasi Label Kelas Lintas Periode (`Ui::labelKelas`) & Penyaringan Dinamis Form Jadwal (`kelolaFilterKelas`)**:
+   - **Format Label Terpusat**: Seluruh dropdown dan teks kelas yang menampilkan lebih dari satu periode wajib menggunakan helper `\App\Support\Ui::labelKelas($kelas)` atau accessor `Kelas::label_lengkap` dengan format baku `"{nama} · {semester} {tahun_ajaran}"` (misalnya `"DKV 1 · Ganjil 2026/2027"`). Format ad-hoc dilarang.
+   - **Aksesibilitas & Tampilan Mobile**: Setiap opsi `<option>` kelas dilengkapi atribut `title` lengkap (`title="{{ \App\Support\Ui::labelKelas($k) }}"`), sementara elemen `<x-ui.select>` memastikan pemotongan teks rapi (`truncate`) di layar kecil (320px–412px) tanpa meluber keluar kontainer kartu.
+   - **Pengurutan Baku (`Ui::sortKelas`)**: Opsi kelas diurutkan dari periode terbaru (`tahun_ajaran` descending, `Genap` mendahului `Ganjil`), diikuti tingkat (`tingkat` ascending), lalu nama kelas (`strnatcasecmp`).
+   - **Penyaringan Otomatis Form Jadwal**: Pada form tambah (`admin/jadwal/create`) dan edit (`admin/jadwal/edit`), opsi kelas membawa atribut `data-tahun-ajaran` dan `data-semester`. Logika reaktif dikelola oleh Alpine via modul murni `resources/js/filter-kelas-jadwal.js` (`kelolaFilterKelas`) dan diuji lewat unit test Node.js (`npm run test:js`). Pilihan kelas menyaring otomatis sesuai Tahun Ajaran dan Semester form. Jika periode diganti dan kelas sebelumnya tidak cocok, pilihan dikosongkan dengan peringatan 'Pilih ulang kelas sesuai periode'. Jika periode belum memiliki kelas, tampil pesan ramah dan tautan Salin Kelas ke menu Pergantian Periode. Tanpa JavaScript (*progressive enhancement*), seluruh opsi tetap tampil berlabel lengkap dan divalidasi oleh aturan server AB-06.
 
 ---
 

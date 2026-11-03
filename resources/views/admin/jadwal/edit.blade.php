@@ -7,20 +7,59 @@
 
     <div class="py-8 sm:py-12">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <x-ui.page-header title="Edit Jadwal" :description="'Perbarui jadwal pelajaran ' . $jadwal->mapel->nama . ' - ' . $jadwal->kelas->nama" />
+            <x-ui.page-header title="Edit Jadwal" :description="'Perbarui jadwal pelajaran ' . $jadwal->mapel->nama . ' - ' . \App\Support\Ui::labelKelas($jadwal->kelas)" />
 
             <x-ui.card>
-                <form action="{{ route('admin.jadwal.update', $jadwal) }}" method="POST" novalidate class="space-y-5">
+                <form action="{{ route('admin.jadwal.update', $jadwal) }}" method="POST" novalidate class="space-y-5"
+                      x-data="kelolaFilterKelas({
+                          daftarKelas: {{ json_encode(\App\Support\Ui::sortKelas($kelas)->map(fn($k) => [
+                              'id' => (string) $k->id,
+                              'nama' => $k->nama,
+                              'tahun_ajaran' => $k->tahun_ajaran,
+                              'semester' => $k->semester,
+                              'label' => \App\Support\Ui::labelKelas($k),
+                          ])->values()->all()) }},
+                          tahunAjaranAwal: '{{ old('tahun_ajaran', $jadwal->tahun_ajaran) }}',
+                          semesterAwal: '{{ old('semester', $jadwal->semester) }}',
+                          kelasIdAwal: '{{ old('kelas_id', (string) $jadwal->kelas_id) }}'
+                      })">
                     @csrf
                     @method('PUT')
                     
                     <div>
                         <x-input-label for="kelas_id" value="Kelas" />
-                        <x-ui.select name="kelas_id" id="kelas_id" required wrapperClass="mt-1">
-                            @foreach($kelas as $k)
-                                <option value="{{ $k->id }}" {{ old('kelas_id', $jadwal->kelas_id) == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
+                        <x-ui.select name="kelas_id" id="kelas_id" required wrapperClass="mt-1" x-model="kelasId" @change="onKelasChange($event.target.value)">
+                            <option value="">-- Pilih Kelas --</option>
+                            <option value="" disabled x-show="!adaKelas" x-cloak>Belum ada kelas di periode ini</option>
+                            @foreach(\App\Support\Ui::sortKelas($kelas) as $k)
+                                <option value="{{ $k->id }}"
+                                        data-tahun-ajaran="{{ $k->tahun_ajaran }}"
+                                        data-semester="{{ $k->semester }}"
+                                        title="{{ \App\Support\Ui::labelKelas($k) }}"
+                                        x-show="tahunAjaran === '{{ $k->tahun_ajaran }}' && semester === '{{ $k->semester }}'"
+                                        {{ old('kelas_id', $jadwal->kelas_id) == $k->id ? 'selected' : '' }}>
+                                    {{ \App\Support\Ui::labelKelas($k) }}
+                                </option>
                             @endforeach
                         </x-ui.select>
+
+                        {{-- Peringatan saat kelas dikosongkan karena periode diubah --}}
+                        <p x-show="pesanPilihUlang" x-cloak class="text-xs text-amber-700 dark:text-amber-400 mt-1 font-semibold flex items-center gap-1">
+                            <x-ui.icon name="info" size="sm" class="inline shrink-0" />
+                            <span>Pilih ulang kelas sesuai periode</span>
+                        </p>
+
+                        {{-- Opsi / Tautan saat tidak ada kelas di periode ini --}}
+                        <div x-show="!adaKelas" x-cloak class="mt-2 p-3 bg-amber-50 dark:bg-amber-950/40 border-2 border-amber-300 dark:border-amber-700 rounded-xl text-xs text-amber-800 dark:text-amber-300 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 shadow-xs">
+                            <div class="flex items-center gap-1.5">
+                                <x-ui.icon name="info" size="sm" class="shrink-0 text-amber-700 dark:text-amber-400" />
+                                <span>Belum ada kelas di periode ini.</span>
+                            </div>
+                            <a href="{{ route('admin.pergantian-periode.index') }}#salin" class="font-bold underline hover:text-amber-950 dark:hover:text-amber-100 shrink-0 inline-flex items-center gap-1">
+                                <span>Salin kelas dari periode sebelumnya &rarr;</span>
+                            </a>
+                        </div>
+
                         <x-input-error :messages="$errors->get('kelas_id')" class="mt-1" />
                     </div>
 
@@ -70,7 +109,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="tahun_ajaran" value="Tahun Ajaran" />
-                            <x-ui.select name="tahun_ajaran" id="tahun_ajaran" required wrapperClass="mt-1">
+                            <x-ui.select name="tahun_ajaran" id="tahun_ajaran" required wrapperClass="mt-1" x-model="tahunAjaran" @change="onPeriodeChange()">
                                 @foreach($daftarTahunAjaran as $ta)
                                     <option value="{{ $ta }}" {{ old('tahun_ajaran', $jadwal->tahun_ajaran) === $ta ? 'selected' : '' }}>
                                         {{ $ta }}
@@ -81,7 +120,7 @@
                         </div>
                         <div>
                             <x-input-label for="semester" value="Semester" />
-                            <x-ui.select name="semester" id="semester" required wrapperClass="mt-1">
+                            <x-ui.select name="semester" id="semester" required wrapperClass="mt-1" x-model="semester" @change="onPeriodeChange()">
                                 <option value="Ganjil" {{ old('semester', $jadwal->semester) == 'Ganjil' ? 'selected' : '' }}>Ganjil</option>
                                 <option value="Genap" {{ old('semester', $jadwal->semester) == 'Genap' ? 'selected' : '' }}>Genap</option>
                             </x-ui.select>

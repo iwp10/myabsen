@@ -73,9 +73,9 @@
                         <label for="filter_kelas_id" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Kelas</label>
                         <x-ui.select id="filter_kelas_id" name="kelas_id">
                             <option value="">Semua Kelas</option>
-                            @foreach($daftarKelas as $k)
-                                <option value="{{ $k->id }}" {{ (string)$filterKelasId === (string)$k->id ? 'selected' : '' }}>
-                                    {{ $k->nama }} ({{ $k->tahun_ajaran }} - {{ $k->semester }})
+                            @foreach(\App\Support\Ui::sortKelas($daftarKelas) as $k)
+                                <option value="{{ $k->id }}" title="{{ \App\Support\Ui::labelKelas($k) }}" {{ (string)$filterKelasId === (string)$k->id ? 'selected' : '' }}>
+                                    {{ \App\Support\Ui::labelKelas($k) }}
                                 </option>
                             @endforeach
                         </x-ui.select>
