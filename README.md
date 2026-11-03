@@ -62,11 +62,12 @@ Menu pada sidebar Guru (dan 4 tab bilah navigasi bawah di HP):
 Form Absensi Guru dirancang khusus untuk kenyamanan layar sentuh: seluruh siswa default **Hadir**, kontrol status pilihan kata penuh (**Hadir**, **Izin**, **Sakit**, **Alpa**), bilah ringkasan sticky dan tindakan cepat massal "Semua Hadir" serta "Semua Alpa" (didukung panel konfirmasi dua langkah di tempat yang menyebut jumlah siswa terdampak), input keterangan kondisional saat non-Hadir, tombol kembali terstandar, dan tombol Simpan melekat di dasar layar (*sticky bottom-0*).
 
 ### Siswa (Read-Only)
-Menu pada sidebar Siswa (dan 4 tab bilah navigasi bawah di HP):
+Menu pada sidebar Siswa (dan 3 tab bilah navigasi bawah di HP):
 1. **Dashboard:** Status kehadiran hari ini per mata pelajaran sesuai jadwal (*Belum diabsen / Hadir / Izin / Sakit / Alpa*), kartu persentase kehadiran keseluruhan, serta kartu rincian kehadiran (Total Hadir, Izin, Sakit, Alpa) interaktif yang tertaut langsung ke tab Semua Riwayat.
-2. **Jadwal Pelajaran:** Jadwal mingguan kelas siswa pada periode aktif yang dikelompokkan per hari urut jam pelajaran berbasis accordion, lengkap dengan panel filter terlipat (hari dan mata pelajaran), label filter aktif, tombol reset, dan badge "Hari ini".
-3. **Mata Pelajaran:** Daftar kartu mata pelajaran kelas pada periode aktif (nama mapel, kode, guru pengampu, jadwal sesi), dengan kartu tertaut langsung ke Jadwal Pelajaran berfilter mapel tersebut.
-4. **Riwayat Kehadiran:** Meninjau kehadiran dalam dua tingkat:
+2. **Mata Pelajaran:** Menu terpadu dengan dua pilihan tampilan yang dapat ditukar melalui tombol alih segmen di atas halaman:
+   - **Per Mata Pelajaran:** Daftar kartu ringkasan mata pelajaran kelas pada periode aktif (nama mapel, kode, guru pengampu, dan ringkasan jadwal sesi mingguan).
+   - **Per Hari:** Jadwal mingguan kelas siswa pada periode aktif yang dikelompokkan per hari urut jam pelajaran berbasis accordion, lengkap dengan panel filter terlipat (hari dan mata pelajaran), label filter aktif, tombol reset, dan lencana "Hari ini".
+3. **Riwayat Kehadiran:** Meninjau kehadiran dalam dua tingkat:
    - **Tab Per Mata Pelajaran (Bawaan):** Grid kartu interaktif per mata pelajaran (nama mapel, guru pengampu, persentase kehadiran, rincian H/I/S/A, total sesi, dan indikator warna) tertaut ke detail per mapel.
    - **Tab Semua Riwayat:** Daftar riwayat linier lengkap dengan panel filter terlipat memuat filter status kehadiran, mata pelajaran, bulan (dropdown 6 bulan semester terkait), tanggal, dan periode, serta header ringkas "Menampilkan {n} catatan {status}".
    - **Detail Per Mapel:** Matriks presensi P1..Pn berurut tanggal untuk satu mapel terpilih khusus SATU BARIS milik siswa itu sendiri beserta catatan keterangan dan tombol kembali.

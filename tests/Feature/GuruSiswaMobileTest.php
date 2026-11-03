@@ -89,14 +89,14 @@ class GuruSiswaMobileTest extends TestCase
         $resGuru->assertSee(route('guru.koreksi-absensi'));
         $resGuru->assertSee(route('guru.riwayat'));
 
-        // 2. Siswa melihat bottom nav dengan 4 tab
+        // 2. Siswa melihat bottom nav dengan 3 tab (Dashboard, Mata Pelajaran, Riwayat)
         $resSiswa = $this->actingAs($this->siswaUser)->get(route('siswa.dashboard'));
         $resSiswa->assertOk();
         $resSiswa->assertSee('aria-label="Navigasi bawah mobile"', false);
         $resSiswa->assertSee(route('siswa.dashboard'));
-        $resSiswa->assertSee(route('siswa.jadwal'));
         $resSiswa->assertSee(route('siswa.mapel'));
         $resSiswa->assertSee(route('siswa.riwayat'));
+        $resSiswa->assertDontSee(route('siswa.jadwal'));
 
         // 3. Admin tidak melihat bottom nav
         $resAdmin = $this->actingAs($this->adminUser)->get(route('admin.dashboard'));

@@ -277,7 +277,7 @@ Semua pasangan warna teks dan elemen UI di atas **100% LULUS** standar WCAG AA (
    - **Hanya untuk Role Guru dan Siswa**: Pengguna admin tetap memakai sidebar drawer untuk mengelola ragam master data sekolah.
    - **Daftar Tab Terpusat (`Ui::bottomNavLinks($role)`)**:
      - **Guru**: Dashboard (`guru.dashboard`), Jadwal (`guru.jadwal`), Absensi (`guru.koreksi-absensi`), Riwayat (`guru.riwayat`).
-     - **Siswa**: Dashboard (`siswa.dashboard`), Jadwal (`siswa.jadwal`), Mapel (`siswa.mapel`), Riwayat (`siswa.riwayat`).
+     - **Siswa**: Dashboard (`siswa.dashboard`), Mata Pelajaran (`siswa.mapel` aktif juga di `siswa.jadwal`), Riwayat (`siswa.riwayat`) (tepat 3 tab berlebar sama).
      - Seluruh nama route dan tab sinkron 100% dengan rute menu sidebar peran bersangkutan di `navigation.blade.php`.
    - **Spesifikasi Aksesibilitas & Tampilan**:
      - Ikon `x-ui.icon` ukuran `md` di atas label teks 11px–12px, tinggi minimal bilah 56px, target ketuk minimal 44px.
@@ -357,3 +357,16 @@ Semua pasangan warna teks dan elemen UI di atas **100% LULUS** standar WCAG AA (
     - **R11 (Anti-Escape Ganda Entitas HTML)**: Menjamin tidak ada entitas HTML (`&rarr;`, `&bull;`, `&times;`, `&amp;`) di dalam interpolasi Blade `{{ ... }}` dan string prop komponen di seluruh views Blade, melainkan memakai karakter Unicode asli atau komponen `<x-ui.icon>`.
     - **Cakupan Berkas Penegak**: Meliputi seluruh layout (`app.blade.php`, `navigation.blade.php`), komponen bersama (`alert`, `confirm-modal`, `sidebar-link`, `x-ui.*`), autentikasi (`login.blade.php`), tiga dashboard (`admin`, `guru`, `siswa`), seluruh halaman guru (`jadwal`, `absensi`, `koreksi_absensi`, `riwayat`, `riwayat_detail`), seluruh halaman siswa (`jadwal`, `mapel`, `riwayat`, `riwayat_mapel`), profil (`profile/edit.blade.php`, `profile/partials/update-password-form.blade.php`), halaman galat (`errors/403.blade.php`, `errors/503.blade.php`), komponen Breeze pendukung (`text-input`, `input-label`, `input-error`, `dropdown`, `dropdown-link`, `modal`), serta seluruh 18 view master data admin (`admin/siswa/**`, `admin/guru/**`, `admin/kelas/**`, `admin/mapel/**`, `admin/jurusan/**`, `admin/jadwal/**`).
     - **Pengujian Ikon**: Memastikan setiap ikon yang dipanggil di views terdaftar di pustaka `$supportedIcons` (21 ikon Tabler), melempar `InvalidArgumentException` saat testing/lokal, dan merender fallback netral di produksi.
+
+12. **Kontrol Alih Tampilan Mata Pelajaran (`x-ui.view-switch`)**:
+    - Kontrol segmen berupa dua tautan biasa (`<a>`) tanpa JavaScript yang terpasang di bagian atas halaman `siswa.mapel` dan `siswa.jadwal`.
+    - Pilihan tampilan:
+      - **"Per Mata Pelajaran"** menuju `route('siswa.mapel')` dengan ikon Tabler `book`.
+      - **"Per Hari"** menuju `route('siswa.jadwal')` dengan ikon Tabler `calendar`.
+    - **Spesifikasi Aksesibilitas & Tampilan**:
+      - Terbungkus dalam elemen `<nav aria-label="Pilihan tampilan mata pelajaran">` dengan grid 2 kolom berlebar seimbang (`grid grid-cols-2 gap-1.5`, lebar penuh di mobile dan maksimal sedang di desktop `w-full sm:max-w-md`).
+      - Target ketuk minimal 44px (`min-h-[44px]`).
+      - Tidak terpotong atau tumpang tindih pada layar sempit 320px.
+      - Status aktif jelas dan kontras: latar kartu (`bg-white dark:bg-slate-900`), border aksen tebal (`border-2 border-emerald-600 dark:border-emerald-400`), teks tebal tinted (`text-emerald-800 dark:text-emerald-300`), dan atribut aksesibilitas `aria-current="page"`.
+      - Ikon Tabler eksplisit ukuran `sm` (`size="sm"`, `w-4 h-4 shrink-0`).
+      - Tautan langsung ke route tujuan tanpa membawa parameter filter yang tidak relevan.

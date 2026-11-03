@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-bold text-xl text-slate-900 dark:text-white leading-tight">
-            {{ __('Jadwal Pelajaran') }}
+            {{ __('Jadwal per Hari') }}
         </h2>
     </x-slot>
 
@@ -55,7 +55,7 @@
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/20 text-white mb-1.5">
                             SMK Mandiri 02 Balaraja &bull; Portal Siswa
                         </span>
-                        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Jadwal Pelajaran Kelas</h1>
+                        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Jadwal per Hari Kelas</h1>
                         <p class="text-white/90 text-xs sm:text-sm mt-0.5">
                             Siswa: <strong class="text-white font-semibold">{{ Auth::user()->name }}</strong>
                             &bull; Kelas: <strong class="text-white font-semibold">{{ $siswa?->kelas?->nama ?? 'Belum ada kelas' }}</strong>
@@ -75,6 +75,9 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Kontrol Alih Tampilan (Per Mata Pelajaran / Per Hari) -->
+            <x-ui.view-switch active="jadwal" />
 
             <!-- Error Alert -->
             @if($errors->any())

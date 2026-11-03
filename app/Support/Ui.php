@@ -435,16 +435,10 @@ class Ui
                     'pattern' => 'siswa.dashboard',
                 ],
                 [
-                    'route' => 'siswa.jadwal',
-                    'label' => 'Jadwal',
-                    'icon' => 'calendar',
-                    'pattern' => 'siswa.jadwal*',
-                ],
-                [
                     'route' => 'siswa.mapel',
-                    'label' => 'Mapel',
+                    'label' => 'Mata Pelajaran',
                     'icon' => 'book',
-                    'pattern' => 'siswa.mapel*',
+                    'pattern' => 'siswa.mapel*|siswa.jadwal*',
                 ],
                 [
                     'route' => 'siswa.riwayat',

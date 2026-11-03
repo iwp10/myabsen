@@ -151,12 +151,19 @@ test('AB-05 & AB-08: akun siswa nonaktif ditolak mengakses jadwal pelajaran', fu
     $response->assertRedirect(route('login'));
 });
 
-test('sidebar siswa menampilkan menu Jadwal Pelajaran', function () {
+test('sidebar siswa memuat tepat 3 item (Dashboard, Mata Pelajaran, Riwayat) dan tidak memuat Jadwal Pelajaran sebagai item menu', function () {
     $response = $this->actingAs($this->userSiswa)->get(route('siswa.dashboard'));
 
     $response->assertStatus(200);
-    $response->assertSee('Jadwal Pelajaran');
-    $response->assertSee(route('siswa.jadwal'));
+    $response->assertSee(route('siswa.dashboard'));
+    $response->assertSee('Mata Pelajaran');
+    $response->assertSee(route('siswa.mapel'));
+    $response->assertSee('Riwayat');
+    $response->assertSee(route('siswa.riwayat'));
+
+    // Tidak memuat route atau teks Jadwal Pelajaran sebagai menu sidebar
+    $response->assertDontSee('Jadwal Pelajaran');
+    $response->assertDontSee(route('siswa.jadwal'));
 });
 
 test('performa: jumlah query jadwal siswa tidak bertambah proporsional terhadap jumlah jadwal (tanpa N+1)', function () {

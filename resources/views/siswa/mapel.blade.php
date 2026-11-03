@@ -36,6 +36,9 @@
                 </div>
             </div>
 
+            <!-- Kontrol Alih Tampilan (Per Mata Pelajaran / Per Hari) -->
+            <x-ui.view-switch active="mapel" />
+
             <!-- Kontainer Daftar Mata Pelajaran -->
             <div class="bg-white dark:bg-slate-900 rounded-xl shadow-xs border-2 border-slate-300 dark:border-slate-600 overflow-hidden">
                 <div class="p-4 sm:p-5 border-b-2 border-slate-300 dark:border-slate-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -49,8 +52,9 @@
                         </p>
                     </div>
                     <div>
-                        <a href="{{ route('siswa.jadwal') }}" class="inline-flex items-center text-xs font-bold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 gap-1 min-h-[44px]">
-                            <span>Lihat Jadwal Lengkap &rarr;</span>
+                        <a href="{{ route('siswa.jadwal') }}" class="inline-flex items-center text-xs font-bold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 gap-1.5 min-h-[44px]">
+                            <span>Lihat Jadwal per Hari</span>
+                            <x-ui.icon name="arrow-right" size="sm" class="shrink-0" />
                         </a>
                     </div>
                 </div>
@@ -125,7 +129,7 @@
 
                                     {{-- Footer Aksi --}}
                                     <div class="mt-3 pt-2.5 border-t-2 border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs text-emerald-700 dark:text-emerald-400 font-bold group-hover:underline">
-                                        <span>Buka di Jadwal Pelajaran</span>
+                                        <span>Buka di Jadwal per Hari</span>
                                         <x-ui.icon name="chevron-right" size="sm" class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                     </div>
                                 </a>

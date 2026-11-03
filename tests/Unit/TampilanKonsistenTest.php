@@ -44,6 +44,7 @@ class TampilanKonsistenTest extends TestCase
             'resources/views/components/ui/filter-panel.blade.php',
             'resources/views/components/ui/segmented-status.blade.php',
             'resources/views/components/ui/ringkasan-sticky.blade.php',
+            'resources/views/components/ui/view-switch.blade.php',
             'resources/views/components/ui/bottom-nav.blade.php',
             'resources/views/components/ui/filter-panel.blade.php',
             'resources/views/components/ui/segmented-status.blade.php',
@@ -755,9 +756,9 @@ class TampilanKonsistenTest extends TestCase
         $this->assertEquals(['guru.dashboard', 'guru.jadwal', 'guru.koreksi-absensi', 'guru.riwayat'], $guruRoutes);
 
         $siswaTabs = Ui::bottomNavLinks('siswa');
-        $this->assertCount(4, $siswaTabs, 'Pelanggaran R9: Siswa harus memiliki 4 tab bottom-nav.');
+        $this->assertCount(3, $siswaTabs, 'Pelanggaran R9: Siswa harus memiliki 3 tab bottom-nav.');
         $siswaRoutes = array_column($siswaTabs, 'route');
-        $this->assertEquals(['siswa.dashboard', 'siswa.jadwal', 'siswa.mapel', 'siswa.riwayat'], $siswaRoutes);
+        $this->assertEquals(['siswa.dashboard', 'siswa.mapel', 'siswa.riwayat'], $siswaRoutes);
 
         // 3. Tab dan route sinkron dengan sidebar peran itu di layouts/navigation.blade.php
         $base = dirname(__DIR__, 2);
@@ -773,6 +774,9 @@ class TampilanKonsistenTest extends TestCase
             $isFound = str_contains($navContent, $route) || ($route === 'siswa.dashboard' && str_contains($navContent, "Auth::user()->role . '.dashboard'"));
             $this->assertTrue($isFound, "Pelanggaran R9: Route siswa '{$route}' pada bottom-nav tidak ditemukan di sidebar navigation.blade.php");
         }
+
+        // Pastikan menu 'siswa.jadwal' tidak ada lagi di menu sidebar navigation.blade.php
+        $this->assertStringNotContainsString("route('siswa.jadwal')", $navContent, "Pelanggaran R9: Route 'siswa.jadwal' seharusnya tidak lagi ada di menu sidebar navigation.blade.php");
 
         // 4. Periksa komponen x-ui.bottom-nav
         $bottomNavPath = $base.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, 'resources/views/components/ui/bottom-nav.blade.php');

@@ -63,12 +63,42 @@ beforeEach(function () {
     ]);
 });
 
-test('sidebar siswa: menu Mata Pelajaran muncul di antara Jadwal Pelajaran dan Riwayat', function () {
-    $response = $this->actingAs($this->userSiswa)->get(route('siswa.dashboard'));
+test('sidebar siswa: menu Mata Pelajaran berstatus aktif pada route siswa.mapel dan siswa.jadwal', function () {
+    // Di dashboard
+    $resDash = $this->actingAs($this->userSiswa)->get(route('siswa.dashboard'));
+    $resDash->assertStatus(200);
+    $resDash->assertSee('Mata Pelajaran');
+    $resDash->assertSee(route('siswa.mapel'));
 
-    $response->assertStatus(200);
-    $response->assertSee('Mata Pelajaran');
-    $response->assertSee(route('siswa.mapel'));
+    // Di halaman siswa.mapel: item Mata Pelajaran aktif
+    $resMapel = $this->actingAs($this->userSiswa)->get(route('siswa.mapel'));
+    $resMapel->assertStatus(200);
+    $resMapel->assertSee(route('siswa.mapel'));
+
+    // Di halaman siswa.jadwal: item Mata Pelajaran tetap aktif
+    $resJadwal = $this->actingAs($this->userSiswa)->get(route('siswa.jadwal'));
+    $resJadwal->assertStatus(200);
+    $resJadwal->assertSee(route('siswa.mapel'));
+});
+
+test('kedua halaman memuat x-ui.view-switch dengan dua tautan benar dan aria-current sesuai halaman', function () {
+    // 1. Pada halaman siswa.mapel: tab Per Mata Pelajaran aktif
+    $resMapel = $this->actingAs($this->userSiswa)->get(route('siswa.mapel'));
+    $resMapel->assertStatus(200);
+    $resMapel->assertSee('aria-label="Pilihan tampilan mata pelajaran"', false);
+    $resMapel->assertSee('Per Mata Pelajaran');
+    $resMapel->assertSee('Per Hari');
+    $resMapel->assertSee(route('siswa.mapel'));
+    $resMapel->assertSee(route('siswa.jadwal'));
+
+    // 2. Pada halaman siswa.jadwal: tab Per Hari aktif
+    $resJadwal = $this->actingAs($this->userSiswa)->get(route('siswa.jadwal'));
+    $resJadwal->assertStatus(200);
+    $resJadwal->assertSee('aria-label="Pilihan tampilan mata pelajaran"', false);
+    $resJadwal->assertSee('Per Mata Pelajaran');
+    $resJadwal->assertSee('Per Hari');
+    $resJadwal->assertSee(route('siswa.mapel'));
+    $resJadwal->assertSee(route('siswa.jadwal'));
 });
 
 test('AB-08: daftar mata pelajaran hanya memuat mapel kelas siswa itu pada periode aktif', function () {

@@ -18,16 +18,24 @@ Halo Siswa-Siswi SMK Mandiri 02 Balaraja! Dokumen ini adalah panduan ringkas unt
 
 ---
 
-## 2. Mengenal 4 Menu Utama di HP
+## 2. Mengenal 3 Menu Utama di HP
 
-Di bagian bawah layar HP, kamu akan melihat 4 menu navigasi utama:
+Di bagian bawah layar HP (dan sidebar laptop), kamu akan melihat 3 menu navigasi utama:
 
 1. **Dashboard**: Menampilkan jadwal pelajaran hari ini, status kehadiranmu hari ini, serta kartu persentase total kehadiranmu.
-2. **Jadwal**: Menampilkan seluruh jadwal pelajaran mingguan kelasmu dari hari Senin sampai Sabtu.
-3. **Mapel**: Menampilkan daftar seluruh mata pelajaran yang kamu pelajari beserta nama guru pengajarnya.
-4. **Riwayat**: Menampilkan catatan rekap kehadiran lengkap di setiap mata pelajaran.
+2. **Mata Pelajaran**: Menampilkan seluruh mata pelajaran kelasmu dalam dua pilihan tampilan yang dapat kamu tukar kapan saja melalui tombol di bagian atas layar:
+   - **Per Mata Pelajaran**: Melihat daftar kartu ringkasan seluruh mata pelajaran beserta nama guru pengampu dan jadwal pertemuannya.
+   - **Per Hari**: Melihat jadwal mingguan yang dikelompokkan dari hari Senin sampai Sabtu lengkap dengan jam pelajaran dan filter pencarian.
+3. **Riwayat**: Menampilkan catatan rekap kehadiran lengkap di setiap mata pelajaran dan daftar absensi per tanggal.
 
-[GAMBAR: Tampilan menu navigasi bawah pada ponsel siswa]
+### Cara Menukar Tampilan di Menu Mata Pelajaran
+1. Buka menu **Mata Pelajaran** dari bilah navigasi bawah atau menu samping.
+2. Pada bagian atas halaman, ketuk tombol pilihan tampilan:
+   - Pilih **Per Mata Pelajaran** untuk melihat daftar guru dan ringkasan mapel kelasmu.
+   - Pilih **Per Hari** untuk melihat urutan jam pelajaran harianmu dari pagi hingga selesai.
+3. Kamu juga bisa mengetuk salah satu kartu pada tampilan Per Mata Pelajaran untuk langsung membuka jadwal hariannya.
+
+[GAMBAR: Tampilan menu navigasi bawah 3 tab pada ponsel siswa dan tombol alih tampilan]
 
 ---
 
