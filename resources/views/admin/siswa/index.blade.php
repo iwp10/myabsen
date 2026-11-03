@@ -89,8 +89,8 @@
                             @foreach($kelasListGrouped as $group)
                                 <optgroup label="{{ $group['label'] }}">
                                     @foreach($group['items'] as $k)
-                                        <option value="{{ $k->id }}" {{ (string)$filterKelasId === (string)$k->id ? 'selected' : '' }}>
-                                            {{ $k->tingkat }} {{ $k->nama }} - {{ $k->jurusan->kode }}
+                                        <option value="{{ $k->id }}" title="{{ \App\Support\Ui::labelKelas($k) }}" {{ (string)$filterKelasId === (string)$k->id ? 'selected' : '' }}>
+                                            {{ \App\Support\Ui::labelKelas($k) }}
                                         </option>
                                     @endforeach
                                 </optgroup>
@@ -137,8 +137,8 @@
                         <label for="import_kelas_id" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Pilih Kelas</label>
                         <x-ui.select id="import_kelas_id" name="kelas_id" required>
                             <option value="">-- Pilih Kelas --</option>
-                            @foreach($kelas as $k)
-                                <option value="{{ $k->id }}">{{ $k->nama }}</option>
+                            @foreach(\App\Support\Ui::sortKelas($kelas) as $k)
+                                <option value="{{ $k->id }}" title="{{ \App\Support\Ui::labelKelas($k) }}">{{ \App\Support\Ui::labelKelas($k) }}</option>
                             @endforeach
                         </x-ui.select>
                         @error('kelas_id') <span class="text-red-700 dark:text-red-400 text-xs mt-1 block">{{ $message }}</span> @enderror
@@ -196,7 +196,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap" data-label="Kelas">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700">
-                                    {{ $siswa->kelas->tingkat }} {{ $siswa->kelas->nama }} - {{ $siswa->kelas->jurusan->kode }}
+                                    {{ \App\Support\Ui::labelKelas($siswa->kelas) }}
                                 </span>
                             </td>
                             <td class="stack-actions px-6 py-4 whitespace-nowrap text-right" data-label="Aksi">

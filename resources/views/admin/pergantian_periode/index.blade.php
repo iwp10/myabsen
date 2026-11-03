@@ -423,8 +423,8 @@
                                              wrapper-class="mt-1">
                                     <option value="">-- Pilih Kelas Asal --</option>
                                     @foreach($daftarKelasAktif as $ka)
-                                        <option value="{{ $ka->id }}" {{ (string)$kelasAsalId === (string)$ka->id ? 'selected' : '' }}>
-                                            {{ $ka->nama }} ({{ $ka->tahun_ajaran }} - {{ $ka->semester }})
+                                        <option value="{{ $ka->id }}" title="{{ \App\Support\Ui::labelKelas($ka) }}" {{ (string)$kelasAsalId === (string)$ka->id ? 'selected' : '' }}>
+                                            {{ \App\Support\Ui::labelKelas($ka) }}
                                         </option>
                                     @endforeach
                                 </x-ui.select>
@@ -483,8 +483,8 @@
                                             <option value="">-- Pilih Kelas Tujuan --</option>
                                             @foreach($daftarKelasAktif as $kt)
                                                 @if((int)$kt->id !== (int)$kelasAsalId)
-                                                    <option value="{{ $kt->id }}">
-                                                        {{ $kt->nama }} ({{ $kt->tahun_ajaran }} - {{ $kt->semester }})
+                                                    <option value="{{ $kt->id }}" title="{{ \App\Support\Ui::labelKelas($kt) }}">
+                                                        {{ \App\Support\Ui::labelKelas($kt) }}
                                                     </option>
                                                 @endif
                                             @endforeach
@@ -644,8 +644,8 @@
                                          wrapper-class="mt-1">
                                 <option value="">-- Pilih Kelas --</option>
                                 @foreach($daftarKelasAktif as $kl)
-                                    <option value="{{ $kl->id }}" {{ (string)$kelasLulusId === (string)$kl->id ? 'selected' : '' }}>
-                                        {{ $kl->nama }} (Tingkat {{ $kl->tingkat }} &bull; {{ $kl->tahun_ajaran }})
+                                    <option value="{{ $kl->id }}" title="{{ \App\Support\Ui::labelKelas($kl) }}" {{ (string)$kelasLulusId === (string)$kl->id ? 'selected' : '' }}>
+                                        {{ \App\Support\Ui::labelKelas($kl) }}
                                     </option>
                                 @endforeach
                             </x-ui.select>

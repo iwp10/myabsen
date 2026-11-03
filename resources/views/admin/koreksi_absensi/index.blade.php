@@ -74,9 +74,9 @@
                                 name="kelas_id"
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 dark:focus:border-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 rounded-md shadow-sm text-sm">
                             <option value="">Semua Kelas</option>
-                            @foreach($kelasList as $kelas)
-                                <option value="{{ $kelas->id }}" {{ $kelasId == $kelas->id ? 'selected' : '' }}>
-                                    {{ $kelas->nama }} @if($kelas->jurusan) ({{ $kelas->jurusan->nama }}) @endif
+                            @foreach(\App\Support\Ui::sortKelas($kelasList) as $kelas)
+                                <option value="{{ $kelas->id }}" title="{{ \App\Support\Ui::labelKelas($kelas) }}" {{ $kelasId == $kelas->id ? 'selected' : '' }}>
+                                    {{ \App\Support\Ui::labelKelas($kelas) }}
                                 </option>
                             @endforeach
                         </select>

@@ -117,16 +117,17 @@ Anda dapat menambahkan siswa satu per satu secara manual atau mengimpor banyak s
 ### Langkah 6: Membuat Jadwal Pelajaran
 1. Klik menu **Jadwal** pada bilah samping.
 2. Klik tombol **Tambah Jadwal**.
-3. Lengkapi formulir:
-   - **Hari**: Pilih hari pembelajaran (`Senin` sampai `Sabtu`).
-   - **Jam Mulai** dan **Jam Selesai**: Tentukan jam pelajaran (contoh: `07:15` sampai `09:15`).
-   - **Kelas**: Pilih rombongan belajar yang mengikuti pembelajaran.
+3. Tentukan **Tahun Ajaran** dan **Semester** jadwal terlebih dahulu (secara bawaan terisi periode aktif sekolah).
+4. Lengkapi formulir:
+   - **Kelas**: Pilih rombongan belajar. Dropdown kelas telah dilengkapi informasi periode lengkap (contoh: `DKV 1 · Ganjil 2026/2027`) dan **menyaring otomatis** hanya menampilkan kelas yang terdaftar pada Tahun Ajaran dan Semester yang Anda pilih di langkah 3. Jika kelas pada periode tersebut belum dibuat, sistem menampilkan pesan *"Belum ada kelas di periode ini"* beserta tautan praktis ke menu Salin Kelas (Pergantian Periode).
    - **Mata Pelajaran**: Pilih mata pelajaran yang diajarkan.
    - **Guru**: Pilih guru pengampu.
-4. Klik tombol **Simpan**.
+   - **Hari**: Pilih hari pembelajaran (`Senin` sampai `Sabtu`).
+   - **Jam Mulai** dan **Jam Selesai**: Tentukan jam pelajaran (contoh: `07:15` sampai `09:15`).
+5. Klik tombol **Simpan**.
 
-> **PERINGATAN PENTING MENGENAI PERIODE JADWAL:**
-> Periode tahun ajaran dan semester pada jadwal mengikuti periode kelas yang dipilih. Pastikan kelas yang Anda pilih pada jadwal berada pada tahun ajaran dan semester yang sama dengan periode aktif sekolah saat ini. Jika Anda memilih kelas dari periode yang berbeda, jadwal tersebut tidak akan tampil di dashboard guru pengajar maupun dashboard siswa!
+> **PERINGATAN PENTING MENGENAI KESELARASAN PERIODE JADWAL:**
+> Sistem secara otomatis menyaring dropdown kelas agar selaras dengan periode yang dipilih. Jika Anda mengubah Tahun Ajaran atau Semester saat kelas sudah dipilih, pilihan kelas akan direset dengan pesan ramah *"Pilih ulang kelas sesuai periode"*. Hal ini menjaga agar jadwal selalu tepat sasaran dan langsung tampil di dashboard guru pengajar maupun dashboard siswa terkait.
 
 ### Langkah 7: Memeriksa Pengaturan Periode Aktif
 1. Klik menu **Pengaturan Periode** pada bilah samping.

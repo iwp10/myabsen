@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Enums\StatusKehadiran;
 use App\Models\Jadwal;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class Ui
 {
@@ -56,6 +57,62 @@ class Ui
             'alpa' => 'x',
             default => 'clock',
         };
+    }
+
+    /**
+     * Format label kelas terstandarisasi untuk dropdown dan teks yang menampilkan lebih dari satu periode.
+     * Format baku: "{nama} · {semester} {tahun_ajaran}", mis. "DKV 1 · Ganjil 2026/2027"
+     */
+    public static function labelKelas(mixed $kelas): string
+    {
+        if (! $kelas) {
+            return '-';
+        }
+
+        $nama = is_array($kelas) ? ($kelas['nama'] ?? '') : ($kelas->nama ?? '');
+        $semester = is_array($kelas) ? ($kelas['semester'] ?? '') : ($kelas->semester ?? '');
+        $tahunAjaran = is_array($kelas) ? ($kelas['tahun_ajaran'] ?? '') : ($kelas->tahun_ajaran ?? '');
+
+        if ($semester !== '' && $tahunAjaran !== '') {
+            return "{$nama} · {$semester} {$tahunAjaran}";
+        }
+
+        return (string) $nama;
+    }
+
+    /**
+     * Urutkan koleksi kelas dengan urutan baku:
+     * 1. Periode terbaru (tahun ajaran desc, semester Genap lebih baru dari Ganjil)
+     * 2. Tingkat (asc: X, XI, XII)
+     * 3. Nama (natural case-insensitive asc)
+     */
+    public static function sortKelas(iterable $daftarKelas): Collection
+    {
+        return collect($daftarKelas)->sort(function ($a, $b) {
+            $taA = is_array($a) ? ($a['tahun_ajaran'] ?? '') : ($a->tahun_ajaran ?? '');
+            $taB = is_array($b) ? ($b['tahun_ajaran'] ?? '') : ($b->tahun_ajaran ?? '');
+            if ($taA !== $taB) {
+                return strcmp((string) $taB, (string) $taA); // Descending tahun ajaran
+            }
+
+            $semA = is_array($a) ? ($a['semester'] ?? '') : ($a->semester ?? '');
+            $semB = is_array($b) ? ($b['semester'] ?? '') : ($b->semester ?? '');
+            if ($semA !== $semB) {
+                // Genap lebih baru dari Ganjil dalam satu tahun ajaran
+                return ($semA === 'Genap') ? -1 : 1;
+            }
+
+            $tingkatA = is_array($a) ? ($a['tingkat'] ?? '') : ($a->tingkat ?? '');
+            $tingkatB = is_array($b) ? ($b['tingkat'] ?? '') : ($b->tingkat ?? '');
+            if ($tingkatA !== $tingkatB) {
+                return strcmp((string) $tingkatA, (string) $tingkatB);
+            }
+
+            $namaA = is_array($a) ? ($a['nama'] ?? '') : ($a->nama ?? '');
+            $namaB = is_array($b) ? ($b['nama'] ?? '') : ($b->nama ?? '');
+
+            return strnatcasecmp((string) $namaA, (string) $namaB);
+        })->values();
     }
 
     /**

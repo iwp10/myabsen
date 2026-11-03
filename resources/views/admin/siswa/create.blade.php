@@ -29,9 +29,9 @@
                         <x-input-label for="kelas_id" value="Kelas" />
                         <x-ui.select name="kelas_id" id="kelas_id" required wrapperClass="mt-1">
                             <option value="">-- Pilih Kelas --</option>
-                            @foreach($kelas as $k)
-                                <option value="{{ $k->id }}" {{ old('kelas_id') == $k->id ? 'selected' : '' }}>
-                                    {{ $k->tingkat }} {{ $k->nama }} - {{ $k->jurusan->kode }}
+                            @foreach(\App\Support\Ui::sortKelas($kelas) as $k)
+                                <option value="{{ $k->id }}" title="{{ \App\Support\Ui::labelKelas($k) }}" {{ old('kelas_id') == $k->id ? 'selected' : '' }}>
+                                    {{ \App\Support\Ui::labelKelas($k) }}
                                 </option>
                             @endforeach
                         </x-ui.select>

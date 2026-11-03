@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Ui;
 use Database\Factories\KelasFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,11 @@ class Kelas extends Model
     protected $table = 'kelas';
 
     protected $fillable = ['jurusan_id', 'nama', 'tingkat', 'tahun_ajaran', 'semester'];
+
+    public function getLabelLengkapAttribute(): string
+    {
+        return Ui::labelKelas($this);
+    }
 
     public function jurusan()
     {
