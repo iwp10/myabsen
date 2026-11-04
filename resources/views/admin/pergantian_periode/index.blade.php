@@ -89,6 +89,32 @@
                 </x-alert>
             @endif
 
+            <!-- KARTU TAUTAN PERGANTIAN SEMESTER OTOMATIS -->
+            <div class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/30 border-2 border-emerald-400 dark:border-emerald-700 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-start sm:items-center gap-3 min-w-0">
+                    <div class="p-2.5 rounded-xl bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 shrink-0">
+                        <x-ui.icon name="calendar-check" size="md" />
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h2 class="text-base sm:text-lg font-bold text-emerald-950 dark:text-emerald-100">
+                                Pergantian Semester Otomatis
+                            </h2>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-200 text-emerald-900 dark:bg-emerald-500/25 dark:text-emerald-200">
+                                Disarankan untuk Ganjil ke Genap
+                            </span>
+                        </div>
+                        <p class="text-xs sm:text-sm text-emerald-900/80 dark:text-emerald-300/80 mt-0.5">
+                            Salin kelas, pindahkan siswa aktif, dan salin jadwal pembelajaran dalam satu alur praktis dengan pratinjau sebelum dijalankan.
+                        </p>
+                    </div>
+                </div>
+                <a href="{{ route('admin.pergantian-semester.index') }}" class="{{ \App\Support\Ui::tombol('primary') }} shrink-0 w-full sm:w-auto inline-flex items-center justify-center gap-2">
+                    <span>Buka Pergantian Otomatis</span>
+                    <x-ui.icon name="arrow-right" size="sm" />
+                </a>
+            </div>
+
             <!-- 0. KARTU PANDUAN KERJA & STATUS PERIODE AKTIF -->
             <div x-ref="panduanPanel" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 scroll-mt-24">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
