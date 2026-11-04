@@ -77,6 +77,7 @@ class TampilanKonsistenTest extends TestCase
             'resources/views/admin/jadwal/index.blade.php',
             'resources/views/admin/jadwal/create.blade.php',
             'resources/views/admin/jadwal/edit.blade.php',
+            'resources/views/admin/koreksi_absensi/index.blade.php',
         ];
 
         return array_map(fn ($rel) => $base.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $rel), $relativePaths);

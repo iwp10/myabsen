@@ -9,6 +9,8 @@ use App\Http\Requests\UpdateKelasRequest;
 use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Services\PeriodeService;
+use App\Support\Kembali;
+use Illuminate\Http\Request;
 
 class KelasController extends Controller
 {
@@ -75,6 +77,10 @@ class KelasController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        if ($kelas->isEmpty() && $kelas->currentPage() > 1) {
+            return redirect($request->fullUrlWithQuery(['page' => max(1, $kelas->lastPage())]));
+        }
+
         $daftarTingkatDb = Kelas::query()
             ->select('tingkat')
             ->distinct()
@@ -119,7 +125,9 @@ class KelasController extends Controller
     {
         Kelas::create($request->validated());
 
-        return redirect()->route('admin.kelas.index')
+        $target = Kembali::tujuan($request->input('kembali'), route('admin.kelas.index'), ['/admin/kelas']);
+
+        return redirect($target)
             ->with('success', 'Kelas berhasil ditambahkan.');
     }
 
@@ -137,26 +145,30 @@ class KelasController extends Controller
     {
         $kelas->update($request->validated());
 
-        return redirect()->route('admin.kelas.index')
+        $target = Kembali::tujuan($request->input('kembali'), route('admin.kelas.index'), ['/admin/kelas']);
+
+        return redirect($target)
             ->with('success', 'Kelas berhasil diperbarui.');
     }
 
-    public function destroy(Kelas $kelas)
+    public function destroy(Request $request, Kelas $kelas)
     {
+        $target = Kembali::tujuan($request->input('kembali'), route('admin.kelas.index'), ['/admin/kelas']);
+
         $siswaAktifCount = $kelas->siswa()->count();
         if ($siswaAktifCount > 0) {
-            return redirect()->route('admin.kelas.index')
+            return redirect($target)
                 ->with('error', "Kelas ini masih berisi {$siswaAktifCount} siswa aktif. Pindahkan atau luluskan siswa terlebih dahulu.");
         }
 
         if ($kelas->jadwal()->exists()) {
-            return redirect()->route('admin.kelas.index')
+            return redirect($target)
                 ->with('error', 'Kelas tidak dapat dihapus karena masih memiliki jadwal aktif.');
         }
 
         $kelas->delete();
 
-        return redirect()->route('admin.kelas.index')
+        return redirect($target)
             ->with('success', 'Kelas berhasil dihapus.');
     }
 }

@@ -8,6 +8,7 @@ use App\Models\DetailAbsensi;
 use App\Models\Mapel;
 use App\Services\AbsensiService;
 use App\Services\PeriodeService;
+use App\Services\PertemuanService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -15,7 +16,8 @@ class DashboardController extends Controller
 {
     public function __construct(
         protected AbsensiService $absensiService,
-        protected PeriodeService $periodeService
+        protected PeriodeService $periodeService,
+        protected PertemuanService $pertemuanService
     ) {}
 
     public function dashboard(Request $request)
@@ -140,8 +142,11 @@ class DashboardController extends Controller
             $rekapSemester
         );
 
+        $nomorPertemuanMap = $this->pertemuanService->hitungNomorPertemuan($riwayat->items());
+
         return view('siswa.riwayat', compact(
             'riwayat',
+            'nomorPertemuanMap',
             'mapels',
             'persentasePerMapel',
             'daftarPeriode',

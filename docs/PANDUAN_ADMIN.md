@@ -149,6 +149,9 @@ Pada setiap tabel data master (Jurusan, Kelas, Mata Pelajaran, Guru, Siswa, Jadw
 - Untuk mengubah data: Klik tombol **Ubah** (ikon pensil berwarna biru) pada baris yang diinginkan, perbarui isian, lalu klik tombol **Simpan**.
 - Untuk menghapus data: Klik tombol **Hapus** (ikon tempat sampah berwarna merah). Sistem akan meminta konfirmasi sebelum data dihapus.
 
+> **Penyaringan & Halaman Tetap Bertahan (Retensi Filter):**
+> Pada daftar **Jadwal** dan **Kelas**, ketika Anda sedang menyaring data (misalnya berdasarkan hari, kelas, guru, atau tingkat tertentu di halaman 2) lalu melakukan pengubahan atau penghapusan data, sistem secara otomatis mengembalikan Anda ke halaman dan saringan yang sama persis. Anda tidak perlu menyaring ulang data dari awal. Jika data terakhir pada suatu halaman dihapus hingga halaman menjadi kosong, sistem dengan cerdas mengarahkan Anda ke halaman sebelumnya dengan saringan yang tetap terjaga.
+
 ### Arti Status "Dihapus" (Perlindungan Histori dan Pemulihan)
 Aplikasi MyAbsen menerapkan perlindungan data ketat agar rekam jejak kehadiran siswa tidak hilang tanpa sengaja:
 - **Data yang Belum Pernah Dipakai Absensi:** Jika siswa, guru, kelas, atau mapel belum pernah memiliki catatan absensi sama sekali, data akan dihapus permanen dari sistem.
