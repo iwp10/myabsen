@@ -9,6 +9,7 @@ use App\Models\Mapel;
 use App\Services\AbsensiService;
 use App\Services\PeriodeService;
 use App\Services\PertemuanService;
+use App\Services\SiswaDashboardService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,8 @@ class DashboardController extends Controller
     public function __construct(
         protected AbsensiService $absensiService,
         protected PeriodeService $periodeService,
-        protected PertemuanService $pertemuanService
+        protected PertemuanService $pertemuanService,
+        protected SiswaDashboardService $siswaDashboardService
     ) {}
 
     public function dashboard(Request $request)
@@ -40,7 +42,43 @@ class DashboardController extends Controller
                 'persentase' => 0.0,
             ];
 
-        return view('siswa.dashboard', compact('statusHariIni', 'ringkasanKehadiran'));
+        $belumDiabsen = $siswa
+            ? $this->siswaDashboardService->getJadwalBelumDiabsen($siswa, $tanggalHariIni)
+            : [
+                'total' => 0,
+                'items' => collect(),
+                'sisa' => 0,
+                'has_data' => false,
+            ];
+
+        $ringkasanMingguIni = $siswa
+            ? $this->siswaDashboardService->getRingkasanMingguIni($siswa, $tanggalHariIni)
+            : [
+                'total_hadir' => 0,
+                'total_izin' => 0,
+                'total_sakit' => 0,
+                'total_alpa' => 0,
+                'total_sesi' => 0,
+                'persentase' => 0.0,
+                'has_data' => false,
+                'rentang_label' => '',
+            ];
+
+        $mapelPerluPerhatian = $siswa
+            ? $this->siswaDashboardService->getMapelPerluPerhatian($siswa)
+            : collect();
+
+        $activePeriode = $this->periodeService->getActivePeriode();
+        $filterPeriodeValue = ($activePeriode['tahun_ajaran'] ?? '').'|'.($activePeriode['semester'] ?? '');
+
+        return view('siswa.dashboard', compact(
+            'statusHariIni',
+            'ringkasanKehadiran',
+            'belumDiabsen',
+            'ringkasanMingguIni',
+            'mapelPerluPerhatian',
+            'filterPeriodeValue'
+        ));
     }
 
     public function riwayat(RiwayatSiswaFilterRequest $request)
