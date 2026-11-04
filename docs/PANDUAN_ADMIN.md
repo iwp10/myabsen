@@ -324,11 +324,38 @@ Pergantian periode akademik adalah prosedur paling krusial bagi administrator. I
 
 ---
 
-### DAFTAR PERIKSA LANGKAH KERJA BERURUTAN:
+### PROSEDUR UTAMA: PERGANTIAN SEMESTER OTOMATIS (GANJIL KE GENAP)
+
+> **PERINGATAN TEBAL & MUTLAK SEBELUM MEMULAI:**
+> Pastikan seluruh guru telah menyelesaikan input absensi dan Anda telah menuntaskan seluruh koreksi absensi pada semester Ganjil sebelum memindahkan siswa. Begitu siswa dipindahkan ke kelas semester Genap, siswa tidak lagi tercatat di form absensi kelas lama. Jangan menjalankan pemindahan jika absensi semester Ganjil masih ada yang tertinggal!
+
+Khusus pergantian dari semester Ganjil ke semester Genap pada tahun ajaran yang sama, sistem menyediakan alur praktis **Pergantian Semester Otomatis**:
+
+1. Buka menu **Pergantian Periode** pada bilah samping.
+2. Klik tombol hijau **Buka Pergantian Otomatis** pada kartu banner di bagian atas (atau akses halaman `admin/pergantian-semester`).
+3. Pada bagian **Tentukan Periode Asal & Opsi Pergantian**:
+   - Pilih **Tahun Ajaran** (semester asal: Ganjil). Semester tujuan akan diatur otomatis ke **Semester Genap**.
+   - Centang opsi tindakan yang diinginkan:
+     - **Salin Struktur Kelas**: Membuat kelas padanan di semester Genap (otomatis memakai kelas yang sudah ada).
+     - **Pindahkan Siswa Aktif**: Memindahkan siswa aktif ke kelas semester Genap.
+     - **Salin Jadwal Pembelajaran**: Menyalin seluruh jadwal mingguan dengan pemeriksaan pencegahan jadwal bentrok (AB-06).
+4. Klik tombol **Lihat Pratinjau Rencana**.
+5. Periksa ringkasan dan daftar per kelas pada tabel pratinjau:
+   - Status kelas: *Akan Disalin*, *Sudah Ada*, atau *Dilewati*.
+   - Siswa aktif: Jumlah siswa yang akan dipindahkan.
+   - Jadwal pelajaran: Rincian jadwal yang siap disalin beserta alasan transparan jika ada jadwal yang dilewati (misalnya karena bentrok jam mengajar atau guru dinonaktifkan).
+6. Jika rencana sudah sesuai, klik tombol **Jalankan Pergantian Semester**.
+7. Pada jendela konfirmasi, periksa kembali jumlah data lalu klik **Ya, Jalankan Sekarang**.
+8. Setelah pemrosesan selesai, sistem menampilkan kartu hasil eksekusi. Klik tombol **Aktifkan Semester Genap {Tahun Ajaran}** untuk menetapkan semester Genap sebagai periode aktif sekolah.
+
+---
+
+### JALUR MANUAL: PERGANTIAN TAHUN AJARAN BARU & PROSEDUR CADANGAN
+
+Gunakan tab manual pada menu **Pergantian Periode** untuk transisi tahun ajaran baru (kenaikan tingkat / kelulusan) atau jika ingin memproses langkah demi langkah secara manual:
 
 #### Langkah 1: Selesaikan Semua Koreksi Absensi Periode Lama
-> **PERINGATAN TEBAL & MUTLAK:**
-> Pastikan seluruh guru telah menyelesaikan input absensi dan Anda telah menuntaskan seluruh koreksi absensi pada semester lama sebelum memulai mutasi siswa. Begitu siswa dipindahkan ke kelas baru, rombongan belajar kelas lama telah berganti. Jangan memindahkan siswa jika absensi semester lama masih ada yang tertinggal!
+Pastikan seluruh sesi absensi semester lama sudah lengkap dan tuntas.
 
 #### Langkah 2: Menyalin Struktur Kelas ke Periode Baru
 1. Buka menu **Pergantian Periode** pada bilah samping.
