@@ -120,7 +120,252 @@
                 </div>
             </div>
 
-            <!-- 2. RINGKASAN & BREAKDOWN KEHADIRAN (PERSENTASE MENONJOL & 4 KARTU 2 KOLOM DI HP) -->
+            <!-- 2. BELUM DIABSEN (7 HARI TERAKHIR) -->
+            <div class="bg-white dark:bg-slate-900 rounded-xl shadow-xs border-2 border-slate-300 dark:border-slate-600 overflow-hidden">
+                <div class="p-4 sm:p-5 border-b-2 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 flex items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <x-ui.icon name="clock" size="md" class="text-amber-600 dark:text-amber-400" />
+                            <span>Belum Diabsen (7 Hari Terakhir)</span>
+                        </h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                            Guru belum mencatat kehadiran. Ini bukan berarti kamu alpa.
+                        </p>
+                    </div>
+                    @if($belumDiabsen['total'] > 0)
+                        <span class="text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 px-2.5 py-1 rounded-lg shrink-0">
+                            {{ $belumDiabsen['total'] }} Pertemuan
+                        </span>
+                    @endif
+                </div>
+
+                <div class="p-4 sm:p-5">
+                    @if($belumDiabsen['total'] === 0)
+                        <div class="py-8 text-center">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 mb-3 border border-emerald-300 dark:border-emerald-700">
+                                <x-ui.icon name="check" size="lg" />
+                            </div>
+                            <p class="text-base font-bold text-slate-900 dark:text-white">Semua pertemuan 7 hari terakhir sudah dicatat.</p>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">Tidak ada jadwal pembelajaran dalam 7 hari terakhir yang terlewat atau belum dicatat oleh bapak/ibu guru.</p>
+                        </div>
+                    @else
+                        {{-- Kartu Mobile (< md) --}}
+                        <div class="md:hidden space-y-3">
+                            @foreach($belumDiabsen['items'] as $item)
+                                <div class="bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl p-4 shadow-xs dark:shadow-lg dark:shadow-black/40 dark:ring-1 dark:ring-white/5 space-y-2">
+                                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                                        <span class="text-xs font-mono font-bold bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 py-1 px-2.5 rounded-md">
+                                            {{ $item->jam_mulai }} - {{ $item->jam_selesai }} WIB
+                                        </span>
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border-2 border-dashed border-slate-400 dark:bg-slate-700/50 dark:text-slate-200 dark:border-slate-400 shrink-0">
+                                            <x-ui.icon name="clock" size="sm" class="shrink-0" />
+                                            <span>Belum dicatat guru</span>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-base text-slate-900 dark:text-white leading-snug">
+                                            {{ $item->mapel_nama }}
+                                        </h4>
+                                        <p class="text-xs font-medium text-slate-600 dark:text-slate-300 mt-0.5">
+                                            Guru: <strong class="text-slate-800 dark:text-slate-200">{{ $item->guru_nama }}</strong>
+                                        </p>
+                                        <p class="text-xs font-semibold text-slate-700 dark:text-slate-300 mt-1 flex items-center gap-1">
+                                            <x-ui.icon name="calendar" size="sm" class="text-slate-600 dark:text-slate-400 shrink-0" />
+                                            <span>{{ $item->tanggal_label }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Tabel Desktop (>= md) --}}
+                        <div class="hidden md:block overflow-x-auto rounded-lg border-2 border-slate-300 dark:border-slate-600">
+                            <table class="min-w-full divide-y-2 divide-slate-200 dark:divide-slate-700">
+                                <thead class="bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-400 dark:border-slate-500">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Tanggal &amp; Hari</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Jam</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Mata Pelajaran</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Guru</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white dark:bg-slate-900 divide-y-2 divide-slate-200 dark:divide-slate-700">
+                                    @foreach($belumDiabsen['items'] as $item)
+                                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-slate-100 font-semibold">
+                                                {{ $item->tanggal_label }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-slate-100 font-mono font-medium tabular-nums">
+                                                {{ $item->jam_mulai }} - {{ $item->jam_selesai }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-white font-semibold">
+                                                {{ $item->mapel_nama }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-300">
+                                                {{ $item->guru_nama }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border-2 border-dashed border-slate-400 dark:bg-slate-700/50 dark:text-slate-200 dark:border-slate-400">
+                                                    <x-ui.icon name="clock" size="sm" class="shrink-0" />
+                                                    <span>Belum dicatat guru</span>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @if($belumDiabsen['sisa'] > 0)
+                            <div class="mt-3 p-3 text-center text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/60 rounded-xl border border-slate-300 dark:border-slate-700">
+                                <span>dan {{ $belumDiabsen['sisa'] }} lainnya</span>
+                            </div>
+                        @endif
+                    @endif
+                </div>
+            </div>
+
+            <!-- 3. DUA KARTU: RINGKASAN MINGGU INI & PERLU PERHATIAN -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <!-- KARTU A: RINGKASAN MINGGU INI -->
+                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-xs border-2 border-slate-300 dark:border-slate-600 overflow-hidden flex flex-col justify-between">
+                    <div class="p-4 sm:p-5 border-b-2 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 flex items-center justify-between gap-3">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <x-ui.icon name="calendar" size="md" class="text-blue-600 dark:text-blue-400" />
+                                <span>Ringkasan Minggu Ini</span>
+                            </h3>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                                Catatan kehadiran 7 hari terakhir ({{ $ringkasanMingguIni['rentang_label'] }})
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+                        @if(! $ringkasanMingguIni['has_data'])
+                            <div class="py-8 text-center my-auto">
+                                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 mb-3 border border-slate-300 dark:border-slate-600">
+                                    <x-ui.icon name="clock" size="lg" />
+                                </div>
+                                <p class="text-base font-bold text-slate-900 dark:text-white">Belum ada catatan minggu ini</p>
+                                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">Belum ada data kehadiran yang tercatat untukmu dalam 7 hari terakhir.</p>
+                            </div>
+                        @else
+                            <div class="space-y-4">
+                                <div class="flex items-baseline justify-between gap-2 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                                    <div>
+                                        <span class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 block">
+                                            Persentase Minggu Ini
+                                        </span>
+                                        <span class="text-xs text-slate-600 dark:text-slate-400 mt-0.5 block">
+                                            dari {{ $ringkasanMingguIni['total_sesi'] }} pertemuan
+                                        </span>
+                                    </div>
+                                    <span class="text-3xl sm:text-4xl font-extrabold tracking-tight {{ \App\Support\Ui::persenWarna($ringkasanMingguIni['persentase']) }}">
+                                        {{ $ringkasanMingguIni['persentase'] }}%
+                                    </span>
+                                </div>
+
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                    <div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/40 flex flex-col items-center text-center">
+                                        <span class="text-xs font-bold text-emerald-900 dark:text-emerald-300 flex items-center gap-1">
+                                            <x-ui.icon name="check" size="sm" />
+                                            <span>Hadir</span>
+                                        </span>
+                                        <span class="text-xl font-extrabold text-emerald-800 dark:text-emerald-200 mt-1">
+                                            {{ $ringkasanMingguIni['total_hadir'] }}
+                                        </span>
+                                    </div>
+
+                                    <div class="p-3 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-300 dark:border-blue-500/40 flex flex-col items-center text-center">
+                                        <span class="text-xs font-bold text-blue-900 dark:text-blue-300 flex items-center gap-1">
+                                            <x-ui.icon name="info" size="sm" />
+                                            <span>Izin</span>
+                                        </span>
+                                        <span class="text-xl font-extrabold text-blue-800 dark:text-blue-200 mt-1">
+                                            {{ $ringkasanMingguIni['total_izin'] }}
+                                        </span>
+                                    </div>
+
+                                    <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/40 flex flex-col items-center text-center">
+                                        <span class="text-xs font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1">
+                                            <x-ui.icon name="plus" size="sm" />
+                                            <span>Sakit</span>
+                                        </span>
+                                        <span class="text-xl font-extrabold text-amber-800 dark:text-amber-200 mt-1">
+                                            {{ $ringkasanMingguIni['total_sakit'] }}
+                                        </span>
+                                    </div>
+
+                                    <div class="p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-300 dark:border-red-500/40 flex flex-col items-center text-center">
+                                        <span class="text-xs font-bold text-red-900 dark:text-red-300 flex items-center gap-1">
+                                            <x-ui.icon name="x" size="sm" />
+                                            <span>Alpa</span>
+                                        </span>
+                                        <span class="text-xl font-extrabold text-red-800 dark:text-red-200 mt-1">
+                                            {{ $ringkasanMingguIni['total_alpa'] }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- KARTU B: PERLU PERHATIAN -->
+                <div class="bg-white dark:bg-slate-900 rounded-xl shadow-xs border-2 border-slate-300 dark:border-slate-600 overflow-hidden flex flex-col justify-between">
+                    <div class="p-4 sm:p-5 border-b-2 border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 flex items-center justify-between gap-3">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <x-ui.icon name="info" size="md" class="text-amber-600 dark:text-amber-400" />
+                                <span>Perlu Perhatian</span>
+                            </h3>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                                Mapel dengan persentase di bawah {{ config('absensi.batas_kehadiran_rendah', 75) }}%
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+                        @if($mapelPerluPerhatian->isEmpty())
+                            <div class="py-8 text-center my-auto">
+                                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 mb-3 border border-emerald-300 dark:border-emerald-700">
+                                    <x-ui.icon name="check" size="lg" />
+                                </div>
+                                <p class="text-base font-bold text-slate-900 dark:text-white">Semua mata pelajaran aman.</p>
+                                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">Kehadiranmu pada seluruh mata pelajaran telah memenuhi batas target minimal sekolah.</p>
+                            </div>
+                        @else
+                            <div class="divide-y-2 divide-slate-200 dark:divide-slate-700">
+                                @foreach($mapelPerluPerhatian as $item)
+                                    <div class="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3">
+                                        <div class="min-w-0 flex-1">
+                                            <h4 class="font-bold text-sm text-slate-900 dark:text-white truncate">
+                                                {{ $item->mapel }}
+                                            </h4>
+                                            <p class="text-xs text-slate-600 dark:text-slate-300 truncate">
+                                                Guru: <strong class="text-slate-800 dark:text-slate-200">{{ $item->guru }}</strong> &bull; Total {{ $item->total_sesi }} Sesi
+                                            </p>
+                                        </div>
+                                        <div class="flex items-center gap-2 shrink-0">
+                                            <span class="text-base font-extrabold {{ \App\Support\Ui::persenWarna($item->persentase) }}">
+                                                {{ $item->persentase }}%
+                                            </span>
+                                            <a href="{{ route('siswa.riwayat.mapel', ['mapel' => $item->id, 'periode' => $filterPeriodeValue]) }}"
+                                               class="inline-flex items-center justify-center min-h-[44px] px-2.5 py-1 text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:underline">
+                                                <span>Detail &rarr;</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. RINGKASAN & BREAKDOWN KEHADIRAN (PERSENTASE MENONJOL & 4 KARTU 2 KOLOM DI HP) -->
             @php
                 $persentase = $ringkasanKehadiran['persentase'] ?? 0;
                 $totalSesi = $ringkasanKehadiran['total_sesi'] ?? 0;

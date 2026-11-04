@@ -255,7 +255,7 @@ MyAbsen dilengkapi pengujian otomatis menyeluruh untuk menjamin keandalan aturan
    ```bash
    php artisan test
    ```
-   *Status saat ini:* **446 test lulus (3017 assertions)**. Pengujian ini berjalan secara otomatis di database MySQL `myabsen_test` (sesuai konfigurasi `phpunit.xml`) sehingga tidak mengganggu data di database utama `myabsen`.
+   *Status saat ini:* **454 test lulus (3082 assertions)**. Pengujian ini berjalan secara otomatis di database MySQL `myabsen_test` (sesuai konfigurasi `phpunit.xml`) sehingga tidak mengganggu data di database utama `myabsen`.
 
 2. **Pengujian Logika JavaScript (Node.js test runner bawaan):**
    ```bash
@@ -269,7 +269,7 @@ MyAbsen dilengkapi pengujian otomatis menyeluruh untuk menjamin keandalan aturan
 
 | Perintah | Deskripsi |
 |---|---|
-| `php artisan test` | Menjalankan seluruh test suite otomatis (446 test PHP). |
+| `php artisan test` | Menjalankan seluruh test suite otomatis (454 test PHP). |
 | `npm run test:js` | Menjalankan unit test modul JavaScript murni (28 test JS). |
 | `php vendor/bin/pint` | Merapikan format kode PHP (Laravel Pint). **Wajib dijalankan sebelum commit.** |
 | `php artisan migrate:fresh --seed` | Menghapus seluruh tabel dan mengulang instalasi database demo (Hanya untuk lokal/dev!). |

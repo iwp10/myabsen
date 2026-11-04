@@ -39,14 +39,31 @@ Di bagian bawah layar HP (dan sidebar laptop), kamu akan melihat 3 menu navigasi
 
 ---
 
-## 3. Melihat Jadwal dan Status Hari Ini
+## 3. Mengenal Fitur pada Dashboard Siswa
 
-- Buka menu **Dashboard**.
-- Pada bagian paling atas, perhatikan kartu **Jadwal & Status Hari Ini**.
-- Di sana kamu bisa langsung melihat:
-  - Jam mulai dan selesai setiap mata pelajaran.
-  - Nama mata pelajaran dan nama bapak/ibu guru pengajar.
-  - Lencana status kehadiranmu: apakah kamu tercatat **Hadir**, **Izin**, **Sakit**, **Alpa**, atau masih berstatus **Belum diabsen** (bila bapak/ibu guru belum selesai mengisi absensi).
+Ketika kamu masuk ke menu **Dashboard**, layar menyajikan informasi lengkap dan ringkas untuk memantau kehadiranmu secara mandiri:
+
+### a. Jadwal & Status Hari Ini (Paling Atas)
+- Selalu tampil paling atas pada layar pertama agar kamu bisa langsung mengecek jadwal pelajaran hari ini tanpa perlu menggulir (*scroll*).
+- Menampilkan jam pelajaran, nama mata pelajaran, bapak/ibu guru pengajar, serta status kehadiranmu (*Hadir*, *Izin*, *Sakit*, *Alpa*, atau *Belum diabsen* jika guru belum mengisi presensi).
+
+### b. Belum Diabsen (7 Hari Terakhir)
+- Menampilkan daftar pertemuan kelasmu dalam 7 hari terakhir (hari ini sampai 6 hari yang lalu) yang **belum dicatat oleh bapak/ibu guru**.
+- Untuk hari ini, pertemuan hanya akan muncul setelah jam mulai pelajaran lewat.
+- **PENTING DIINGAT:** Status *"Belum dicatat guru"* **bukan berarti kamu Alpa**! Ini hanya tanda bahwa guru yang bersangkutan belum sempat menginput absensi ke sistem web. Nilai kehadiranmu sama sekali tidak berkurang.
+- Jika semua guru sudah mencatat kehadiranmu dalam 7 hari terakhir, kartu ini akan menampilkan pesan ramah: *"Semua pertemuan 7 hari terakhir sudah dicatat."*
+
+### c. Ringkasan Minggu Ini
+- Menyajikan ringkasan singkat kehadiranmu dalam rentang 7 hari terakhir pada periode aktif.
+- Memuat persentase kehadiran minggu ini (sesuai rumus resmi AB-07) dan kotak rincian jumlah status: **Hadir**, **Izin**, **Sakit**, dan **Alpa** dengan kata penuh.
+
+### d. Perlu Perhatian
+- Mengingatkan mata pelajaran yang persentase kehadirannya berada di bawah batas target sekolah (di bawah 75%).
+- Diurutkan dari nilai persentase yang paling rendah (maksimal 5 mata pelajaran) dan dilengkapi tombol tautan **Detail →** untuk langsung membuka rincian pertemuannya.
+- Jika seluruh mata pelajaranmu berada dalam batas aman ($\ge$75%), kartu ini akan menyemangati dengan pesan: *"Semua mata pelajaran aman."*
+
+### e. Rincian & Persentase Kehadiran Keseluruhan
+- Di bagian bawah, kamu tetap dapat melihat kartu persentase total kehadiranmu sepanjang semester aktif beserta 4 kartu rincian (Total Hadir, Izin, Sakit, dan Alpa) yang dapat diketuk untuk langsung membuka riwayat lengkapnya.
 
 ---
 

@@ -8,7 +8,7 @@ Cara pakai:
 
 ## Ringkasan
 
-MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan Siswa: otentikasi fleksibel (Username/NIP/NIS), dashboard responsif berbasis font Inter dan Tabler Icons, presensi cepat default Hadir, manajemen sesi dengan jendela koreksi 7 hari, riwayat guru dua tingkat, ekspor Excel multi-sheet matriks pertemuan (P1..Pn), ekspor PDF resmi, serta perlindungan integritas histori absensi dengan **446 automated test PHP (3017 assertions)** dan **28 test JavaScript** lulus (PASS).
+MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan Siswa: otentikasi fleksibel (Username/NIP/NIS), dashboard responsif berbasis font Inter dan Tabler Icons, presensi cepat default Hadir, manajemen sesi dengan jendela koreksi 7 hari, riwayat guru dua tingkat, ekspor Excel multi-sheet matriks pertemuan (P1..Pn), ekspor PDF resmi, serta perlindungan integritas histori absensi dengan **454 automated test PHP (3082 assertions)** dan **28 test JavaScript** lulus (PASS).
 
 | Fase | Isi | Penanggung jawab | Branch | Status |
 |---|---|---|---|---|
@@ -68,6 +68,7 @@ MyAbsen telah menyelesaikan seluruh fitur inti MVP untuk role Admin, Guru, dan S
 - [x] Test akses data milik sendiri (AB-08)
 - [x] Menyesuaikan perhitungan persentase (status Hadir, Izin, dan Sakit dihitung sebagai hadir, Alpa tidak dihitung, pembagi = jumlah sesi yang sudah diabsen untuk siswa itu) dan menambahkan breakdown detail kehadiran transparan di dashboard siswa.
 - [x] Riwayat Siswa Dua Tingkat: Tab Per Mata Pelajaran (grid kartu dengan nama mapel, guru, persentase AB-07, H/I/S/A, total sesi) dan Tab Semua Riwayat, serta Tingkat 2 Detail Per Mapel (matriks presensi P1..Pn satu baris milik siswa login dengan catatan keterangan, hanya-baca, isolasi AB-08, tanpa N+1).
+- [x] Pengayaan Dashboard Siswa dengan tiga kartu baru hanya-baca (`App\Services\SiswaDashboardService`): "Belum Diabsen (7 Hari Terakhir)" dengan jendela H s.d. H-6, aturan jam mulai hari ini, lencana abu-abu "Belum dicatat guru", penegasan ramah "bukan berarti kamu alpa", dan penyingkatan 7 item; "Ringkasan Minggu Ini" dengan agregat H/I/S/A kata penuh dan persentase rumus AB-07; serta "Perlu Perhatian" dengan daftar mapel < 75% urut terendah (maksimal 5 item) berlabel `Ui::persenWarna` dan tautan detail; bebas N+1 query.
 
 ### Fase 6: Rekap dan ekspor
 - [x] Rekap per kelas, mapel, periode (agregasi SQL)
