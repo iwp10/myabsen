@@ -293,6 +293,7 @@
                                 <thead class="bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-400 dark:border-slate-500 text-slate-900 dark:text-slate-100">
                                     <tr>
                                         <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Tanggal</th>
+                                        <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Pertemuan</th>
                                         <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Mata Pelajaran</th>
                                         <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Guru</th>
                                         <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold uppercase tracking-wider">Status</th>
@@ -301,9 +302,18 @@
                                 </thead>
                                 <tbody class="divide-y-2 divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-900">
                                     @foreach($riwayat as $item)
+                                        @php
+                                            $nomorPertemuan = $nomorPertemuanMap[$item->id] ?? null;
+                                            $teksPertemuan = $nomorPertemuan ? 'Pertemuan ke-' . $nomorPertemuan : '-';
+                                        @endphp
                                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
                                             <td class="px-6 py-4 font-bold text-slate-900 dark:text-slate-100 tabular-nums" data-label="Tanggal">
                                                 {{ \Illuminate\Support\Carbon::parse($item->sesiAbsensi->tanggal)->format('d/m/Y') }}
+                                            </td>
+                                            <td class="px-6 py-4 font-bold text-slate-800 dark:text-slate-200" data-label="Pertemuan">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 text-slate-800 border border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600">
+                                                    {{ $teksPertemuan }}
+                                                </span>
                                             </td>
                                             <td class="px-6 py-4 font-bold text-slate-900 dark:text-white" data-label="Mata Pelajaran">
                                                 {{ $item->sesiAbsensi->jadwal->mapel->nama }}

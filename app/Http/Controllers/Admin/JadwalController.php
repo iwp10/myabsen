@@ -11,6 +11,8 @@ use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\Mapel;
 use App\Services\PeriodeService;
+use App\Support\Kembali;
+use Illuminate\Http\Request;
 
 class JadwalController extends Controller
 {
@@ -109,6 +111,10 @@ class JadwalController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        if ($jadwals->isEmpty() && $jadwals->currentPage() > 1) {
+            return redirect($request->fullUrlWithQuery(['page' => max(1, $jadwals->lastPage())]));
+        }
+
         $daftarKelasQuery = Kelas::orderBy('tingkat')->orderBy('nama');
         if ($filterTahunAjaran && $filterSemester) {
             $daftarKelasQuery->where('tahun_ajaran', $filterTahunAjaran)->where('semester', $filterSemester);
@@ -167,7 +173,9 @@ class JadwalController extends Controller
     {
         Jadwal::create($request->validated());
 
-        return redirect()->route('admin.jadwal.index')->with('success', 'Jadwal berhasil ditambahkan.');
+        $target = Kembali::tujuan($request->input('kembali'), route('admin.jadwal.index'), ['/admin/jadwal']);
+
+        return redirect($target)->with('success', 'Jadwal berhasil ditambahkan.');
     }
 
     /**
@@ -192,22 +200,25 @@ class JadwalController extends Controller
     {
         $jadwal->update($request->validated());
 
-        return redirect()->route('admin.jadwal.index')->with('success', 'Jadwal berhasil diperbarui.');
+        $target = Kembali::tujuan($request->input('kembali'), route('admin.jadwal.index'), ['/admin/jadwal']);
+
+        return redirect($target)->with('success', 'Jadwal berhasil diperbarui.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Jadwal $jadwal)
+    public function destroy(Request $request, Jadwal $jadwal)
     {
+        $target = Kembali::tujuan($request->input('kembali'), route('admin.jadwal.index'), ['/admin/jadwal']);
         $hasSesi = $jadwal->sesiAbsensi()->exists();
 
         if ($hasSesi) {
-            return redirect()->route('admin.jadwal.index')->with('error', 'Jadwal tidak dapat dihapus karena sudah memiliki riwayat absensi.');
+            return redirect($target)->with('error', 'Jadwal tidak dapat dihapus karena sudah memiliki riwayat absensi.');
         }
 
         $jadwal->delete();
 
-        return redirect()->route('admin.jadwal.index')->with('success', 'Jadwal berhasil dihapus.');
+        return redirect($target)->with('success', 'Jadwal berhasil dihapus.');
     }
 }

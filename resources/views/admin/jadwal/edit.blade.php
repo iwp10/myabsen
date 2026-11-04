@@ -25,6 +25,9 @@
                       })">
                     @csrf
                     @method('PUT')
+                    @if(request('kembali'))
+                        <input type="hidden" name="kembali" value="{{ request('kembali') }}">
+                    @endif
                     
                     <div>
                         <x-input-label for="kelas_id" value="Kelas" />
@@ -129,7 +132,7 @@
                     </div>
 
                     <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t-2 border-slate-200 dark:border-slate-700">
-                        <a href="{{ route('admin.jadwal.index') }}" class="{{ \App\Support\Ui::tombol('secondary') }} w-full sm:w-auto">
+                        <a href="{{ \App\Support\Kembali::tujuan(request('kembali'), route('admin.jadwal.index'), ['/admin/jadwal']) }}" class="{{ \App\Support\Ui::tombol('secondary') }} w-full sm:w-auto">
                             Batal
                         </a>
                         <button type="submit" class="{{ \App\Support\Ui::tombol('primary') }} w-full sm:w-auto">

@@ -17,7 +17,7 @@
 
             <x-ui.page-header title="Kelola Kelas" :description="'Menampilkan ' . $kelas->total() . ' kelas'">
                 <x-slot:actions>
-                    <a href="{{ route('admin.kelas.create') }}" class="{{ \App\Support\Ui::tombol('primary') }} w-full sm:w-auto">
+                    <a href="{{ route('admin.kelas.create', request()->query() ? ['kembali' => request()->getRequestUri()] : []) }}" class="{{ \App\Support\Ui::tombol('primary') }} w-full sm:w-auto">
                         <x-ui.icon name="plus" size="sm" class="mr-1.5" />
                         Tambah Kelas
                     </a>
@@ -105,7 +105,7 @@
                                 </span>
                             </td>
                             <td class="stack-actions px-6 py-4 whitespace-nowrap text-right" data-label="Aksi">
-                                <a href="{{ route('admin.kelas.edit', $k) }}" class="inline-flex items-center justify-center min-h-[44px] px-3 py-2 text-sm font-semibold text-blue-700 dark:text-blue-400 hover:underline">
+                                <a href="{{ route('admin.kelas.edit', array_merge([$k], request()->query() ? ['kembali' => request()->getRequestUri()] : [])) }}" class="inline-flex items-center justify-center min-h-[44px] px-3 py-2 text-sm font-semibold text-blue-700 dark:text-blue-400 hover:underline">
                                     Edit
                                 </a>
                                 <button type="button" 
@@ -113,7 +113,7 @@
                                     x-on:click.prevent="$dispatch('open-confirm-modal', {
                                         title: 'Konfirmasi Hapus',
                                         message: 'Apakah Anda yakin ingin menghapus kelas ini?\n\nData yang sudah dihapus mungkin tidak dapat dikembalikan.',
-                                        action: '{{ route('admin.kelas.destroy', $k) }}',
+                                        action: '{{ route('admin.kelas.destroy', array_merge([$k], request()->query() ? ['kembali' => request()->getRequestUri()] : [])) }}',
                                         method: 'DELETE',
                                         confirmText: 'Hapus'
                                     })"
